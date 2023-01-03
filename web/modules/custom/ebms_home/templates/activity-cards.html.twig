@@ -1,0 +1,29 @@
+<div class="margin-top-1 tablet:margin-top-3 desktop:margin-top-5 home-page-cards">
+  {% for card in cards %}
+  <div class="grid-row grid-wrap margin-bottom-4">
+    <div class="grid-col-12 tablet:grid-col-2 card-image margin-top-3">
+      <img src="/themes/custom/ebms/images/{{ card.img }}" alt="">
+    </div>
+    <div class="tablet:padding-left-3 grid-col-12 tablet:grid-col-10">
+      <header>
+        <h2 class="card-title">{{ card.title }}</h2>
+      </header>
+      <div class="card-body">
+        <ul class="usa-list">
+        {% for item in card.items %}
+          <li>{{ item }}</li>
+        {% endfor %}
+        {% if not card.items %}
+          <li>{{ card.empty }}</li>
+        {% endif %}
+        </ul>
+      </div>
+      {% if card.url %}
+      <div class="card-button margin-top-2">
+        <a class="usa-button" href="{{ card.url }}">More</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+<div>

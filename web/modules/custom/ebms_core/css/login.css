@@ -1,0 +1,13 @@
+nav {
+  display: none;
+}
+#login-instructions {
+  width: 75%;
+}
+.login-images {
+  text-align: center;
+}
+.login-images img {
+  width: 18%;
+  margin: 0;
+}
