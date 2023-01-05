@@ -36,13 +36,23 @@ class FullTextQueue extends FormBase {
 
     // Get the parameters.
     $values = empty($queue_id) ? [] : SavedRequest::loadParameters($queue_id);
+    $boards = Board::boards();
+    $board = $form_state->getValue('board', $values['board'] ?? '');
+    $topics = empty($board) ? [] : Topic::topics($board);
+    $topic = $form_state->getValue('topic', $values['topic'] ?? '');
+    if (!empty($topic) && !array_key_exists($topic, $topics)) {
+      $topic = '';
+    }
+    $cycles = Batch::cycles();
+    $cycle = $form_state->getValue('cycle', $values['cycle'] ?? '');
+    $preliminary = $form_state->getValue('preliminary', $values['preliminary'] ?? 'without');
 
     // Find the articles needing PDFs.
     $storage = \Drupal::entityTypeManager()->getStorage('ebms_article');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('topics.entity.states.entity.value.entity.field_text_id', 'passed_bm_review');
     $query->condition('topics.entity.states.entity.current', 1);
-    if (!empty($values['preliminary']) && $values['preliminary'] === 'with') {
+    if ($preliminary === 'with') {
       $query->condition('full_text.file', NULL, 'IS NOT NULL');
       $query->condition('tags.entity.tag.entity.field_text_id', 'preliminary');
     }
@@ -53,14 +63,14 @@ class FullTextQueue extends FormBase {
       ->condition('full_text.unavailable', FALSE)
       ->condition('full_text.unavailable', NULL, 'IS NULL');
     $query->condition($or);
-    if (!empty($values['board'])) {
-      $query->condition('topics.entity.topic.entity.board', $values['board']);
+    if (!empty($board)) {
+      $query->condition('topics.entity.topic.entity.board', $board);
     }
-    if (!empty($values['topic'])) {
-      $query->condition('topics.entity.topic', $values['topic']);
+    if (!empty($topic)) {
+      $query->condition('topics.entity.topic', $topic);
     }
-    if (!empty($values['cycle'])) {
-      $query->condition('topics.entity.cycle', $values['board']);
+    if (!empty($cycle)) {
+      $query->condition('topics.entity.cycle', $cycle);
     }
     else {
       $query->condition('topics.entity.states.entity.entered', Article::CONVERSION_DATE, '>');
@@ -114,7 +124,7 @@ class FullTextQueue extends FormBase {
           '#title' => 'Related Articles',
         ];
       }
-      
+
       $items[] = [
         '#type' => 'container',
         "article-$article_id" => [
@@ -157,8 +167,8 @@ class FullTextQueue extends FormBase {
           '#type' => 'select',
           '#title' => 'Editorial Board',
           '#description' => 'Optionally narrow the queue to those associated with a specific board.',
-          '#options' => Board::boards(),
-          '#default_value' => $values['board'] ?? '',
+          '#options' => $boards,
+          '#default_value' => $board,
           '#empty_value' => '',
           '#ajax' => [
             'callback' => '::getTopicsCallback',
@@ -173,8 +183,8 @@ class FullTextQueue extends FormBase {
             '#type' => 'select',
             '#title' => 'Summary Topic',
             '#description' => 'Optionally narrow the queue to those assigned to a specific review topic. Select a board to populate the picklist for topics.',
-            '#options' => empty($values['board']) ? [''] : Topic::topics($values['board']),
-            '#default_value' => $values['topic'] ?? '',
+            '#options' => $topics,
+            '#default_value' => $topic,
             '#empty_value' => '',
           ],
         ],
@@ -182,8 +192,8 @@ class FullTextQueue extends FormBase {
           '#type' => 'select',
           '#title' => 'Review Cycle',
           '#description' => 'Optionally restrict the queue to articles assigned to a specific review cycle.',
-          '#options' => Batch::cycles(),
-          '#default_value' => $values['cycle'],
+          '#options' => $cycles,
+          '#default_value' => $cycle,
           '#empty_value' => '',
         ],
         'preliminary' => [
@@ -193,7 +203,7 @@ class FullTextQueue extends FormBase {
             'without' => 'Without PDFs',
             'with' => 'With Preliminary PDFs',
           ],
-          '#default_value' => $values['preliminary'] ?? 'without',
+          '#default_value' => $preliminary,
         ],
       ],
       'options' => [
@@ -340,13 +350,6 @@ class FullTextQueue extends FormBase {
    *   Modified portion of the form.
    */
   public function getTopicsCallback(array &$form, FormStateInterface $form_state): array {
-    $board_id = $form_state->getValue('board');
-    $topics = empty($board_id) ? [] : Topic::topics($board_id);
-    // Shouldn't have to do this, but Drupal is broken here
-    // (https://www.drupal.org/project/drupal/issues/3180011).
-    // @todo remove next line when the bug is fixed.
-    $topics = ['' => '- None -'] + $topics;
-    $form['filters']['topic-wrapper']['topic']['#options'] = $topics;
     return $form['filters']['topic-wrapper'];
   }
 
