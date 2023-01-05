@@ -291,7 +291,7 @@ class PublicationForm extends FormBase {
    *   Form values.
    */
   public function cancelSubmit(array &$form, FormStateInterface $form_state) {
-    $this->redirect('ebms_review.publish');
+    $form_state->setRedirect('ebms_review.publish');
   }
 
   /**
