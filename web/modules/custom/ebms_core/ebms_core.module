@@ -81,6 +81,7 @@ function _ebms_core_role_permissions(): array {
       'manage documents',
       'manage journals',
       'manage review packets',
+      'manage summaries',
       'manage topics',
       'perform full search',
       'print packets',
