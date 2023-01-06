@@ -199,7 +199,7 @@ class ImportInternalArticles extends FormBase {
    *   Form values.
    */
   public function reset(array &$form, FormStateInterface $form_state) {
-    $form_state->setRedirect('ebms_article.import_internal_articles');
+    $form_state->setRedirect('ebms_import.import_internal_articles');
   }
 
 }
