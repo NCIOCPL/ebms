@@ -338,18 +338,41 @@ class ReviewQueue extends FormBase {
       $count = $count_query->execute()->fetchField();
       if ($sort === 'core') {
         $query->leftJoin('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
+        $query->addField('journal', 'core');
+        $query->addField('article', 'journal_title');
+        $query->addField('article', 'title');
         $query->orderBy('journal.core', 'DESC');
         $query->orderBy('article.journal_title');
         $query->orderBy('article.title');
       }
       elseif ($sort === 'author') {
         $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
+        $query->addField('author', 'authors_search_name');
+        $query->addField('article', 'title');
         $query->orderBy('author.authors_search_name');
+        $query->orderBy('article.title');
+      }
+      elseif ($sort === 'article.year') {
+        $query->addField('article', 'year');
+        $query->addField('article', 'title');
+        $query->orderBy('article.year');
+        $query->orderBy('article.title');
+      }
+      elseif ($sort === 'article.journal_title') {
+        $query->addField('article', 'journal_title');
+        $query->addField('article', 'title');
+        $query->orderBy('article.journal_title');
         $query->orderBy('article.title');
       }
       else {
         if (!array_key_exists($sort, $sorts)) {
           $sort = 'state.article';
+        }
+        if ($sort === 'article.source_id') {
+          $query->addField('article', 'source_id');
+        }
+        elseif ($sort === 'article.title') {
+          $query->addField('article', 'title');
         }
         $query->orderBy($sort);
       }
