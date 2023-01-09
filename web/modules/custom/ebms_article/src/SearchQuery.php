@@ -172,6 +172,7 @@ class SearchQuery {
 
     // Add sorting and return the query.
     $this->searchOrder();
+    ebms_debug_log((string) $this->query, 3);
     return $this->query;
   }
 

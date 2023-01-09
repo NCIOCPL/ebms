@@ -339,7 +339,7 @@ class SearchForm extends FormBase {
         'ebms-id-wrapper' => [
           '#type' => 'container',
           '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
-          'pmid' => [
+          'ebms_id' => [
             '#type' => 'textfield',
             '#title' => 'EBMS ID',
             '#default_value' => $ebms_id,
