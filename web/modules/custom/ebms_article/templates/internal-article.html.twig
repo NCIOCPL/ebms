@@ -1,6 +1,6 @@
 <div class="internal-article">
   <div class="article-authors">{{ article.authors|join('; ') }}</div>
-  <div class="article-title"><a href="{{ article.url }}">{{ article.title }}</a></div>
+  <div class="article-title"><a href="{{ article.url }}">{{ article.title|raw }}</a></div>
   <div class="article-citation">{{ article.publication }}</div>
   <div class="article-ids">
     <span class="pmid">PMID: {{ article.pmid }}</span>

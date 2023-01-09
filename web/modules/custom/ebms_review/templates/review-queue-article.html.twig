@@ -19,7 +19,7 @@
   {% endif %}
   {% if article.abstract %}
   {% for paragraph in article.abstract %}
-  <p><strong>{{ paragraph.label}}</strong> {{ paragraph.text }}</p>
+  <p><strong>{{ paragraph.label}}</strong> {{ paragraph.text|raw }}</p>
   {% endfor %}
   {% endif %}
   <div class="article-review-buttons">

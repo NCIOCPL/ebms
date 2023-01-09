@@ -2,7 +2,7 @@
   {% if authors %}
   <div>{{ authors }}</div>
   {% endif %}
-  <div><em>{{ article_title }}</em></div>
+  <div><em>{{ article_title|raw }}</em></div>
   <div>{{ publication }}</div>
   {% if ids.pubmed %}
   <div>PubMed ID: {{ ids.pubmed }}</div>

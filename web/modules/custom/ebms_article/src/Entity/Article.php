@@ -811,6 +811,11 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       throw new \Exception('MedlineJournalInfo block not found.');
     }
     $title = trim($article->ArticleTitle ?? '');
+    if (!empty($title)) {
+      $title = $article->ArticleTitle->asXML();
+      $title = str_replace('<ArticleTitle>', '', $title);
+      $title = str_replace('</ArticleTitle>', '', $title);
+    }
     $search_title = substr(self::normalize($title), 0, 512);
     $authors = [];
     $last_author_name = NULL;
@@ -849,6 +854,9 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       foreach ($article->Abstract->AbstractText as $node) {
         $text = trim($node ?? '');
         if (!empty($text)) {
+          $text = $node->asXML();
+          $text = str_replace('<AbstractText>', '', $text);
+          $text = str_replace('</AbstractText>', '', $text);
           $paragraph = ['paragraph_text' => $text];
           $label = trim($node['Label'] ?? '');
           if (!empty($label)) {
@@ -1022,6 +1030,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $old_locale = setlocale(LC_CTYPE, 0);
     setlocale(LC_CTYPE, 'en_US.utf8');
     $normalized = preg_replace('/\s+/', ' ', trim($string ?? ''));
+    $normalized = preg_replace('/<[^>]*>/', '', $normalized);
     $normalized = iconv('UTF-8', 'ASCII//TRANSLIT', $normalized);
     setlocale(LC_CTYPE, $old_locale);
     return $normalized;

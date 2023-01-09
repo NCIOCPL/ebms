@@ -1,7 +1,7 @@
 {% if abstract %}
   {% for paragraph in abstract %}
     <h4>{{ paragraph.label }}</h4>
-    <p>{{ paragraph.text }}</p>
+    <p>{{ paragraph.text|raw }}</p>
   {% endfor %}
 {% else %}
   <p><em>Article has no abstract</em></p>
