@@ -812,11 +812,17 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     }
     $title = trim($article->ArticleTitle ?? '');
     if (!empty($title)) {
-      $title = $article->ArticleTitle->asXML();
-      $title = str_replace('<ArticleTitle>', '', $title);
-      $title = str_replace('</ArticleTitle>', '', $title);
+      $title_xml = $article->ArticleTitle->asXML();
+      $title = preg_replace('#<\s*/?\s*ArticleTitle[^>]*>#', '', $title_xml);
+      $node = \dom_import_simplexml($article->ArticleTitle);
+      $text = $node->textContent ?? '';
+      ebms_debug_log("title textContent=$text", 3);
+      $search_title = trim(substr(self::normalize($text), 0, 512));
+      ebms_debug_log("search_title=$search_title");
     }
-    $search_title = substr(self::normalize($title), 0, 512);
+    else {
+      $search_title = '';
+    }
     $authors = [];
     $last_author_name = NULL;
     if (!empty($article->AuthorList->Author)) {
@@ -854,9 +860,8 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       foreach ($article->Abstract->AbstractText as $node) {
         $text = trim($node ?? '');
         if (!empty($text)) {
-          $text = $node->asXML();
-          $text = str_replace('<AbstractText>', '', $text);
-          $text = str_replace('</AbstractText>', '', $text);
+          $text_xml = $node->asXML();
+          $text = preg_replace('#<\s*/?\s*AbstractText[^>]*>#', '', $text_xml);
           $paragraph = ['paragraph_text' => $text];
           $label = trim($node['Label'] ?? '');
           if (!empty($label)) {
@@ -975,7 +980,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $simple = [
       'title', 'source', 'source_id', 'source_journal_id', 'source_status',
       'journal_title', 'brief_journal_title', 'volume', 'issue', 'pagination',
-      'year',
+      'year', 'search_title',
     ];
     foreach ($simple as $name) {
       $old = $this->get($name)->value;
@@ -984,9 +989,6 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
         if ($old != $new) {
           $this->set($name, $new);
           $changed = TRUE;
-          if ($name === 'title') {
-            $this->set('search_title', '');
-          }
         }
       }
     }
@@ -1030,7 +1032,6 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $old_locale = setlocale(LC_CTYPE, 0);
     setlocale(LC_CTYPE, 'en_US.utf8');
     $normalized = preg_replace('/\s+/', ' ', trim($string ?? ''));
-    $normalized = preg_replace('/<[^>]*>/', '', $normalized);
     $normalized = iconv('UTF-8', 'ASCII//TRANSLIT', $normalized);
     setlocale(LC_CTYPE, $old_locale);
     return $normalized;

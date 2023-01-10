@@ -13,8 +13,16 @@ use Drupal\Core\Database\Query\SelectInterface;
 function ebms_article_ebms_article_presave(EntityInterface $entity): void {
   if (!empty($entity->title->value)) {
     if (empty($entity->search_title->value)) {
-      $search_title = substr(Article::normalize($entity->title->value), 0, 512);
+      $title = $entity->title->value;
+      $wrapped = "<wrapper>$title</wrapper>";
+      ebms_debug_log("wrapped is $wrapped", 3);
+      $node = new \DOMDocument();
+      $node->loadXML($wrapped);
+      $text = $node->textContent;
+      ebms_debug_log("textContent is $text", 3);
+      $search_title = substr(Article::normalize($text), 0, 512);
       $entity->set('search_title', $search_title);
+      ebms_debug_log("search title is $search_title", 3);
     }
   }
   $last_author_name = '';
