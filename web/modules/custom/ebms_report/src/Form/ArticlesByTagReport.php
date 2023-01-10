@@ -214,6 +214,7 @@ class ArticlesByTagReport extends FormBase {
       return [];
     }
     $librarian_comment_id = reset($ids);
+    ebms_debug_log("librarian comment ID=$librarian_comment_id", 3);
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'states');
     $query->condition('field_text_id', 'passed_full_review');
@@ -236,7 +237,6 @@ class ArticlesByTagReport extends FormBase {
     $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
     $query->condition('article_tag.tag', $params['tag']);
     $query->condition('article_tag.active', 1);
-    $query->condition('state.current', 1);
     if (!empty($params['topics'])) {
       $query->condition('article_topic.topic', $params['topics'], 'IN');
     }
@@ -259,13 +259,15 @@ class ArticlesByTagReport extends FormBase {
         $query->condition('comments.comments_body', $params['comment'], 'LIKE');
       }
       else {
-        $query->join('ebms_article_topic__comments', 'comments', 'comments.entity_id = article_topic.id');
-        $query->condition('comments.comments_comment', $params['comment'], 'LIKE');
+        $query->join('ebms_state__comments', 'comments', 'comments.entity_id = state.id');
+        $query->condition('comments.comments_body', $params['comment'], 'LIKE');
       }
     }
     if (!empty($params['options']['no-decision'])) {
-      $query->join('taxonomy_term__field_text_id', 'state_text_id', 'state_text_id.entity_id = state.value');
-      $query->condition('state_text_id.field_text_id_value', 'final_board_decision', '<>');
+      $fbd = $term_lookup->getState('final_board_decision')->tid->value;
+      ebms_debug_log("final_board_decision state ID=$fbd", 3);
+      $query->leftJoin('ebms_state',  'fbd', "fbd.article = article.id AND fbd.topic = topic.id AND fbd.value = $fbd");
+      $query->isNull('fbd.article');
     }
     $query->addField('topic', 'name', 'topic_name');
     $query->addField('article_topic', 'id', 'article_topic_id');
@@ -273,18 +275,21 @@ class ArticlesByTagReport extends FormBase {
     $query->addField('article_tag', 'id', 'article_tag_id');
     $query->addField('article_tag', 'assigned', 'tag_assigned');
     $query->addField('topic', 'id', 'topic_id');
-    $query->addField('state', 'id', 'state_id');
     $query->addField('author', 'authors_display_name', 'author');
     $query->addField('article', 'title', 'article_title');
     $query->distinct();
     $query->orderBy('topic.name');
     $query->orderBy('author.authors_display_name');
     $query->orderBy('article.title');
+    ebms_debug_log((string) $query, 3);
 
     // Walk through the results set collecting nested topic/article arrays.
     $topics = [];
     $articles = [];
     foreach ($query->execute() as $row) {
+      ebms_debug_log(print_r($row->topic_id, TRUE), 3);
+      ebms_debug_log("topic={$row->topic_name} ({$row->topic_id}) article_topic_id={$row->article_topic_id} article={$row->article_id} " .
+        "article_tag={$row->article_tag_id} tag_assigned={$row->tag_assigned} author={$row->author}", 3);
       if (!array_key_exists($row->topic_id, $topics)) {
         $topics[$row->topic_id] = [
           'name' => $row->topic_name,
@@ -292,8 +297,8 @@ class ArticlesByTagReport extends FormBase {
         ];
       }
       if (!array_key_exists($row->article_id, $topics[$row->topic_id]['articles'])) {
+        $article = Article::load($row->article_id);
         if (!array_key_exists($row->article_id, $articles)) {
-          $article = Article::load($row->article_id);
           $articles[$row->article_id] = [
             'id' => $row->article_id,
             'title' => $row->article_title,
@@ -303,7 +308,7 @@ class ArticlesByTagReport extends FormBase {
             'pmid' => $article->source_id->value,
           ];
         }
-        $state = State::load($row->state_id);
+        $state = $article->getCurrentState($row->topic_id);
         $state_description = $state->laterStateDescription($full_text_approval->field_sequence->value);
         if (empty($state_description)) {
           $state_description = $state->value->entity->name->value;
@@ -333,6 +338,7 @@ class ArticlesByTagReport extends FormBase {
         if ($params['tag'] != $librarian_comment_id) {
           foreach ($article_topic->states as $topic_state) {
             foreach ($topic_state->entity->comments as $state_comment) {
+              ebms_debug_log('found another state comment for a non-librarian tag'. 3);
               $comment = $this->vet_comment($state_comment->body);
               if (!empty($comment)) {
                 $state_comments[] = $comment;
@@ -352,6 +358,7 @@ class ArticlesByTagReport extends FormBase {
         $topics[$row->topic_id]['articles'][$row->article_id]['tag_added'][] = $assigned;
       }
       if ($params['tag'] == $librarian_comment_id) {
+        ebms_debug_log("fetching comments for article tag {$row->article_tag_id}", 3);
         $article_tag = ArticleTag::load($row->article_tag_id);
         foreach ($article_tag->comments as $tag_comment) {
           $comment = $this->vet_comment($tag_comment->body);
