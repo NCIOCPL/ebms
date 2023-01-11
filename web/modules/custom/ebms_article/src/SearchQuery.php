@@ -1213,7 +1213,7 @@ class SearchQuery {
       $this->query->addTag('core_journal_sort');
     }
     else {
-      $this->query->sort('id');
+      $this->query->sort('id', 'DESC');
     }
   }
 
