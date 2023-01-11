@@ -91,7 +91,7 @@ class SearchForm extends FormBase {
     $journal = $params['journal'] ?? '';
     $publication_year = $params['publication-year'] ?? '';
     $publication_month = $params['publication-month'] ?? '';
-    $sort = $params['sort'] ?? $user->search_sort->value ?? $restricted ? 'pmid' : 'ebms-id';
+    $sort = $params['sort'] ?? $user->search_sort->value ?? ($restricted ? 'pmid' : 'ebms-id');
     $per_page_options = [
       '10' => '10',
       '25' => '25',
