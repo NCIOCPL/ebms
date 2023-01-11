@@ -3,6 +3,8 @@ article:
     theme:
       css/article.css: {}
 search-form:
+  js:
+    js/search-form.js: {}
   css:
     theme:
       css/search-form.css: {}
