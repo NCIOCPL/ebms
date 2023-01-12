@@ -376,7 +376,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -495,7 +495,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['passed_init_review']) || !empty($board['reject_init_review'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -756,7 +756,9 @@ class ArticlesReports extends FormBase {
           $topics[$topic]++;
         }
       }
-      ksort($topics);
+      uksort($topics, function($a, $b): int {
+        return strcasecmp($a, $b);
+      });
       foreach ($topics as $name => $count) {
         $rows[] = [$name, $count];
       }
@@ -864,7 +866,7 @@ class ArticlesReports extends FormBase {
       foreach ($storage->loadMultiple($query->execute()) as $state) {
         $librarian_topics[] = $state->topic->entity->name->value;
       }
-      sort($librarian_topics);
+      natcasesort($librarian_topics);
       $librarian_topics = [
         '#theme' => 'item_list',
         '#items' => $librarian_topics,
@@ -878,7 +880,7 @@ class ArticlesReports extends FormBase {
       foreach ($storage->loadMultiple($query->execute()) as $state) {
         $reviewer_topics[] = $state->topic->entity->name->value;
       }
-      sort($reviewer_topics);
+      natcasesort($reviewer_topics);
       $reviewer_topics = [
         '#theme' => 'item_list',
         '#items' => $reviewer_topics,
@@ -1002,7 +1004,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -1136,7 +1138,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -1270,7 +1272,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
