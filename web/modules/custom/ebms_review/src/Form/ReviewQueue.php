@@ -63,29 +63,37 @@ class ReviewQueue extends FormBase {
   /**
    * Decisions the reviewer can make about each article-topic combination.
    */
-  const DECISIONS = ['None', 'Approve', 'Reject', 'FYI', 'On Hold'];
+  const DECISIONS = ['None', 'FYI', 'On Hold', 'Reject', 'Approve'];
 
   /**
    * States used when applying decisions.
+   *
+   * Made trickier by OCEEBMS-698, because the queues no longer share
+   * all the decisions at the front of the a common decisions array
+   * (that ticket jumbled the order of the decision radio buttons).
+   * The keys here represent the position in the array of decision
+   * buttons shown for each article/topic combination for the selected
+   * queue (with zero being the position of the "None" button, which
+   * never triggers storage of a new state).
    */
   const DECISION_STATES = [
     'Librarian Review' => [
-      1 => 'passed_init_review',
-      2 => 'reject_init_review',
+      3 => 'reject_init_review',
+      4 => 'passed_init_review',
     ],
     'Abstract Review' => [
-      1 => 'passed_bm_review',
-      2 => 'reject_bm_review',
+      3 => 'reject_bm_review',
+      4 => 'passed_bm_review',
     ],
     'Full Text Review' => [
-      1 => 'passed_full_review',
-      2 => 'reject_full_review',
-      3 => 'fyi',
-      4 => 'on_hold',
+      1 => 'fyi',
+      2 => 'on_hold',
+      3 => 'reject_full_review',
+      4 => 'passed_full_review',
     ],
     'On Hold Review' => [
-      1 => 'passed_full_review',
-      2 => 'reject_full_review',
+      3 => 'reject_full_review',
+      4 => 'passed_full_review',
     ],
   ];
 
@@ -813,7 +821,7 @@ class ReviewQueue extends FormBase {
       $actions = self::DECISIONS;
     }
     else {
-      $actions = array_slice(self::DECISIONS, 0, 3);
+      $actions = ['None', 3 => 'Reject', 4 => 'Approve'];
     }
     $boards = [];
 
@@ -1078,6 +1086,9 @@ class ReviewQueue extends FormBase {
 
   /**
    * Collect the strings to display decisions waiting to be saved.
+   *
+   * This is now hidden, because the librarians didn't want to see it.
+   * Kept in place (for now) in case that decision gets overridden.
    */
   private function getQueuedDecisionsListItems($decisions_json): array {
     $items = [];
