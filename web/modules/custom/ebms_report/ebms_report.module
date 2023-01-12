@@ -85,7 +85,7 @@ function ebms_report_query_states_for_cycle_alter(AlterableInterface $query) {
     $cycle = $query->getMetaData('cycle');
     $operator = $query->getMetaData('operator');
     $query->join('ebms_article__topics', 'topics', 'topics.entity_id = base_table.article');
-    $query->join('ebms_article_topic', 'topic', 'topic.id = topics.topics_target_id');
+    $query->join('ebms_article_topic', 'topic', 'topic.id = topics.topics_target_id AND topic.topic = base_table.topic');
     $query->condition('topic.cycle', $cycle, $operator);
   }
 }
