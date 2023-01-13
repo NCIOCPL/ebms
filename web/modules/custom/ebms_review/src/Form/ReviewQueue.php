@@ -998,7 +998,7 @@ class ReviewQueue extends FormBase {
   private function getTopics(mixed $board, string $state): array {
 
     // Load the `Topic` entities which belong to this board.
-    ebms_debug_log('top of ReviewQueue::getTopics()');
+    ebms_debug_log("top of ReviewQueue::getTopics(board=$board, state=$state)");
     $storage = $this->entityTypeManager->getStorage('ebms_topic');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $operator = is_array($board) ? 'IN' : '=';
@@ -1018,19 +1018,20 @@ class ReviewQueue extends FormBase {
     // This was originally implemented using the entity query API. That
     // worked OK in the version which just loads up a small set of sample
     // test data for development, but when the production data was loaded
-    // This took over a minute for the boards with the smallest number of
+    // this took over a minute for the boards with the smallest number of
     // topics, and three minutes for the boards with lots of topics. So we
     // talk directly to the database (or rather, to the database API), and
     // now this step takes around 5 seconds.
-    ebms_debug_log('fetched the integer state ID');
+    $state_id = State::getStateId($state);
+    ebms_debug_log("integer state ID is $state_id");
     $query = \Drupal::database()->select('ebms_state', 'state');
-    $query->condition('state.value', State::getStateId($state));
+    $query->condition('state.value', $state_id);
     $query->condition('state.topic', $topic_ids, 'IN');
     $query->condition('state.current', 1);
     $query->addExpression('COUNT(*)', 'count');
     $query->addField('state', 'topic');
     $query->groupBy('state.topic');
-    if ($state !== 'published') {
+    if ($state !== 'published' && $state !== 'ready_init_review') {
       $query->join('ebms_article', 'article', 'article.id = state.article');
       $query->isNotNull('article.full_text__file');
     }
