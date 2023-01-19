@@ -50,15 +50,43 @@ class ImportForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $request_id = NULL): array {
 
-    // The only default we provide is for the PubMed IDs field.
-    $request = empty($request_id) ? NULL : ImportRequest::load($request_id);
-    $pmids = $this->getRequest()->get('pmid') ?: '';
-    if (!empty($request)) {
+    // Start with tabula rasa.
+    $board = $topic = $disposition = $bma_disposition = $meeting = 0;
+    $cycle = $pmids = $comment = $mgr_comment = $placement = $fast_track_comments = '';
+    $override_not_list = $test_mode = $fast_track = $special_search = $core_journals_search = $hi_priority = FALSE;
+    $request = NULL;
+
+    // See if we have overrides for these values.
+    if (!empty($request_id)) {
+      $request = ImportRequest::load($request_id);
       $params = json_decode($request->params->value, TRUE);
+      $board = $params['board'];
+      $topic = $params['topic'];
+      $cycle = $params['cycle'];
+      $pmids = $params['pmids'];
       if (!empty($params['followup-pmids'])) {
         $pmids = implode(' ', $params['followup-pmids']);
       }
+      $comment = $params['import-comments'];
+      $mgr_comment = $params['mgr-comment'];
+      $override_not_list = $params['override-not-list'];
+      $test_mode = $params['test-mode'];
+      $fast_track = $params['fast-track'];
+      $special_search = $params['special-search'];
+      $core_journals_search = $params['core-journals-search'];
+      $hi_priority = $params['hi-priority'];
+      $placement = $params['placement'];
+      $disposition = $params['disposition'];
+      $bma_disposition = $params['bma-disposition'];
+      $meeting = $params['meeting'];
+      $fast_track_comments = $params['fast-track-comments'];
     }
+
+    // See if an ajax call is responding to a change in a form value.
+    $values = $form_state->getValues();
+    $board = $values['board'] ?? $board;
+    $fast_track = $values['fast_track'] ?? $fast_track;
+    $placement = $values['placement'] ?? $placement;
 
     // Populate the picklists.
     $storage = $this->entityTypeManager->getStorage('ebms_board');
@@ -122,9 +150,13 @@ class ImportForm extends FormBase {
     }
 
     // Populate the topics picklist.
-    $board = $form_state->getValue('board');
-    ebms_debug_log("board is $board");
+    ebms_debug_log("loading topic picklist for board $board");
     $options = empty($board) ? [] : $this->getTopics($board);
+
+    // Make sure we don't have a leftover orphaned topic selection.
+    if (!empty($topic) && !array_key_exists($topic, $options)) {
+      $topic = '';
+    }
 
     // The #empty_option setting is broken in AJAX.
     // See https://www.drupal.org/project/drupal/issues/3180011.
@@ -145,6 +177,7 @@ class ImportForm extends FormBase {
             '#title' => 'Board',
             '#required' => TRUE,
             '#options' => $boards,
+            '#default_value' => $board,
             '#empty_option' => 'Select a board to populate the Topic picklist',
             '#empty_value' => '',
             '#ajax' => [
@@ -166,6 +199,7 @@ class ImportForm extends FormBase {
             '#required' => TRUE,
             '#empty_option' => 'The topic assigned to articles imported in this batch',
             '#options' => $topics,
+            '#default_value' => $topic,
             '#empty_value' => '',
 
             // See http://drupaldummies.blogspot.com/2012/01/solved-illegal-choice-has-been-detected.html.
@@ -183,6 +217,7 @@ class ImportForm extends FormBase {
             '#type' => 'select',
             '#title' => 'Review Cycle',
             '#options' => $cycles,
+            '#default_value' => $cycle,
             '#required' => TRUE,
             '#empty_option' => 'Review cycle for which these articles are to be imported.',
             '#empty_value' => '',
@@ -213,6 +248,7 @@ class ImportForm extends FormBase {
           'import-comments' => [
             '#type' => 'textfield',
             '#title' => 'Import Comment',
+            '#default_value' => $comment,
           ],
         ],
         'mgr-comment-wrapper' => [
@@ -221,6 +257,7 @@ class ImportForm extends FormBase {
           'mgr-comment' => [
             '#type' => 'textfield',
             '#title' => 'Manager Comments',
+            '#default_value' => $mgr_comment,
           ],
         ],
       ],
@@ -230,26 +267,32 @@ class ImportForm extends FormBase {
         'override-not-list' => [
           '#type' => 'checkbox',
           '#title' => "Override NOT List (<em>don't reject articles even from journals we don't usually accept for the selected board</em>)",
+          '#default_value' => $override_not_list,
         ],
         'test-mode' => [
           '#type' => 'checkbox',
           '#title' => 'Test Mode (<em>if checked, only show what we would have imported</em>)',
+          '#default_value' => $test_mode,
         ],
         'fast-track' => [
           '#type' => 'checkbox',
           '#title' => 'Fast Track (<em>skip some of the earlier reviews</em>)',
+          '#default_value' => $fast_track,
         ],
         'special-search' => [
           '#type' => 'checkbox',
           '#title' => 'Special Search (<em>mark these articles as the result of a custom search</em>)',
+          '#default_value' => $special_search,
         ],
         'core-journals-search' => [
           '#type' => 'checkbox',
           '#title' => 'Core Journals (<em>importing articles from a PubMed search of the "core" journals</em>)',
+          '#default_value' => $core_journals_search,
         ],
         'hi-priority' => [
           '#type' => 'checkbox',
           '#title' => 'High Priority (<em>tag the articles in this import batch as high-priority articles</em>)',
+          '#default_value' => $hi_priority,
         ],
         'fast-track-fieldset' => [
           '#type' => 'fieldset',
@@ -265,12 +308,14 @@ class ImportForm extends FormBase {
             ],
             '#description' => 'Assign this state to the imported articles.',
             '#options' => $placements,
+            '#default_value' => $placement,
             '#empty_value' => '',
           ],
           'disposition' => [
             '#type' => 'select',
             '#title' => 'Disposition',
             '#options' => $dispositions,
+            '#default_value' => $disposition,
             '#empty_value' => '',
             '#states' => [
               'visible' => [':input[name="placement"]' => ['value' => 'final_board_decision']],
@@ -286,6 +331,7 @@ class ImportForm extends FormBase {
             '#type' => 'select',
             '#title' => 'Disposition',
             '#options' => $bma_dispositions,
+            '#default_value' => $bma_disposition,
             '#empty_value' => '',
             '#states' => [
               'visible' => [':input[name="placement"]' => ['value' => 'bma']],
@@ -301,6 +347,7 @@ class ImportForm extends FormBase {
             '#type' => 'select',
             '#title' => 'Meeting',
             '#options' => $meetings,
+            '#default_value' => $meeting,
             '#empty_value' => '',
             '#description' => 'Select the meeting for the on-agenda placement state.',
             '#states' => [
@@ -322,6 +369,7 @@ class ImportForm extends FormBase {
             '#type' => 'textfield',
             '#title' => 'Fast Track Comments',
             '#description' => 'Enter notes to be attached to the "fast-track" tag.',
+            '#default_value' => $fast_track_comments,
           ],
         ],
       ],
