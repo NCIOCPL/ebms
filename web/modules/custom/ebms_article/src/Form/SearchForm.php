@@ -350,7 +350,7 @@ class SearchForm extends FormBase {
     $form['basic']['authors'] = [
       '#type' => 'textfield',
       '#title' => 'Author',
-      '#description' => 'Separate multiple author last names (optionally followed by space and initials) by semicolons (e.g., Fisher C; Thomas JM).',
+      '#description' => 'Separate multiple author names (surname and initials) with semicolons, using wildcards for partial matches (e.g., Fisher CL; Morris-Rose%; %smith%).',
       '#default_value' => $authors,
     ];
     $form['basic']['author-position'] = [
@@ -373,7 +373,7 @@ class SearchForm extends FormBase {
     $form['basic']['journal'] = [
       '#type' => 'textfield',
       '#title' => 'Journal Title',
-      '#description' => 'Search by full journal title. Wildcards can be used for partial matches.',
+      '#description' => 'Search by full journal title. Wildcards can be used for partial matches (for example, %surgical oncology%).',
       '#default_value' => $journal,
     ];
     $form['basic']['publication-date'] = [
