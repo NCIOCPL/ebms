@@ -30,3 +30,29 @@ ebms_user.switch_to_sso:
     parameters:
       user:
         type: entity:user
+ebms_user.manage_topic_assignments:
+  path: '/admin/manage-topic-assignments/{request_id}'
+  defaults:
+    _form: Drupal\ebms_user\Form\ManageReviewTopicAssignments
+    _title: Manage Review Topic Assignments
+    request_id: 0
+  requirements:
+    _permission: manage topic assignments
+  options:
+    no_cache: TRUE
+    parameters:
+      request_id:
+        type: integer
+ebms_user.assign_review_topics:
+  path: '/admin/assign-review-topics/{user}'
+  defaults:
+    _form: Drupal\ebms_user\Form\AssignReviewTopics
+    _title: Assign Review Topics
+    user: NULL
+  requirements:
+    _permission: manage topic assignments
+  options:
+    no_cache: TRUE
+    parameters:
+      user:
+        type: entity:user
