@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\ebms_article\Entity\Relationship;
 use Drupal\ebms_core\TermLookup;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_import\Entity\ImportRequest;
@@ -53,6 +54,7 @@ class ImportForm extends FormBase {
     // Start with tabula rasa.
     $board = $topic = $disposition = $bma_disposition = $meeting = 0;
     $cycle = $pmids = $comment = $mgr_comment = $placement = $fast_track_comments = '';
+    $followup_pmids = [];
     $override_not_list = $test_mode = $fast_track = $special_search = $core_journals_search = $hi_priority = FALSE;
     $request = NULL;
 
@@ -64,9 +66,6 @@ class ImportForm extends FormBase {
       $topic = $params['topic'];
       $cycle = $params['cycle'];
       $pmids = $params['pmids'];
-      if (!empty($params['followup-pmids'])) {
-        $pmids = implode(' ', $params['followup-pmids']);
-      }
       $comment = $params['import-comments'];
       $mgr_comment = $params['mgr-comment'];
       $override_not_list = $params['override-not-list'];
@@ -80,6 +79,15 @@ class ImportForm extends FormBase {
       $bma_disposition = $params['bma-disposition'];
       $meeting = $params['meeting'];
       $fast_track_comments = $params['fast-track-comments'];
+      if (!$test_mode &&!empty($params['followup-pmids'])) {
+        $followup_pmids = $params['followup-pmids'];
+        $pmids = implode(' ', array_keys($followup_pmids));
+        ebms_debug_log("PMIDs for followup articles: $pmids");
+        $count = count($followup_pmids);
+        $s_have = $count === 1 ? ' has' : 's have';
+        $s = $count === 1 ? '' : 's';
+        $this->messenger()->addMessage("PMID$s for $count related article$s_have been loaded into the PubMed ID field.");
+      }
     }
 
     // See if an ajax call is responding to a change in a form value.
@@ -166,6 +174,10 @@ class ImportForm extends FormBase {
     $form = [
       '#title' => 'Import Articles from PubMed',
       '#attached' => ['library' => ['ebms_import/import-form']],
+      'related_ids' => [
+        '#type' => 'hidden',
+        '#value' => json_encode($followup_pmids),
+      ],
       'board-and-topic' => [
         '#type' => 'container',
         '#attributes' => ['class' => ['grid-row', 'grid-gap']],
@@ -510,6 +522,8 @@ class ImportForm extends FormBase {
 
     // Submit the import request, catching failures.
     $request = $form_state->getValues();
+    $related_ids = $request['related_ids'];
+    unset($request['related_ids']);
     try {
       $batch = Batch::process($request);
     }
@@ -537,6 +551,49 @@ class ImportForm extends FormBase {
       $import_request = ImportRequest::create($values);
       $import_request->save();
       $parameters = ['request_id' => $import_request->id()];
+
+      // Record article relationships if appropriate.
+      if (!empty($related_ids)) {
+        $logger = $this->logger('ebms_import');
+        $related_ids = json_decode($related_ids, TRUE);
+        $today = date('Y-m-d');
+        $comment = "linked programmatically upon import ($today)";
+        $storage = $this->entityTypeManager->getStorage('taxonomy_term');
+        $relationship_types = $storage->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('vid', 'relationship_types')
+          ->condition('name', 'Other')
+          ->execute();
+        $other_relationship_type = reset($relationship_types);
+        $disposition_types = $storage->getQuery()
+          ->accessCheck(FALSE)
+          ->condition('vid', 'import_dispositions')
+          ->condition('field_text_id', 'imported')
+          ->execute();
+        $imported = reset($disposition_types);
+        $values = [
+          'type' => $other_relationship_type,
+          'recorded' => date('Y-m-d H:i:s'),
+          'recorded_by' => $this->currentUser()->id(),
+          'comment' => $comment,
+          'suppress' => FALSE,
+        ];
+        foreach ($batch->actions as $action) {
+          if ($action->disposition == $imported && !empty($action->article)) {
+            if (array_key_exists($action->source_id, $related_ids)) {
+              $values['related'] = $from_id = $action->article;
+              foreach ($related_ids[$action->source_id] as $to_id) {
+                $values['related_to'] = $to_id;
+                $relationship = Relationship::create($values);
+                $relationship->save();
+                $message = "recorded relationship of $from_id to $to_id";
+                ebms_debug_log($message);
+                $logger->info($message);
+              }
+            }
+          }
+        }
+      }
     }
 
     // Navigate back to the form.

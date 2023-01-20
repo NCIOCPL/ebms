@@ -157,7 +157,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
    * See OCEEBMS-568 and OCEEBMS-600.
    *
    * @return array
-   *   List of PubMed IDs for related articles we should import.
+   *   List of EBMS indexed by PubMed IDs for related articles we should import.
    */
   public function getFollowup(): array {
     return $this->followup;
@@ -368,7 +368,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
             continue;
           }
           try {
-            $article = $batch->import($values);
+            $article = $batch->import($values, $pmids);
             if (empty($article)) {
               ebms_debug_log("skipping failed article with PMID $pmid", 1);
               continue;
@@ -475,12 +475,6 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
     $message = 'No article with this Pubmed ID was returned by Pubmed';
     foreach ($missing as $pmid) {
       $batch->addAction($pmid, 'error', NULL, $message);
-    }
-
-    // Clean up the list of articles we want to get in a followup job.
-    if (!empty($batch->followup)) {
-      $followup = array_unique($batch->followup);
-      $batch->followup = array_diff($followup, $pmids);
     }
 
     // Save the batch if this is a live import job.
@@ -647,17 +641,23 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
    *
    * @param array $values
    *   Keyed array of values for the `Article` entity's fields.
+   * @param array $pmids_in_batch
+   *   Array of all the PubMed ID being imported now.
    *
    * @throws \Exception
    *   Bubble up exceptions from the stack.
    */
-  protected function import(array $values) {
+  protected function import(array $values, array $pmids_in_batch) {
     $logger = \Drupal::logger('ebms_import');
     $comments_corrections = $values['comments_corrections'];
     unset($values['comments_corrections']);
     $now = $this->imported->value;
     $source = $values['source'];
     $pmid = $values['source_id'];
+    if (!empty($comments_corrections)) {
+      $cc_string = implode(' ', $comments_corrections);
+      ebms_debug_log("importing PMID $pmid with comments_corrections=$cc_string");
+    }
     $journal_id = $values['source_journal_id'];
     $board = $this->board;
     $topic = $board ? $this->topic->target_id : 0;
@@ -746,36 +746,47 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
       }
     }
 
-    // Find out if there are any related articles which should also be imported.
-    if (!empty($topic) && !empty($comments_corrections) && $article->inCoreJournal()) {
-      if (!empty(Board::load($board)->auto_imports->value)) {
-        $journal_id = $article->source_journal_id->value;
-        foreach ($comments_corrections as $other_pmid) {
-          try {
-            $other_article = Article::getArticleBySourceId('Pubmed', $other_pmid);
-
-            // Don't bother if we already have the article.
-            if (empty($other_article)) {
-
-              // Skip it if it's in a different journal.
-              $other_journal_id = $this->getPubmedArticleJournalId($other_pmid);
-              if ($other_journal_id === $journal_id) {
-                $this->followup[] = $other_pmid;
-              }
-            }
-          }
-          catch (\Exception $e) {
-            $message = 'Checking for related articles: ' . $e->getMessage();
-            $logger->error($message);
-            $this->addAction($pmid, 'error', NULL, $message);
-          }
-        }
-      }
-    }
-
     // Store the changes to the article if we're not just testing.
     if (!$this->isTest()) {
       $article->save();
+
+      // Find out if there are any related articles which should also be imported.
+      $core = $article->inCoreJournal();
+      ebms_debug_log("checking comments/corrections: core journal=$core topic=$topic");
+      if (!empty($topic) && !empty($comments_corrections) && $core) {
+
+        // Only do this for boards which want it to happen.
+        if (!empty(Board::load($board)->auto_imports->value)) {
+          $journal_id = $article->source_journal_id->value;
+          ebms_debug_log("checking comments_corrections $cc_string; journal=$journal_id");
+          foreach ($comments_corrections as $other_pmid) {
+
+            // Skip this PMID if it's in the current batch already.
+            if (!in_array($other_pmid, $pmids_in_batch)) {
+              try {
+                $other_article = Article::getArticleBySourceId('Pubmed', $other_pmid);
+
+                // Don't bother if we already have the article.
+                if (empty($other_article)) {
+
+                  // Skip it if it's in a different journal.
+                  $other_journal_id = $this->getPubmedArticleJournalId($other_pmid);
+                  ebms_debug_log("other article is in journal with ID $other_journal_id");
+                  if ($other_journal_id === $journal_id) {
+                    $this->followup[$other_pmid][] = $article->id();
+                    ebms_debug_log("Added PMID $other_pmid to followup list");
+                  }
+                }
+              }
+              catch (\Exception $e) {
+                $message = 'Checking for related articles: ' . $e->getMessage();
+                $logger->error($message);
+                $this->addAction($pmid, 'error', NULL, $message);
+              }
+            }
+          }
+        }
+      }
     }
 
     // Let the caller do any necessary followup processing on the article.
