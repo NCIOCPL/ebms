@@ -253,7 +253,7 @@ class FullTextQueue extends FormBase {
         // to create our HTML markup for the title showing how many
         // articles meet the query conditions here in the PDF code. I'm
         // not going to create a TWIG template for a single H2 element.
-        '#markup' => "<h2>Article which require PDFs ($count)</h2>",
+        '#markup' => "<h2>Articles which require PDFs ($count)</h2>",
         /*
         '#theme' => 'item_list',
         '#list_type' => 'ol',
