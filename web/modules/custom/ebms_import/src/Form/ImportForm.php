@@ -53,9 +53,10 @@ class ImportForm extends FormBase {
 
     // Start with tabula rasa.
     $board = $topic = $disposition = $bma_disposition = $meeting = 0;
-    $cycle = $pmids = $comment = $mgr_comment = $placement = $fast_track_comments = '';
+    $cycle = $comment = $mgr_comment = $placement = $fast_track_comments = '';
     $followup_pmids = [];
     $override_not_list = $test_mode = $fast_track = $special_search = $core_journals_search = $hi_priority = FALSE;
+    $pmids = $this->getRequest()->get('pmid') ?: '';
     $request = NULL;
 
     // See if we have overrides for these values.
