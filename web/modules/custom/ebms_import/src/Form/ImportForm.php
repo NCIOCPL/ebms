@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_article\Entity\Relationship;
 use Drupal\ebms_core\TermLookup;
 use Drupal\ebms_import\Entity\Batch;
@@ -80,10 +81,10 @@ class ImportForm extends FormBase {
       $bma_disposition = $params['bma-disposition'];
       $meeting = $params['meeting'];
       $fast_track_comments = $params['fast-track-comments'];
-      if (!$test_mode &&!empty($params['followup-pmids'])) {
+      if (!$test_mode && !empty($params['followup-pmids'])) {
         $followup_pmids = $params['followup-pmids'];
         $pmids = implode(' ', array_keys($followup_pmids));
-        ebms_debug_log("PMIDs for followup articles: $pmids");
+        ebms_debug_log("PMIDs for followup articles: $pmids for request $request_id");
         $count = count($followup_pmids);
         $s_have = $count === 1 ? ' has' : 's have';
         $s = $count === 1 ? '' : 's';
@@ -543,7 +544,8 @@ class ImportForm extends FormBase {
       // Save the statistical report information, even if this is a test run.
       $report = $batch->toArray();
       $report['batch'] = $batch->id();
-      $request['followup-pmids'] = $batch->getFollowup();
+      $request['followup-pmids'] = $followup_pmids = $batch->getFollowup();
+      ebms_debug_log('the batch identified followup PMIDs: ' . implode(' ', $followup_pmids));
       $values = [
         'batch' => $batch->id(),
         'params' => json_encode($request),
@@ -555,6 +557,12 @@ class ImportForm extends FormBase {
 
       // Record article relationships if appropriate.
       if (!empty($related_ids)) {
+        $fast_track = !empty($request['fast-track']);
+        $core_journals = !empty($request['core-journals-search']);
+        $topic_id = $request['topic'];
+        $cycle = $request['cycle'];
+        $uid = $this->currentUser()->id();
+        $pubmsg = 'Published related article';
         $logger = $this->logger('ebms_import');
         $related_ids = json_decode($related_ids, TRUE);
         $today = date('Y-m-d');
@@ -575,7 +583,7 @@ class ImportForm extends FormBase {
         $values = [
           'type' => $other_relationship_type,
           'recorded' => date('Y-m-d H:i:s'),
-          'recorded_by' => $this->currentUser()->id(),
+          'recorded_by' => $uid,
           'comment' => $comment,
           'suppress' => FALSE,
         ];
@@ -590,6 +598,13 @@ class ImportForm extends FormBase {
                 $message = "recorded relationship of $from_id to $to_id";
                 ebms_debug_log($message);
                 $logger->info($message);
+              }
+
+              // Mark as published, if a state hasn't already been selected
+              // (OCEEBMS-583).
+              if (!$fast_track && !$core_journals) {
+                $article = Article::load($from_id);
+                $article->addState('published', $topic_id, $uid, date('Y-m-d H:i:s'), $cycle, $pubmsg);
               }
             }
           }
