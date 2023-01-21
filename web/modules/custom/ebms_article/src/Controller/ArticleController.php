@@ -808,6 +808,12 @@ class ArticleController extends ControllerBase {
       $opts = ['query' => \Drupal::request()->query->all()];
       $opts['query']['article'] = $article_id;
       $add_comment = Url::fromRoute($route, $parms, $opts);
+      $inactivate = '';
+      if (!empty($tag->active->value)) {
+        $route = 'ebms_article.inactivate_article_tag';
+        $parms = ['ebms_article_tag' => $tag->id()];
+        $inactivate = Url::fromRoute($route, $parms, $opts);
+      }
       $tags[] = [
         'name' => $tag->tag->entity->getName(),
         'user' => $tag->user->entity->getDisplayName(),
@@ -815,6 +821,7 @@ class ArticleController extends ControllerBase {
         'assigned' => $tag->assigned->value,
         'comments' => $comments,
         'add_comment' => $add_comment,
+        'inactivate' => $inactivate,
       ];
     }
     return $tags;

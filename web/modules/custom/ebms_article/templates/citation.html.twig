@@ -47,11 +47,14 @@
       <div class="article-tag">
         {% if not tag.active %}<s>{% endif %}&ldquo;{{ tag.name }}&rdquo; assigned {{ tag.assigned|date('Y-m-d') }} by {{ tag.user }}{% if not tag.active %}</s>{% endif %}
         <a class="button usa-button usa-button--base inline-button left-pad-button" href="{{ tag.add_comment }}" title="Add another comment for this tag">Add Comment</a>
+        {% if tag.inactivate %}
+        <a class="button usa-button usa-button--base inline-button left-pad-button" href="{{ tag.inactivate }}" title="Inactivate this tag">Inactivate</a>
+        {% endif %}
       </div>
       {% if tag.comments %}
         <ul>
           {% for comment in tag.comments %}
-            <li>{{ comment.user }} [{{ comment.entered|date('Y-m-d') }}]: {{ comment.body }}</li>
+            <li>{% if not tag.active %}<s>{% endif %}{{ comment.user }} [{{ comment.entered|date('Y-m-d') }}]: {{ comment.body }}{% if not tag.active %}</s>{% endif %}</li>
           {% endfor %}
         </ul>
       {% endif %}

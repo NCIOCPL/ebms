@@ -24,6 +24,11 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  * @ContentEntityType(
  *   id = "ebms_article_tag",
  *   label = @Translation("Article Tag"),
+ *   handlers = {
+ *     "form" = {
+ *       "inactivate" = "Drupal\ebms_article\Form\ArticleTagInactivationForm",
+ *     },
+ *   },
  *   base_table = "ebms_article_tag",
  *   entity_keys = {
  *     "id" = "id",
