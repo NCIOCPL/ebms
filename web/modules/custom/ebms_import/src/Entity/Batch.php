@@ -695,7 +695,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
       if (!$this->isTest() && !empty($topic)) {
         $article->addState('ready_init_review', $topic, $user, $now, $cycle, $comment);
       }
-      if (!empty($topic)) {
+      if (!empty($topic) && !$not_listed) {
         $this->addAction($pmid, 'review_ready', $article_id);
         $this->readyForReview[] = $article_id;
       }
@@ -704,6 +704,17 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
 
       // We already have this article.
       $article_id = $article->id();
+
+      // See if we should reject the article based on its journal.
+      $current_state = $article->getCurrentState($topic);
+      if ($not_listed) {
+        if (!empty($current_state)) {
+          $text_id = $current_state->value->entity->field_text_id;
+          if ($text_id !== 'reject_journal_title') {
+            $not_listed = FALSE;
+          }
+        }
+      }
 
       // Record actions and the new state as appropriate.
       // @todo Ask the users if they agree we should streamline this.
@@ -714,27 +725,18 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
       if ($article->refresh($values, $now)) {
         $this->addAction($pmid, 'replaced', $article_id);
       }
-      $current_state = $article->getCurrentState($topic);
       if (!empty($topic) && empty($current_state)) {
         $this->addAction($pmid, 'topic_added', $article_id);
-        $this->addAction($pmid, 'review_ready', $article_id);
-        $this->readyForReview[] = $article_id;
-        if (!$this->isTest()) {
-          $article->addState('ready_init_review', $topic, $user, $now, $cycle, $comment);
+        if (!$not_listed) {
+          $this->addAction($pmid, 'review_ready', $article_id);
+          $this->readyForReview[] = $article_id;
+          if (!$this->isTest()) {
+            $article->addState('ready_init_review', $topic, $user, $now, $cycle, $comment);
+          }
         }
       }
       else {
         $this->addAction($pmid, 'duplicate', $article_id);
-      }
-
-      // See if we should reject the article now.
-      if ($not_listed) {
-        if (!empty($current_state)) {
-          $text_id = $current_state->value->entity->field_text_id;
-          if ($text_id !== 'reject_journal_title') {
-            $not_listed = FALSE;
-          }
-        }
       }
     }
 
