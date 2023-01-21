@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- * Form for deleting a relationship between two articles.
+ * Form for deleting a summary page.
  *
  * The user interface presents this as a deletion, but behind the scenes
  * the software retains the entity and marks it as deactivated. The users
