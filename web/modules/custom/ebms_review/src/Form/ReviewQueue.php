@@ -965,6 +965,7 @@ class ReviewQueue extends FormBase {
         'publication' => $article->getLabel(),
         'tags' => $tags,
         'types' => $types,
+        'related' => $this->getRelatedArticles($article),
         'abstract' => $abstract,
         'abstract_url' => $abstract_url,
         'full_text_url' => $full_text_url,
@@ -1109,6 +1110,43 @@ class ReviewQueue extends FormBase {
       }
     }
     return $items;
+  }
+
+  /**
+   * Find the articles related in some way to this one.
+   *
+   * @param object $article
+   * @return array
+   */
+  private function getRelatedArticles(object $article): array {
+    $values = [];
+    foreach ($article->getRelatedArticles() as $related_article) {
+      $citation = [];
+      foreach ($related_article->authors as $author) {
+        if (!empty($author->last_name)) {
+          $citation[] = $author->last_name;
+          break;
+        }
+      }
+      $journal = trim($related_article->brief_journal_title->value ?? '');
+      if (!empty($journal)) {
+        $citation[] = $journal;
+      }
+      $year = trim($related_article->year->value ?? '');
+      if (!empty($year)) {
+        $citation[] = $year;
+      }
+      $pmid = trim($related_article->source_id->value);
+      $values[] = [
+        'citation' => implode(' ', $citation),
+        'url' => "https://pubmed.ncbi.nlm.nih.gov/$pmid",
+        'pmid' => $pmid,
+      ];
+    }
+    usort($values, function ($a, $b) {
+      return strtolower($a['citation']) <=> strtolower($b['citation']);
+    });
+    return $values;
   }
 
 }

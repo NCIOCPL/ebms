@@ -17,6 +17,9 @@
   {% if article.types %}
   <div>Publication types: {{ article.types }}</div>
   {% endif %}
+  {% for related in article.related %}
+  <div class="related">[Related article: {{ related.citation }} PMID <a href="{{ related.url }}" target="_blank">{{ related.pmid }}</a>]</div>
+  {% endfor %}
   {% if article.abstract %}
   {% for paragraph in article.abstract %}
   <p><strong>{{ paragraph.label}}</strong> {{ paragraph.text|raw }}</p>

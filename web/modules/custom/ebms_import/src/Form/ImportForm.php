@@ -85,10 +85,6 @@ class ImportForm extends FormBase {
         $followup_pmids = $params['followup-pmids'];
         $pmids = implode(' ', array_keys($followup_pmids));
         ebms_debug_log("PMIDs for followup articles: $pmids for request $request_id");
-        $count = count($followup_pmids);
-        $s_have = $count === 1 ? ' has' : 's have';
-        $s = $count === 1 ? '' : 's';
-        $this->messenger()->addMessage("PMID$s for $count related article$s_have been loaded into the PubMed ID field.");
       }
     }
 
@@ -545,7 +541,13 @@ class ImportForm extends FormBase {
       $report = $batch->toArray();
       $report['batch'] = $batch->id();
       $request['followup-pmids'] = $followup_pmids = $batch->getFollowup();
-      ebms_debug_log('the batch identified followup PMIDs: ' . implode(' ', $followup_pmids));
+      if (!empty($followup_pmids)) {
+        $count = count($followup_pmids);
+        $s_have = $count === 1 ? ' has' : 's have';
+        $s = $count === 1 ? '' : 's';
+        $this->messenger()->addMessage("PMID$s for $count related article$s_have been loaded into the PubMed ID field.");
+        ebms_debug_log('the batch identified followup PMIDs: ' . implode(' ', $followup_pmids));
+      }
       $values = [
         'batch' => $batch->id(),
         'params' => json_encode($request),
@@ -553,7 +555,9 @@ class ImportForm extends FormBase {
       ];
       $import_request = ImportRequest::create($values);
       $import_request->save();
-      $parameters = ['request_id' => $import_request->id()];
+      $request_id = $import_request->id();
+      ebms_debug_log("import request ID is $request_id");
+      $parameters = ['request_id' => $request_id];
 
       // Record article relationships if appropriate.
       if (!empty($related_ids)) {
