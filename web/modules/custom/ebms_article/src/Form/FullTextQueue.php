@@ -55,6 +55,7 @@ class FullTextQueue extends FormBase {
     if ($preliminary === 'with') {
       $query->condition('full_text.file', NULL, 'IS NOT NULL');
       $query->condition('tags.entity.tag.entity.field_text_id', 'preliminary');
+      $query->condition('tags.entity.active', TRUE);
     }
     else {
       $query->condition('full_text.file', NULL, 'IS NULL');
