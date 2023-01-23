@@ -268,7 +268,7 @@ class ReviewQueue extends FormBase {
       'state.article' => 'EBMS ID #',
       'article.source_id' => 'PMID #',
       'author' => 'Author',
-      'article.title' => 'Title',
+      'article.search_title' => 'Title',
       'article.journal_title' => 'Journal',
       'article.year' => 'Publication Date',
       'core' => 'Core Journals',
@@ -311,7 +311,7 @@ class ReviewQueue extends FormBase {
             $query->join('ebms_article', 'article', 'article.id = state.article');
             $have_article_join = TRUE;
           }
-          $query->condition('article.title', "%$title%", 'LIKE');
+          $query->condition('article.search_title', "%$title%", 'LIKE');
         }
         if (!empty($journal)) {
           if (!$have_article_join) {
