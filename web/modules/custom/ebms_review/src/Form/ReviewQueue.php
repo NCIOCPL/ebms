@@ -6,7 +6,6 @@ use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
@@ -958,7 +957,8 @@ class ReviewQueue extends FormBase {
       '#theme' => 'review_queue_article',
       '#article' => [
         'authors' => $authors,
-        'link' => Link::createFromRoute($title, $route, $parameters, $options),
+        'title' => $title,
+        'url' => Url::fromRoute($route, $parameters, $options),
         'pmid' => $article->source_id->value,
         'ebms_id' => $article_id,
         'legacy_id' => $article->legacy_id->value,
