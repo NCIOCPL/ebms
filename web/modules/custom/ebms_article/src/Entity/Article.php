@@ -465,13 +465,16 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     foreach ($parent->tags as $tag) {
       $entity = $tag->entity;
       if ($entity->tag->target_id == $tag_term->id()) {
-        $existing_tag = $entity;
-        break;
+        if ($entity->active->value) {
+          $existing_tag = $entity;
+          break;
+        }
       }
     }
-    if ($existing_tag) {
+    if (!empty($existing_tag)) {
       if (!empty($comment)) {
         $existing_tag->comment[] = $comment;
+        $existing_tag->save();
       }
       return $existing_tag;
     }
