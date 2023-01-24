@@ -1,6 +1,6 @@
 {% if abstract %}
   {% for paragraph in abstract %}
-    <h4>{{ paragraph.label }}</h4>
+    <h4>{{ paragraph.label|raw }}</h4>
     <p>{{ paragraph.text|raw }}</p>
   {% endfor %}
 {% else %}
