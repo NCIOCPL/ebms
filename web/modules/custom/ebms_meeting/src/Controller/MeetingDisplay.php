@@ -105,6 +105,13 @@ class MeetingDisplay extends ControllerBase {
       $archive = Url::fromRoute('ebms_meeting.archive', ['meeting' => $meeting->id()], $options)->toString();
     }
 
+    // Determine if the user should see the meeting's agenda.
+    $agenda_visible = FALSE;
+    if ($meeting->agenda_published->value || $this->currentUser()->hasPermission('view all meetings')) {
+      $agenda_visible = TRUE;
+    }
+    $agenda = $agenda_visible ? $meeting->agenda->value : '';
+
     // Assemble and return the render array for the page.
     return [
       '#title' => $meeting->name->value,
@@ -121,7 +128,7 @@ class MeetingDisplay extends ControllerBase {
           'scheduled' => $when,
           'type' => $meeting->type->entity->name->value,
           'participants' => implode('; ', $participants),
-          'agenda' => $meeting->agenda->value,
+          'agenda' => $agenda,
           'notes' => $meeting->notes->value,
           'user' => $meeting->user->entity->name->value,
           'submitted' => substr($meeting->entered->value, 0, 10),
