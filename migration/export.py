@@ -93,6 +93,19 @@ class Exporter:
         OnHold="on_hold",
         FullReviewHold="full_review_hold",
     )
+    STATE_NAMES = dict(
+        ready_init_review="Ready for initial librarian review",
+        passed_init_review="Passed initial librarian review",
+        reject_init_review="Rejected in initial librarian review",
+        passed_bm_review="Passed abstract review",
+        reject_bm_review="Rejected after abstract review",
+        full_review_hold="Held after full text review",
+        not_for_agenda="Minor changes not for board review",
+        on_hold="On hold",
+        agenda_board_discuss="Paper for board discussion",
+        agenda_work_group_discuss="Paper for working group discussion",
+        agenda_no_paper_change="Summary changes for board review (no paper for discussion)",
+    )
     ROLE_MAP = {
         9: "admin_assistant",
         3: "administrator",
@@ -1646,11 +1659,12 @@ class Exporter:
         with open(path, "w", encoding="utf-8") as fp:
             for old_text_id, new_text_id in self.STATE_MACHINE_NAMES.items():
                 row = rows[old_text_id]
+                name = self.STATE_NAMES.get(new_text_id, row["state_name"])
                 values = dict(
                     vid="states",
                     id=row["state_id"],
                     field_text_id=new_text_id,
-                    name=row["state_name"],
+                    name=name,
                     description=row["description"],
                     field_terminal=row["completed"]=="Y",
                     field_sequence=row["sequence"],
