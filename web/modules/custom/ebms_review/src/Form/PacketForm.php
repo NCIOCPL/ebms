@@ -703,14 +703,18 @@ class PacketForm extends FormBase {
     if ($sort === self::SORT_BY_AUTHOR) {
       $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
       $query->orderBy('author.authors_display_name');
+      $query->addField('author', 'authors_display_name');
     }
     else {
       $query->leftJoin('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
       $query->orderBy('journal.core', 'DESC');
       $query->orderBy('article.journal_title');
+      $query->addField('article', 'journal_title');
+      $query->addField('journal', 'core');
     }
     $query->distinct();
-    $query->orderBy('article.title');
+    $query->orderBy('article.search_title');
+    $query->addField('article', 'search_title');
     ebms_debug_log((string) $query, 3);
     return $query;
   }
