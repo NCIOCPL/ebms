@@ -493,11 +493,6 @@ class SearchQuery {
    */
   private function searchTopicsOrBoards() {
 
-    // Only perform this filtering for unrestricted searching.
-    if ($this->restricted) {
-      return;
-    }
-
     // Make sure this isn't taken care of elsewhere. Note that checking for
     // whether articles have two or more topic is independent of this test,
     // as that check doesn't care which topics they are.
