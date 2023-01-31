@@ -605,6 +605,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $authors = array_slice($authors, 0, $max);
       $authors[] = 'et al.';
     }
+    ebms_debug_log('returning ' . count($authors) . ' authors', 3);
     return $authors;
   }
 
@@ -653,6 +654,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $datetime = new \DateTime($date);
       $cycles[] = $datetime->format('F Y');
     }
+    ebms_debug_log('returning cycles ' . implode('|', $cycles), 3);
     return $cycles;
   }
 

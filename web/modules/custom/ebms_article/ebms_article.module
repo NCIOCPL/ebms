@@ -59,7 +59,7 @@ function ebms_article_theme($existing, $type, $theme, $path): array {
         'tags' => NULL,
         'internal' => NULL,
         'import' => NULL,
-        'refreshes' => NULL,
+        'refreshed' => NULL,
       ],
     ],
     'board_article_states' => [

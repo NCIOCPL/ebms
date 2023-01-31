@@ -63,11 +63,11 @@ class ArticleController extends ControllerBase {
   protected $actions = [];
 
   /**
-   * Refreshes of the article's data from NLM.
+   * The last time the article's data was refreshed from NLM.
    *
-   * @var array
+   * @var string
    */
-  protected $refreshes = [];
+  protected $refreshed = '';
 
   /**
    * States, indexed by board, then by topic.
@@ -138,6 +138,7 @@ class ArticleController extends ControllerBase {
    *   Render array for the page.
    */
   public function display(Article $article) {
+    ebms_debug_log('top of ArticleController::display()', 3);
     $states = $this->getStateRenderArrays($article);
     return [
       '#title' => 'Full Article History',
@@ -165,7 +166,7 @@ class ArticleController extends ControllerBase {
           'user' => $article->imported_by->entity->getDisplayName(),
           'date' => $article->import_date->value,
         ],
-        '#refreshes' => $this->refreshes,
+        '#refreshed' => $this->refreshed,
         '#cache' => ['max-age' => 0],
       ],
       'states' => $states,
@@ -179,6 +180,7 @@ class ArticleController extends ControllerBase {
    * @return array
    */
   private function getRelatedArticles($article) {
+    ebms_debug_log('top of ArticleController::getRelatedArticles()', 3);
     $article_id = $article->id();
     $storage = $this->entityTypeManager()->getStorage('ebms_article_relationship');
     $query = $storage->getQuery()->accessCheck(FALSE);
@@ -188,6 +190,7 @@ class ArticleController extends ControllerBase {
     $query->condition($group);
     $query->condition('inactivated', NULL, 'IS NULL');
     $ids = $query->execute();
+    ebms_debug_log('getRelatedArticles(): got ' . count($ids) . ' ID rows', 3);
     $relationships = $storage->loadMultiple($ids);
     $storage = $this->entityTypeManager()->getStorage('ebms_article');
     $values = [];
@@ -229,78 +232,102 @@ class ArticleController extends ControllerBase {
         'edit' => $edit,
       ];
     }
+    ebms_debug_log('returning ' . count($values) . ' relationships', 3);
     return $values;
   }
 
   /**
    * Assemble information about how the article first entered the system.
    *
-   * Populates the `actions` and `refreshes` properties of the controller.
+   * Populates the `actions` and `refreshed` properties of the controller.
    *
    * @param \Drupal\ebms_article\Entity\Article $article
    *   Article entity for which the information is collected.
    */
   private function collectImportEvents(object $article) {
-    $imports = $this->entityTypeManager()->getStorage('ebms_import_batch');
-    $query = $imports->getQuery()->accessCheck(FALSE);
-    $query->condition('actions.article', $article->id());
-    $ids = $query->execute();
-    $batches = $imports->loadMultiple($ids);
-    $this->actions = [];
-    $this->refreshes = [];
-    foreach ($batches as $batch) {
-      if (empty($batch->topic->entity)) {
-        $type = $batch->import_type->entity->getName();
-        if (str_contains(strtolower($type), 'refresh')) {
-          if ($batch->user->target_id)
-            $user = $batch->user->entity->getDisplayName();
-          else
-            $user = 'scheduled job';
-          $this->refreshes[] = [
-            'date' => $batch->imported->value,
-            'user' => $user,
-          ];
+
+    // Another place where the entity query API falls short.
+    // See https://tracker.nci.nih.gov/browse/OCEEBMS-718.
+    $query = \Drupal::database()->select('ebms_import_batch__actions', 'a');
+    $query->join('ebms_import_batch', 'b', 'b.id = a.entity_id');
+    $query->join('taxonomy_term_field_data', 'd', 'd.tid = a.actions_disposition');
+    $query->join('taxonomy_term_field_data', 't', 't.tid = b.import_type');
+    $query->leftJoin('users_field_data', 'u', 'u.uid = b.user');
+    $query->leftJoin('ebms_topic', 'topic', 'topic.id = b.topic');
+    $query->condition('a.actions_article', $article->id());
+    $query->addField('d', 'name', 'disposition');
+    $query->addField('t', 'name', 'import_type');
+    $query->addField('topic', 'name', 'topic_name');
+    $query->addField('u', 'name', 'user_name');
+    $query->fields('b', ['id', 'imported', 'cycle']);
+    $query->orderBy('b.imported');
+    $actions = $query->execute();
+    $batches = [];
+    $this->refreshed = '';
+    $refresh_count = 0;
+    foreach ($actions as $action) {
+      if (empty($action->topic_name)) {
+        if (str_contains(strtolower($action->import_type), 'refresh')) {
+          $user = $action->user_name ?: 'scheduled job';
+          $date = substr($action->imported, 0, 10);
+          $refresh_count++;
+          if ($refresh_count === 1) {
+            $msg = "Refreshed from PubMed $date by $user";
+          }
+          elseif ($refresh_count === 2) {
+            $msg = "Refreshed twice from PubMed, most recently $date by $user";
+          }
+          else {
+            $msg = "Refreshed $refresh_count times from PubMed, most recently $date by $user";
+          }
+          $this->refreshed = $msg;
         }
       }
       else {
-        $values = [
-          'date' => $batch->imported->value,
-          'user' => $batch->user->entity->getDisplayName(),
-          'type' => $batch->import_type->entity->getName(),
-          'cycle' => $batch->cycle->value,
-        ];
-
-        // Collect all the dispositions recorded when the article was imported
-        // or updated for this topic. There can be multiple values, and we
-        // pick the one most relevant for this article, testing the values in
-        // the order given in the `$disposition_tests` array below.
-        $dispositions = [];
-        foreach ($batch->actions as $action) {
-          if ($action->article == $article->id()) {
-            $dispositions[] = $this->termStorage->load($action->disposition)->getName();
-          }
+        if (!array_key_exists($action->id, $batches)) {
+          $batches[$action->id] = [
+            'date' => $action->imported,
+            'user' => $action->user_name,
+            'type' => $action->import_type,
+            'cycle' => $action->cycle,
+            'topic' => $action->topic_name,
+            'dispositions' => [],
+          ];
         }
-        $disposition_tests = [
-          'Error',
-          'Imported',
-          'Summary topic added',
-          'Replaced',
-          'NOT listed',
-          'Ready for review',
-          'Duplicate, not imported',
-        ];
-        foreach ($disposition_tests as $disposition_test) {
-          if (in_array($disposition_test, $dispositions)) {
-            $values['disposition'] = $disposition_test;
-            break;
-          }
-        }
-        $this->actions[$batch->topic->entity->getName()][] = $values;
+        $batches[$action->id]['dispositions'][] = $action->disposition;
       }
     }
-    usort($this->refreshes, function($a, $b) {
-      return $a['date'] <=> $b['date'];
-    });
+
+    // Index the import events by topic.
+    $this->actions = [];
+    foreach ($batches as $batch) {
+
+      // Pick the most salient disposition value for each event, testing
+      // the values in the order tive in the `$dispositions` array below.
+      $dispositions = [
+        'Error',
+        'Imported',
+        'Summary Topic Added',
+        'Replaced',
+        'NOT Listed',
+        'Ready For Review',
+        'Duplicate, Not Imported',
+      ];
+      $disposition = 'unknown';
+      foreach ($dispositions as $candidate) {
+        if (in_array($disposition_test, $batch['dispositions'])) {
+          $disposition = $candidate;
+          break;
+        }
+      }
+      $this->actions[$batch['topic']][] = [
+        'date' => $batch['date'],
+        'user' => $batch['user'],
+        'type' => $batch['type'],
+        'cycle' => $batch['cycle'],
+        'disposition' => $disposition,
+      ];
+    }
   }
 
   /**
@@ -712,6 +739,7 @@ class ArticleController extends ControllerBase {
         'attributes' => ['title' => 'Return to the review queue.'],
       ];
     }
+    ebms_debug_log('returning ' . count($actions) . ' action buttons', 3);
     return $actions;
   }
 
@@ -740,6 +768,7 @@ class ArticleController extends ControllerBase {
       $ft_user = $user->getDisplayName();
       $ft_note = $article->full_text->notes;
     }
+    ebms_debug_log('returning article full text information', 3);
     return [
       'name' => $ft_filename,
       'url' => $ft_url,
@@ -767,6 +796,7 @@ class ArticleController extends ControllerBase {
       ],
     ];
     $url = Url::fromUri($uri, $options);
+    ebms_debug_log('returning article IDs', 3);
     return [
       'ebms' => $article->id(),
       'pubmed' => Link::fromTextAndUrl($pmid, $url),
@@ -788,6 +818,7 @@ class ArticleController extends ControllerBase {
    *   Values used for the article tag display.
    */
   private function getArticleTags(object $article_or_topic, int $article_id) {
+    ebms_debug_log('top of ArticleController::getArticleTags()', 3);
     $tags = [];
     foreach ($article_or_topic->get('tags') as $tag) {
       $tag = $tag->entity;
@@ -824,6 +855,7 @@ class ArticleController extends ControllerBase {
         'inactivate' => $inactivate,
       ];
     }
+    ebms_debug_log('returning ' . count($tags) . ' article tags', 3);
     return $tags;
   }
 
@@ -844,6 +876,7 @@ class ArticleController extends ControllerBase {
         'assigned' => $tag->added->value,
       ];
     }
+    ebms_debug_log('returning ' . count($internal_tags) . ' internal tags', 3);
     return $internal_tags;
   }
 
@@ -877,6 +910,7 @@ class ArticleController extends ControllerBase {
         ];
       }
     }
+    ebms_debug_log('returning ' . count($values) . ' internal comments', 3);
     return $values;
   }
 
@@ -892,22 +926,28 @@ class ArticleController extends ControllerBase {
   private function getStateRenderArrays(Article $article): array {
 
     // Ensure that this index starts fresh.
+    ebms_debug_log('top of ArticleController::getStateRenderArrays()', 3);
     $this->topicBoards = [];
 
     // Populate the controller's `states` property.
     $this->collectImportEvents($article);
+    ebms_debug_log('import events collected', 3);
     $this->collectStateInformation($article);
+    ebms_debug_log('state information collected', 3);
     // Suppressing this for now.
     // $this->collectTopicComments($article);
     // ... to prevent duplicate display of these comments.
     $this->collectPacketInformation($article);
+    ebms_debug_log('packet information collected', 3);
 
     // Walk through the sorted states and create the render arrays for each.
     ksort($this->states);
+    ebms_debug_log('found ' . count($this->states) . ' sets of states', 3);
     $render_arrays = [];
     foreach ($this->states as $board_name => $topics) {
 
       // Create a collapsible block for the board's topics.
+      ebms_debug_log("board $board_name has " . count($topics) . ' topics', 3);
       $board = [
         '#type' => 'details',
         '#open' => FALSE,
@@ -1021,6 +1061,7 @@ class ArticleController extends ControllerBase {
       }
       $render_arrays[] = $board;
     }
+    ebms_debug_log('returning ' . count($render_arrays) . ' state render arrays', 3);
     return $render_arrays;
   }
 
