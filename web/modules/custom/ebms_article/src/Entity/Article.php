@@ -84,6 +84,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $fields['source_id'] = BaseFieldDefinition::create('string')
       ->setLabel('Source ID')
       ->setRequired(TRUE)
+      ->addConstraint('UniqueField')
       ->setSettings(['max_length' => 32])
       ->setDescription('Identifier for the article, unique for the source.');
     $fields['source_journal_id'] = BaseFieldDefinition::create('string')
