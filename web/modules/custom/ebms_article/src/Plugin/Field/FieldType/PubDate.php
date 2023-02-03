@@ -66,7 +66,7 @@ class PubDate extends FieldItemBase {
         'season' => [
           'description' => 'Publication season',
           'type' => 'varchar',
-          'length' => 12,
+          'length' => 64,
         ],
         'medline_date' => [
           'description' => 'Custom publication date string',
