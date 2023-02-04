@@ -37,7 +37,7 @@ class ManageReviewTopicAssignments extends FormBase {
 
     // If we have a job request, fetch its parameters.
     $parameters = empty($request_id) ? [] : SavedRequest::loadParameters($request_id);
-    $name = $parameters['name'] ?? '';
+    $name = trim($parameters['name'] ?? '');
     $board = array_diff($parameters['board'] ?? [], [0]);
     $role = array_diff($parameters['role'] ?? ['board_member'], [0]);
 
