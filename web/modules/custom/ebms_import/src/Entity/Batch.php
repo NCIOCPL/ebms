@@ -466,6 +466,9 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
         $slice = array_slice($pmids, $offset, self::PUBMED_BATCH_SIZE);
         if (!empty($slice)) {
           usleep(500000);
+          if ($text_id == self::IMPORT_TYPE_DATA_REFRESH) {
+            set_time_limit(300);
+          }
         }
       }
     }

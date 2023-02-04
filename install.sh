@@ -28,6 +28,9 @@ case $SITEHOST in
         ;;
 esac
 $SUDO chmod a+w ${SITE}
+$SUDO rm -rf ${SITE}/logs
+$SUDO mkdir ${SITE}/logs
+$SUDO chmod 777 ${SITE}/logs
 [ -d ${SITE}/files ] && $SUDO chmod -R a+w ${SITE}/files && rm -rf ${SITE}/files/*
 [ -f ${SITE}/settings.php ] && $SUDO chmod +w ${SITE}/settings.php
 cp -f ${SITE}/default.settings.php ${SITE}/settings.php

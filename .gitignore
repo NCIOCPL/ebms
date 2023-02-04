@@ -1,4 +1,6 @@
+logs
 unversioned
+__pycache__
 /testdata/maps.json
 /testdata/dumps
 /migration/maps.json
