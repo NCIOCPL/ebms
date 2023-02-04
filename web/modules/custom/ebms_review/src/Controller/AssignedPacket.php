@@ -178,10 +178,8 @@ class AssignedPacket extends ControllerBase {
         ],
       ],
       'reviewers' => [
-        '#theme' => 'item_list',
-        '#title' => 'Reviewers',
-        '#list_type' => 'ul',
-        '#items' => $reviewers,
+        '#theme' => 'packet_assigned_reviewers',
+        '#reviewers' => $reviewers,
       ],
       'summaries' => [
         '#theme' => 'item_list',
