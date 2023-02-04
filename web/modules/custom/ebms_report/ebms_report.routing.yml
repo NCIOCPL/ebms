@@ -192,7 +192,7 @@ ebms_report.topic_reviewers:
     _title: 'Topic Reviewers'
     report_id: 0
   requirements:
-    _permission: 'manage topics'
+    _permission: 'manage topics+manage topic assignments'
   options:
     no_cache: TRUE
     parameters:
