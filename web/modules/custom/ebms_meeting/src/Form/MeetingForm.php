@@ -211,6 +211,7 @@ class MeetingForm extends FormBase {
           '#description' => "The nature of the meeting's scope.",
           '#options' => $categories,
           '#default_value' => $category,
+          '#required' => TRUE,
         ],
       ],
       'participants' => [
