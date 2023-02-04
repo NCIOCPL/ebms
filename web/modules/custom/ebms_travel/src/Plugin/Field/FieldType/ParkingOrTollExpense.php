@@ -62,7 +62,7 @@ class ParkingOrTollExpense extends FieldItemBase {
       $type = Term::load($this->type)->name->value;
     }
     if (!empty($this->amount)) {
-      return "$type - $date - " . '$' . $this->amount;
+      return "$type - $date - " . '$' . $this->amount . ' (52-04)';
     }
     return "$type - $date - no amount given";
   }
