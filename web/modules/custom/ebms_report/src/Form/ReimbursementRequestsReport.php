@@ -204,7 +204,7 @@ class ReimbursementRequestsReport extends FormBase {
         'hotel_amount' => $request->hotel_amount->value,
         'nights_stayed' => $request->nights_stayed->value,
         'meals_and_incidentals' => $request->meals_and_incidentals->entity->name->value,
-        'honorarium' => $request->honorarium_request->value ? 'Requested' : 'Declined',
+        'honorarium' => $request->honorarium_requested->value ? 'Requested' : 'Declined',
         'reimburse_to' => $request->reimburse_to->entity->name->value,
         'total' => $request->total_amount->value,
         'certified' => $request->certified->value,
