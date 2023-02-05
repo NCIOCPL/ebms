@@ -23,6 +23,7 @@ and https://tracker.nci.nih.gov/browse/OCEEBMS-687.
 """
 
 from argparse import ArgumentParser
+from datetime import datetime
 from functools import cached_property
 from logging import basicConfig, getLogger
 from pathlib import Path
@@ -50,21 +51,19 @@ class Control:
     DAYS_TO_CHECK = 15
 
     def main(self):
+        started = datetime.now()
         self.logger.info("-" * 40)
         self.logger.info("job started")
         try:
             if self.stale_articles:
                 url = f"{self.base_url}/{self.IMPORT_REFRESH}"
                 pmids = ",".join(sorted(self.stale_articles, key=int))
-                import json
-                with open("stale-articles.json", "w", encoding="utf-8") as fp:
-                    json.dump(sorted(self.stale_articles, key=int), fp,
-                              indent=2)
                 response = post(url, data=dict(pmids=pmids))
                 self.logger.info(response.text)
         except Exception:
             self.logger.exception("refresh job failure")
-        self.logger.info("job finished")
+        elapsed = datetime.now() - started
+        self.logger.info("job finished (%s)", elapsed)
         self.logger.info("-" * 40)
 
     @cached_property
