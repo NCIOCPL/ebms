@@ -44,6 +44,7 @@ class FileMatcher extends MatcherBase {
     ebms_debug_log("found $counter matching articles", 3);
     $query = \Drupal::database()->select('ebms_doc', 'd');
     $query->condition('d.description', "%{$string}%", 'LIKE');
+    $query->condition('d.dropped', 0);
     $query->isNotNull('d.file');
     $query->fields('d', ['description', 'file']);
     $query->orderBy('d.description');
