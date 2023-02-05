@@ -27,7 +27,7 @@ class FileMatcher extends MatcherBase {
     $query->condition('a.search_title', "%{$string}%", 'LIKE');
     $query->isNotNull('a.full_text__file');
     $query->fields('a', ['title', 'full_text__file']);
-    $query->orderBy('a.search_title');
+    $query->orderBy('a.import_date', 'DESC');
     $query->range(0, 100);
     $results = $query->execute();
     $counter = 0;
@@ -47,7 +47,7 @@ class FileMatcher extends MatcherBase {
     $query->condition('d.dropped', 0);
     $query->isNotNull('d.file');
     $query->fields('d', ['description', 'file']);
-    $query->orderBy('d.description');
+    $query->orderBy('d.posted', 'DESC');
     $query->range(0, 100);
     $results = $query->execute();
     $counter = 0;
