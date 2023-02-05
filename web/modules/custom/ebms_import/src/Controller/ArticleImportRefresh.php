@@ -24,7 +24,7 @@ class ArticleImportRefresh extends ControllerBase {
 
       // Get the PubMed IDs.
       $pmids = \Drupal::request()->request->get('pmids');
-      ebms_debug_log("pmids=$pmids");
+      ebms_debug_log("pmids=$pmids", 3);
 
       // Prevent a rogue process from tricking us into adding new articles.
       $query = \Drupal::database()->select('ebms_article', 'article');

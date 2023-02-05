@@ -326,7 +326,9 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
     $offset = 0;
     $slice = array_slice($pmids, $offset, self::PUBMED_BATCH_SIZE);
     $debugging = Settings::get('APP_ENV') === 'dev';
+    $n = count($pmids);
     while (!empty($slice)) {
+      ebms_debug_log("fetching $n articles from NLM (offset=$offset)");
       $response = $batch->fetch($slice);
       if (empty($batch->success->value)) {
         $slice = '';
@@ -659,7 +661,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
     $pmid = $values['source_id'];
     if (!empty($comments_corrections)) {
       $cc_string = implode(' ', $comments_corrections);
-      ebms_debug_log("importing PMID $pmid with comments_corrections=$cc_string");
+      ebms_debug_log("importing PMID $pmid with comments_corrections=$cc_string", 3);
     }
     $journal_id = $values['source_journal_id'];
     $board = $this->board;
@@ -758,13 +760,13 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
 
       // Find out if there are any related articles which should also be imported.
       $core = $article->inCoreJournal();
-      ebms_debug_log("checking comments/corrections: core journal=$core topic=$topic");
+      ebms_debug_log("checking comments/corrections: core journal=$core topic=$topic", 3);
       if (!empty($topic) && !empty($comments_corrections) && $core) {
 
         // Only do this for boards which want it to happen.
         if (!empty(Board::load($board)->auto_imports->value)) {
           $journal_id = $article->source_journal_id->value;
-          ebms_debug_log("checking comments_corrections $cc_string; journal=$journal_id");
+          ebms_debug_log("checking comments_corrections $cc_string; journal=$journal_id", 3);
           foreach ($comments_corrections as $other_pmid) {
 
             // Skip this PMID if it's in the current batch already.
@@ -777,7 +779,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
 
                   // Skip it if it's in a different journal.
                   $other_journal_id = $this->getPubmedArticleJournalId($other_pmid);
-                  ebms_debug_log("other article is in journal with ID $other_journal_id");
+                  ebms_debug_log("other article is in journal with ID $other_journal_id", 3);
                   if ($other_journal_id === $journal_id) {
                     $this->followup[$other_pmid][] = $article->id();
                     ebms_debug_log("Added PMID $other_pmid to followup list");

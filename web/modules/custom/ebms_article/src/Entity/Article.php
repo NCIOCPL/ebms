@@ -824,7 +824,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $text = $node->textContent ?? '';
       ebms_debug_log("title textContent=$text", 3);
       $search_title = trim(substr(self::normalize($text), 0, 512));
-      ebms_debug_log("search_title=$search_title");
+      ebms_debug_log("search_title=$search_title", 3);
     }
     else {
       $search_title = '';
