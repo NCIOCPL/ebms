@@ -22,7 +22,7 @@ See https://tracker.nci.nih.gov/browse/OCEEBMS-87
 and https://tracker.nci.nih.gov/browse/OCEEBMS-687.
 """
 
-from datetime import datetime
+from argparse import ArgumentParser
 from functools import cached_property
 from logging import basicConfig, getLogger
 from pathlib import Path
@@ -102,6 +102,14 @@ class Control:
         return getLogger()
 
     @cached_property
+    def opts(self):
+      """Run-time options."""
+
+      parser = ArgumentParser()
+      parser.add_argument("--verbose", "-v", action="store_true")
+      return parser.parse_args()
+
+    @cached_property
     def root(self):
         """Find the base directory for the site."""
 
@@ -118,6 +126,9 @@ class Control:
         pmids = sorted(self.ebms_dates, key=int)
         offset = 0
         recent = set()
+        if self.verbose:
+          msg = f"Checking {len(pmids)} articles to see which are changed\n"
+          stderr.write(msg)
         while offset < len(pmids):
             batch = pmids[offset:offset+self.ESEARCH_BATCH_SIZE]
             offset += len(batch)
@@ -146,6 +157,11 @@ class Control:
                     snooze *= 2
             if offset < len(pmids):
                 sleep(.35)
+            if self.verbose:
+                percent = offset / len(pmids)
+                left = "=" * int(72 * percent)
+                right = " " * (72 - len(left))
+                stderr.write(f"\r[{left}>{right}]")
         self.logger.info("found %d recently changed articles", len(recent))
         return recent
 
@@ -154,9 +170,12 @@ class Control:
         """Sequence of PubMed IDs for articles which need to be refreshed."""
 
         pmids = sorted(self.recently_changed_articles, key=int)
+        n = len(pmids)
         offset = 0
         stale = set()
-        while offset < len(pmids):
+        if self.verbose and pmids:
+              stderr.write(f"\nChecking {n} articles to see which are stale\n")
+        while offset < n:
             chunk = pmids[offset:offset+self.EFETCH_BATCH_SIZE]
             offset += len(chunk)
             response = self._fetch_articles(chunk)
@@ -175,10 +194,26 @@ class Control:
                             stale.add(article.pmid)
                 except Exception as e:
                     self.logger.exception("parsing Pubmed article")
-            if offset < len(pmids):
+            if offset < n:
                 sleep(.35)
+            if self.verbose:
+                percent = offset / n
+                left = "=" * int(72 * percent)
+                right = " " * (72 - len(left))
+                stderr.write(f"\r[{left}>{right}]")
+        if self.verbose:
+            if stale:
+                msg = f"\nwaiting for refresh of {len(stale)} articles\n"
+                stderr.write(msg)
+            else:
+                stderr.write("\nno articles need refreshing\n")
         self.logger.info("identified %d stale articles", len(stale))
         return stale
+
+    @cached_property
+    def verbose(self):
+      """Should we display progress?"""
+      return self.opts.verbose
 
     def _fetch_articles(self, pmids):
         """Retrieve the XML for a batch of PubMed articles from NLM.
