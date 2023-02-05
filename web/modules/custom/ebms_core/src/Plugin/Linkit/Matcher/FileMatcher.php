@@ -37,7 +37,7 @@ class FileMatcher extends MatcherBase {
       $suggestion = new SimpleSuggestion();
       $suggestion->setLabel($result->title)
         ->setPath($url)
-        ->setGroup('Articles');
+        ->setGroup('Article Full Text');
       $suggestions->addSuggestion($suggestion);
       $counter++;
     }
