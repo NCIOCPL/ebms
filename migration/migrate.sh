@@ -39,9 +39,9 @@ $SUDO chmod a+w ${SITE}
 $SUDO rm -rf ${SITE}/files
 $SUDO mkdir ${SITE}/files
 $SUDO chmod 777 ${SITE}/files
-$SUDO rm -rf ${SITE}/logs
-$SUDO mkdir ${SITE}/logs
-$SUDO chmod 777 ${SITE}/logs
+$SUDO rm -rf ${REPO_BASE}/logs
+$SUDO mkdir ${REPO_BASE}/logs
+$SUDO chmod 777 ${REPO_BASE}/logs
 [ -f ${SITE}/settings.php ] && $SUDO chmod +w ${SITE}/settings.php
 cp -f ${SITE}/default.settings.php ${SITE}/settings.php
 $SUDO chmod +w ${SITE}/settings.php
