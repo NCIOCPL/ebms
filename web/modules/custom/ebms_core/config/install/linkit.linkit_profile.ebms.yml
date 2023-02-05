@@ -10,5 +10,6 @@ description: 'Supports linking to files stored on the site.'
 matchers:
   c5f93a7b-a7e9-4e0f-9171-3625512ed5b4:
     id: 'ebms_matcher'
+    uuid: c5f93a7b-a7e9-4e0f-9171-3625512ed5b4
     settings: { }
     weight: 0
