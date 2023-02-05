@@ -753,6 +753,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
 
     // Store the changes to the article if we're not just testing.
     if (!$this->isTest()) {
+      $article->data_checked = $now;
       $article->save();
 
       // Find out if there are any related articles which should also be imported.
