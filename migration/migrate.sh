@@ -106,6 +106,9 @@ $DRUSH scr --script-path=$MIGRATION summaries
 $DRUSH scr --script-path=$MIGRATION states
 $DRUSH scr --script-path=$MIGRATION article-tags
 $DRUSH scr --script-path=$MIGRATION article-topics
+/bin/sleep 60
+$DRUSH cache:rebuild
+/bin/sleep 60
 $DRUSH scr --script-path=$MIGRATION articles
 $DRUSH scr --script-path=$MIGRATION relationships
 $DRUSH scr --script-path=$MIGRATION imports
