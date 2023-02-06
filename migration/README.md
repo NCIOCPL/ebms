@@ -1,7 +1,7 @@
 # EBMS Migration
 
 These instructions explain the plan for creating the Drupal 9 replacement
-for EBMS, which is currently running on Drupal 7. This implementation has
+for the EBMS, which is currently running on Drupal 7. This implementation has
 been completely rewritten, and the data structures are all different than
 they were in the earlier version of the software, which made extensive
 use of custom data tables because the Drupal entity APIs were not yet
@@ -35,6 +35,8 @@ naming convention for the tiers (ebms-test.nci.nih.gov).
 * ebms-stage.nci.nih.gov (will keep this name)
 * ebms4.nci.nih.gov (will become ebms.nci.nih.gov)
 
+**_Note:_** _All four of the servers have been provisioned as of October 2022, so this step is done (with a footnote that we can't yet verify that the SiteMinder configuration is in place)._
+
 ## Install Software From GitHub
 
 Execute the following commands on the new server. From this point on all commands should be run as the `drupal` account (`sudo su - drupal`).
@@ -56,28 +58,21 @@ cd /local/drupal/ebms
 rsync -a nciws-d2387-v:/local/drupal/ebms/unversioned ./
 ```
 
-If you have the password for the `drupal` account on nciws-d2387-v,
-then the `rsync` command will work as written. Otherwise, you will
-need to
-- run `chmod -R 777 /local/drupal/ebms/unversioned` on nciws-d2387-v
-- prepend "some-other-account@" to "nciws-d2387-v" in the `rsync` command,
-  using an account for which you have the password on nciws-d2387-v,
-  or the ability to log in with SSH keys.
-- run `chmod -R 777 /local/drupal/ebms/unversioned` as root or
-  as the other account used for the `rsync` command (assuming
-  that account exists on the new server)
+For the lower tiers I set up SSH keys for the drupal account so that
+the `rsync` command will work without a password (which I don't have,
+nor do I even know if that account allows password login).
 
 Edit the file `unversioned/dburl` so that it contains the correct
 database credentials, host name, and port number. Similarly, edit the
 file `unversioned/sitehost` so that it contains the correct name for
-the web host (_e.g._, `ebms4.nci.nih.gov`).
+the web host (_e.g._, `ebms4.nci.nih.gov` or `ebms-stage.nci.nih.gov`).
 
 ## Create the Web Site
 
 Creation of the new production site should probably happen a few days
 before the planned cutover to the new site. To create the site,
 execute these commands on the new server. The `migrate.sh` command can
-take 14-15 hours to complete on the CBIIT-hosted servers, so it is
+take 15-16 hours to complete on the CBIIT-hosted servers, so it is
 necessary to start the job early in the morning so that it completes
 before midnight, when CBIIT performs database and/or network
 maintenance which would cause the job to fail. Even though this step
