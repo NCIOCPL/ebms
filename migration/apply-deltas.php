@@ -47,6 +47,17 @@ foreach ($vocabularies as $vid) {
   }
 }
 
+// Add the article update dates from the manifest.
+$fp = fopen("$repo_base/unversioned/articles.manifest", "r");
+while (($line = fgets($fp)) !== FALSE) {
+  list($pmid, $refreshed) = explode("\t", trim($line));
+  $period = strpos($refreshed, '.');
+  if ($period !== FALSE) {
+    $refreshed = substr($refreshed, 0, $period);
+  }
+  $maps['article_manifest_dates'][$pmid] = $refreshed;
+}
+
 
 // Map the user's group membership IDs and clear out empty picture fields.
 function map_user_values(array &$values, array &$maps, string $repo_base) {
@@ -161,10 +172,14 @@ function map_article_tags(array &$values, array &$maps, string $repo_base) {
 // Map internal tags and merge in values from PubMed.
 function assemble_article(array &$values, array &$maps, string $repo_base) {
   $id = $values['id'];
-  $xml = file_get_contents("$repo_base/unversioned/articles/$id.xml");
+  $pmid = $values['source_id'];
+  $xml = file_get_contents("$repo_base/unversioned/articles/$pmid.xml");
   $pubmed_values = \Drupal\ebms_article\Entity\Article::parse($xml);
   unset($pubmed_values['comments_corrections']);
   $values = array_merge($values, $pubmed_values);
+  if (array_key_exists($pmid, $maps['article_manifest_dates'])) {
+    $values['update_date'] = $maps['article_manifest_dates'][$pmid];
+  }
   if (!empty($values['internal_tags'])) {
     $tags = [];
     foreach ($values['internal_tags'] as $tag) {
