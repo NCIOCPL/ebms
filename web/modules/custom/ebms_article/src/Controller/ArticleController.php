@@ -315,7 +315,7 @@ class ArticleController extends ControllerBase {
       ];
       $disposition = 'unknown';
       foreach ($dispositions as $candidate) {
-        if (in_array($disposition_test, $batch['dispositions'])) {
+        if (in_array($candidate, $batch['dispositions'])) {
           $disposition = $candidate;
           break;
         }

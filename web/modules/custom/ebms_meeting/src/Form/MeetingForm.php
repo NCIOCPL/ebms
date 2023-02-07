@@ -48,7 +48,7 @@ class MeetingForm extends FormBase {
 
     // Set some defaults.
     $name = $category = $type = $status = $meeting_id = $agenda = $notes = '';
-    $selected_boards = $selected_groups = $selected_individuals = [];
+    $files = $selected_boards = $selected_groups = $selected_individuals = [];
     $published = TRUE;
     $agenda_published = FALSE;
     $boards = Board::boards();

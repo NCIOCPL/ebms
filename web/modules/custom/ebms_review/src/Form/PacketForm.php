@@ -93,7 +93,8 @@ class PacketForm extends FormBase {
       $boards = Board::boards();
       $board_id = $form_state->getValue('board');
       if (empty($board_id)) {
-        $board_id = Board::defaultBoard($this->account) ?: reset(array_keys($boards));
+        $keys = array_keys($boards);
+        $board_id = Board::defaultBoard($this->account) ?: reset($keys);
       }
       $topic_ids = $this->topicsForBoard($board_id);
       $topic_options = $this->topicOptions($board_id);
@@ -424,7 +425,8 @@ class PacketForm extends FormBase {
     $error_field = NULL;
     $ids = [];
     foreach ($fields as $name) {
-      foreach ($form_state->getValue($name) as $key => $value) {
+      $values = $form_state->getValue($name) ?: [];
+      foreach ($values as $key => $value) {
         if (is_null($error_field)) {
           $error_field = $name;
         }
@@ -442,7 +444,7 @@ class PacketForm extends FormBase {
 
     // Collect the IDs for the selected reviewers.
     $ids = [];
-    foreach ($form_state->getValue('reviewers') as $key => $value) {
+    foreach ($form_state->getValue('reviewers') ?: [] as $key => $value) {
       if (!empty($value)) {
         $ids[] = $key;
       }
@@ -456,7 +458,7 @@ class PacketForm extends FormBase {
 
     // Collect the IDs for the selected summary documents (if any).
     $ids = [];
-    foreach ($form_state->getValue('summaries') as $key => $value) {
+    foreach ($form_state->getValue('summaries') ?: [] as $key => $value) {
       if (!empty($value)) {
         $ids[] = $key;
       }

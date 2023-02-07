@@ -744,7 +744,7 @@ class ReviewQueue extends FormBase {
       $default_queue_type = reset($queue_types);
     }
     $parameters = $form_state->getValues();
-    ebms_debug_log(print_r($parameters['topic'], TRUE), 3);
+    ebms_debug_log('createQueue() topic=' . print_r($parameters['topic'] ?? 'no topic', TRUE), 3);
     $spec = [
       'board' => $parameters['board'] ?? Board::defaultBoard($user),
       'topic' => $parameters['topic'] ?? [],

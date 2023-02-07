@@ -103,7 +103,7 @@ class AssignedPacket extends ControllerBase {
         $full_text_url = $file->createFileUrl();
       }
       $current_state = $article->getCurrentState($topic_id);
-      if ($current_state->field_text_id->value === 'on_agenda') {
+      if ($current_state->value->entity->field_text_id->value === 'on_agenda') {
         $meetings = [];
         foreach ($current_state->meetings as $meeting) {
           $name = $meeting->entity->name->value;

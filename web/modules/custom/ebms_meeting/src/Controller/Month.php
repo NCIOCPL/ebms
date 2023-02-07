@@ -147,7 +147,7 @@ class Month extends ControllerBase {
       if (!$user->boards->isEmpty()) {
         $label = 'Show All Boards';
         $options = ['query' => \Drupal::request()->query->all()];
-        if ($options['query']['boards'] === 'all') {
+        if ($options['query']['boards'] ?? '' === 'all') {
           unset($options['query']['boards']);
           $label = 'Restrict To My Boards';
         }
