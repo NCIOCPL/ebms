@@ -83,6 +83,7 @@ from time to time.
 
 ```
 cd /local/drupal/ebms
+composer install
 nohup migration/migrate.sh &
 cd unversioned
 rm -rf baseline
