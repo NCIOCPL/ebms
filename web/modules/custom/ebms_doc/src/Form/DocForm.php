@@ -45,22 +45,23 @@ class DocForm extends FormBase {
     }
 
     // Find out what the user has changed on the form.
+    $description = '';
+    $selected_boards = [];
+    $selected_tags = [];
+    $selected_topics = [];
     $values = $form_state->getValues();
     if (!empty($values)) {
-      $selected_boards = [];
-      foreach ($values['boards'] as $key => $value) {
+      foreach ($values['boards'] ?? [] as $key => $value) {
         if (!empty($value)) {
           $selected_boards[] = $key;
         }
       }
-      $selected_tags = [];
-      foreach ($values['tags'] as $key => $value) {
+      foreach ($values['tags'] ?? [] as $key => $value) {
         if (!empty($value)) {
           $selected_tags[] = $key;
         }
       }
-      $selected_topics = [];
-      foreach ($values['topics'] as $key => $value) {
+      foreach ($values['topics'] ?? [] as $key => $value) {
         if (!empty($value)) {
           $selected_topics[] = $key;
         }
@@ -71,10 +72,6 @@ class DocForm extends FormBase {
     if (empty($doc)) {
       $doc_id = '';
       $title = 'Post New Document';
-      if (empty($values)) {
-        $description = '';
-        $selected_boards = $selected_tags = $selected_topics = [];
-      }
     }
 
     // Otherwise, get the values from the existing entity.
