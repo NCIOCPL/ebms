@@ -43,7 +43,7 @@ Execute the following commands on the new server. From this point on all command
 
 ```
 cd /local/drupal/ebms
-curl -L https://api.github.com/repos/NCIOCPL/ebms/tarball/ebms4 | tar -xzf -
+curl -L https://api.github.com/repos/NCIOCPL/ebms/tarball/uat | tar -xzf -
 mv NCIOCPL-ebms-*/* .
 mv NCIOCPL-ebms-*/.??* .
 rmdir NCIOCPL-ebms-*
