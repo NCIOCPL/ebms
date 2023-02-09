@@ -80,7 +80,7 @@ is run in the background, it is necessary to wait until it has
 finished before proceeding with the next commands. You can monitor
 progress while `migrate.sh` is running by executing `cat nohup.out`
 from time to time. Don't be alarmed by the lengthy delay after
-"[success] Installation complete appears in the output. The next
+"[success] Installation complete" appears in the output. The next
 step performed by the script is the unpacking of the `files.tar`
 archive, which has well over 50GB. You can monitor that substep with
 `du -sh /local/drupal/ebms/web/sites/default/files`.
