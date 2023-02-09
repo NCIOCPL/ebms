@@ -115,13 +115,6 @@ put the Drupal 7 production site into maintenance mode. The process for
 doing that is very similar to the instructions given above for taking a
 new Drupal 9 site *out* of maintennce mode. Perform the following steps:
 
-* log onto https://ebms.nci.nih.gov as an administrator
-* navigate to /admin/config/development/maintenance
-* check the "Put site into maintenance mode" box
-* click the "Save configuration" button
-
-As an alternate method, this can be done from the command line using `drush`.
-
 * log onto nciws-p2154-v using ssh
 * `sudo` to the drupal account
 * change to the /local/drupal/sites/ebms.nci.nih.gov directory
