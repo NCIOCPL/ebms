@@ -99,16 +99,7 @@ drush sql:dump | gzip > ~/ebms-$TODAY.sql.gz
 
 At this point the new site has been left in maintenance mode. When
 testing these steps on lower tiers it is generally safe to take the
-site out of maintenance mode. To do this using the web interface,
-perform the following steps (replacing "-stage" with "-qa" or "-dev"
-if appropriate for the current tier):
-
-* log onto https://ebms-stage.nci.nih.gov as `admin`
-* navigate to /admin/config/development/maintenance
-* uncheck the "Put site into maintenance mode" box
-* click the "Save configuration" button
-
-As an alternate method, this can be done from the command line using `drush`.
+site out of maintenance mode. This can be done from the command line using `drush`.
 
 * log onto the web server using ssh
 * `sudo` to the drupal account
