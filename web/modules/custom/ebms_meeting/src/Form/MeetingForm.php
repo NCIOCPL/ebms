@@ -252,7 +252,7 @@ class MeetingForm extends FormBase {
           '#description' => 'Supporting files for this meeting.',
           '#upload_location' => 'public://',
           '#upload_validators' => [
-            'file_validate_extensions' => ['pdf rtf doc docx pptx'],
+            'file_validate_extensions' => ['pdf rtf doc docx pptx xlsx'],
           ],
           '#default_value' => $files,
           '#multiple' => TRUE,
