@@ -250,7 +250,7 @@ class MeetingForm extends FormBase {
           '#type' => 'managed_file',
           '#title' => 'Files',
           '#description' => 'Supporting files for this meeting.',
-          '#upload_location' => 'public:///',
+          '#upload_location' => 'public://',
           '#upload_validators' => [
             'file_validate_extensions' => ['pdf rtf doc docx pptx'],
           ],
