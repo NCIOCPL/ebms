@@ -97,6 +97,15 @@ TODAY=`/bin/date +"%Y%m%d"`
 drush sql:dump | gzip > ~/ebms-$TODAY.sql.gz
 ```
 
+On a tier where the database server is unable to keep up with the load,
+the `nohup migration/migrate.sh` script can be replaced with
+
+```
+nohup migration/migrate-part1.sh &
+# ... followed on the next day with ...
+nohup migration/migrate-part2.sh &
+```
+
 At this point the new site has been left in maintenance mode. When
 testing these steps on lower tiers it is generally safe to take the
 site out of maintenance mode. This can be done from the command line using `drush`.

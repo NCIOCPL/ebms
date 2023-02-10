@@ -78,6 +78,9 @@ while (($line = fgets($fp)) !== FALSE) {
   $state = \Drupal\ebms_state\Entity\State::create($values);
   $state->save();
   $n++;
+  if ($n % 10000 === 0) {
+    sleep(1);
+  }
 }
 $elapsed = round(microtime(TRUE) - $start);
 log_success("Successfully loaded: $n article states", $elapsed);

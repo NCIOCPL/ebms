@@ -46,6 +46,9 @@ while (($line = fgets($fp)) !== FALSE) {
   $article = \Drupal\ebms_article\Entity\Article::create($values);
   $article->save();
   $n++;
+  if ($n % 1000 === 0) {
+    sleep(1);
+  }
 }
 $elapsed = round(microtime(TRUE) - $start);
 log_success("Successfully loaded: $n articles", $elapsed);
