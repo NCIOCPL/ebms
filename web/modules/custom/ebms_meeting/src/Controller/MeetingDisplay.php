@@ -55,29 +55,52 @@ class MeetingDisplay extends ControllerBase {
         'label' => 'Calendar',
       ],
     ];
+
+    // Handle the extremely rare edge case: multiple meetings at exactly
+    // the same date and time, all visible to the current user.
     $storage = $this->entityTypeManager()->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE)
-      ->condition('dates', $meeting->dates->value, '<=')
-      ->condition('id', $meeting->id(), '<>')
-      ->sort('dates.value', 'DESC')
+      ->condition('dates', $meeting->dates->value)
+      ->condition('id', $meeting->id(), '<')
       ->sort('id', 'DESC')
       ->range(0, 1);
     Meeting::applyMeetingFilters($query, $user);
     $ids = $query->execute();
+    if (empty($ids)) {
+
+      // The normal case: previous meeting is actually earier than this one.
+      $query = $storage->getQuery()->accessCheck(FALSE)
+        ->condition('dates', $meeting->dates->value, '<')
+        ->sort('dates.value', 'DESC')
+        ->sort('id', 'DESC')
+        ->range(0, 1);
+      Meeting::applyMeetingFilters($query, $user);
+      $ids = $query->execute();
+    }
     if (!empty($ids)) {
       $buttons[] = [
         'url' => Url::fromRoute('ebms_meeting.meeting', ['meeting' => reset($ids)], $options),
         'label' => 'Previous',
       ];
     }
+
+    // Same approach for the Next button.
     $query = $storage->getQuery()->accessCheck(FALSE)
-      ->condition('dates', $meeting->dates->value, '>=')
-      ->condition('id', $meeting->id(), '<>')
-      ->sort('dates.value')
+      ->condition('dates', $meeting->dates->value)
+      ->condition('id', $meeting->id(), '>')
       ->sort('id')
       ->range(0, 1);
     Meeting::applyMeetingFilters($query, $user);
     $ids = $query->execute();
+    if (empty($ids)) {
+      $query = $storage->getQuery()->accessCheck(FALSE)
+        ->condition('dates', $meeting->dates->value, '>')
+        ->sort('dates.value')
+        ->sort('id')
+        ->range(0, 1);
+      Meeting::applyMeetingFilters($query, $user);
+      $ids = $query->execute();
+    }
     if (!empty($ids)) {
       $buttons[] = [
         'url' => Url::fromRoute('ebms_meeting.meeting', ['meeting' => reset($ids)], $options),
