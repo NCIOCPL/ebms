@@ -21,6 +21,15 @@ while (($line = fgets($fp)) !== FALSE) {
   $dates[$pmid] = $refreshed;
 }
 
+// Add a uniquenes constraint for the PMIDs.
+$db = \Drupal::database();
+$name = 'unique_pmid_constraint';
+$table = 'INFORMATION_SCHEMA.TABLE_CONSTRAINTS';
+$sql = "SELECT COUNT(*) FROM $table WHERE CONSTRAINT_NAME = '$name'";
+if (empty($db->query($sql)->fetchField())) {
+  $db->query("CREATE UNIQUE INDEX $name ON ebms_article (source_id)");
+}
+
 // Load the articles.
 $n = 0;
 $start = microtime(TRUE);
