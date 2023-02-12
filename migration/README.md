@@ -102,9 +102,14 @@ the `nohup migration/migrate.sh` script can be replaced with
 
 ```
 nohup migration/migrate-part1.sh &
-# ... followed on the next day with ...
+drush sql:dump | gzip > ~/ebms-migration-step1.sql.gz
 nohup migration/migrate-part2.sh &
+drush sql:dump | gzip > ~/ebms-migration-step2.sql.gz
+nohup migration/migrate-part3.sh &
+drush sql:dump | gzip > ~/ebms-migration-complete.sql.gz
 ```
+
+Schedule these runs of the parts so that they avoid running at midnight.
 
 At this point the new site has been left in maintenance mode. When
 testing these steps on lower tiers it is generally safe to take the

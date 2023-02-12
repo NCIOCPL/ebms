@@ -32,7 +32,16 @@ UNVERSIONED=${REPO_BASE}/unversioned
 DBURL=$(cat ${UNVERSIONED}/dburl)
 ADMINPW=$(cat ${UNVERSIONED}/adminpw)
 SITEHOST=$(cat ${UNVERSIONED}/sitehost)
-$DRUSH scr --script-path=$MIGRATION articles1
+$DRUSH scr --script-path=$MIGRATION articles2
+$DRUSH scr --script-path=$MIGRATION relationships
+$DRUSH scr --script-path=$MIGRATION imports
+$DRUSH scr --script-path=$MIGRATION reviews
+$DRUSH scr --script-path=$MIGRATION travel
+$DRUSH scr --script-path=$MIGRATION messages
+$DRUSH scr --script-path=$MIGRATION assets
+$DRUSH scr --script-path=$MIGRATION pubtypes
+$DRUSH scr --script-path=$MIGRATION help
+$DRUSH scr --script-path=$MIGRATION about
 date
 elapsed=$(( SECONDS - start_time ))
 eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
