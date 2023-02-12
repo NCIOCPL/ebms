@@ -155,6 +155,7 @@ rsync -a ../unversioned/files ../web/sites/default/
 ./find-deltas-from-baseline.py
 cd ..
 migration/apply-deltas.sh
+migration/install-help-pages.sh
 ```
 
 ## Bring the New Server Online
