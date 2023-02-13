@@ -59,15 +59,16 @@ class Control:
     def main(self):
         """Find and save new and changed article XML."""
 
+        only_new = self.opts.only_new
         start = datetime.now()
         self.logger.info("updating articles changed since %s", self.latest)
-        if not self.opts.only_new:
+        if not only_new:
             refreshed = self.refresh()
         added = self.add()
         self.update_manifest()
         self.update_checksums()
         elapsed = datetime.now() - start
-        if self.opts.only_new:
+        if only_new:
             self.logger.info("added %d in %s", len(added), elapsed)
         else:
             args = len(refreshed), len(added), elapsed

@@ -147,7 +147,7 @@ above):
 ```
 cd /local/drupal/ebms/migration
 ./export.py
-./refresh-article-xml.py
+./refresh-article-xml.py --only-new
 rm -rf ../unversioned/files
 mkdir ../unversioned/files
 ./get-new-files.py
