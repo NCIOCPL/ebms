@@ -26,7 +26,7 @@ mkdir $WORKDIR || {
 
 echo Backing up existing files
 cd $BASEDIR
-tar -czf $BACKUP migration web/modules/custom || {
+tar -czf $BACKUP migration web/modules/custom web/themes/custom/ebms/images || {
     echo "tar of migration scripts and custom modules failed"
     exit 1
 }
@@ -44,13 +44,16 @@ mv NCIOCPL-ebms* ebms || {
 
 echo Clearing directories which will be refreshed from GitHub
 cd $BASEDIR
-rm -rf migration/* web/modules/custom/*
+rm -rf migration/* web/modules/custom/* web/themes/custom/ebms/images/*
 
 echo Refreshing those directories
 cd $WORKDIR/ebms
 cp -r migration $BASEDIR/ || { echo cp migration failed; exit; }
 cp -r web/modules/custom $BASEDIR/web/modules/ || {
-  echo cp custom failed; exit;
+  echo cp custom modules failed; exit;
+}
+cp -r web/themes/custom/ebms/images $BASEDIR/web/themes/custom/ebms/ || {
+  echo cp images failed; exit;
 }
 
 echo Done
