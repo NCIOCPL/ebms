@@ -285,6 +285,8 @@ class ReviewQueue extends FormBase {
       $query->distinct();
       $query->condition('state.value', State::getStateId($state));
       $query->condition('state.current', 1);
+      $query->join('ebms_topic', 'topic', 'topic.id = state.topic');
+      $query->condition('topic.active', 1);
       if ($sort === 'state.article') {
         $have_article_join = FALSE;
       }
@@ -323,17 +325,18 @@ class ReviewQueue extends FormBase {
       }
       if (!empty($cycle)) {
         $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
-        $query->join('ebms_article_topic', 'topic', 'topic.id = topics.topics_target_id');
-        $query->condition('topic.cycle', $cycle);
+        $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
+        $query->condition('article_topic.cycle', $cycle);
       }
       if ($queue_type !== 'Librarian Review') {
         if (!empty($tag)) {
           if (empty($cycle)) {
             $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
+            $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
           }
           $query->leftJoin('ebms_article__tags', 'article_tags', 'article_tags.entity_id = state.article');
           $query->leftJoin('ebms_article_tag', 'article_tag', 'article_tag.id = article_tags.tags_target_id');
-          $query->leftJoin('ebms_article_topic__tags', 'topic_tags', 'topic_tags.entity_id = topics.topics_target_id');
+          $query->leftJoin('ebms_article_topic__tags', 'topic_tags', 'topic_tags.entity_id = article_topic.id');
           $query->leftJoin('ebms_article_tag', 'topic_tag', 'topic_tag.id = topic_tags.tags_target_id');
           $group = $query->orConditionGroup();
           $group->condition('article_tag.tag', $tag);
@@ -1004,6 +1007,7 @@ class ReviewQueue extends FormBase {
     $query = $storage->getQuery()->accessCheck(FALSE);
     $operator = is_array($board) ? 'IN' : '=';
     $query->condition('board', $board, $operator);
+    $query->condition('active', 1);
     $query->sort('name');
     $topic_ids = $query->execute();
     $topics = $storage->loadMultiple($topic_ids);
