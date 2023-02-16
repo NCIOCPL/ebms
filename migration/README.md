@@ -71,63 +71,43 @@ the web host (_e.g._, `ebms4.nci.nih.gov` or `ebms-stage.nci.nih.gov`).
 
 Creation of the new production site should probably happen a few days
 before the planned cutover to the new site. To create the site,
-execute these commands on the new server. The `migrate.sh` command can
-take 15-16 hours to complete on the CBIIT-hosted servers, so it is
-necessary to start the job early in the morning so that it completes
-before midnight, when CBIIT performs database and/or network
-maintenance which would cause the job to fail. Even though this step
-is run in the background, it is necessary to wait until it has
-finished before proceeding with the next commands. You can monitor
-progress while `migrate.sh` is running by executing `cat nohup.out`
+execute these commands on the new server. The `migrate-partN.sh`
+commands will each take several hours (part 1 took eleven hours
+on the STAGE server, with the other two parts taking three or more
+hours each), so it's important to start each script early enough
+that it completes before midnight, when CBIIT performs database
+and/or network maintenance which would cause the job to fail.
+Even though these steps are run in the background, it is necessary
+to wait until each has finished before proceeding with the next commands.
+You can monitor progress while they are running by executing `cat nohup.out`
 from time to time. Don't be alarmed by the lengthy delay after
-"[success] Installation complete" appears in the output. The next
-step performed by the script is the unpacking of the `files.tar`
+"[success] Installation complete" appears in the output during part 1.
+The next step performed by the script is the unpacking of the `files.tar`
 archive, which has well over 50GB. You can monitor that substep with
 `du -sh /local/drupal/ebms/web/sites/default/files`.
 
 ```
 cd /local/drupal/ebms
 composer install
-nohup migration/migrate.sh &
-cd unversioned
-rm -rf baseline
-mv exported baseline
-cd ..
-TODAY=`/bin/date +"%Y%m%d"`
-drush sql:dump | gzip > ~/ebms-$TODAY.sql.gz
-```
-
-On a tier where the database server is unable to keep up with the load,
-the `nohup migration/migrate.sh` script can be replaced with
-
-```
 nohup migration/migrate-part1.sh &
 drush sql:dump | gzip > ~/ebms-migration-step1.sql.gz
 nohup migration/migrate-part2.sh &
 drush sql:dump | gzip > ~/ebms-migration-step2.sql.gz
 nohup migration/migrate-part3.sh &
 drush sql:dump | gzip > ~/ebms-migration-complete.sql.gz
+cd unversioned
+rm -rf baseline
+mv exported baseline
 ```
-
-Schedule these runs of the parts so that they avoid running at midnight.
-
-At this point the new site has been left in maintenance mode. When
-testing these steps on lower tiers it is generally safe to take the
-site out of maintenance mode. This can be done from the command line using `drush`.
-
-* log onto the web server using ssh
-* `sudo` to the drupal account
-* change to the /local/drupal/ebms directory
-* run the command `drush state:set system.maintenance_mode 0`
 
 ## Turn Off User Access
 
-Everything from this point on is done at the time agreed with the users
-for switching over to the new production site. We need to block all activity
-on the old production server which might change any data. To do this we
-put the Drupal 7 production site into maintenance mode. The process for
-doing that is very similar to the instructions given above for taking a
-new Drupal 9 site *out* of maintennce mode. Perform the following steps:
+For deployment on the production tier, everything from this point on is done
+at the time agreed with the users for switching over to the new production site.
+We need to block all activity on the old production server which might change
+any data. To do this we put the Drupal 7 production site into maintenance mode.
+Perform the following steps (again this is for the production deployment, not
+for the dry run on STAGE):
 
 * log onto nciws-p2154-v using ssh
 * `sudo` to the drupal account
@@ -163,8 +143,13 @@ migration/install-help-pages.sh
 After the development team has done some spot-checking to make sure
 everything has landed safely, CBIIT can do their magic to have
 ebms.nci.nih.gov point to the new server, and we can let the users
-know it's ready. Use the instructions given above in the *Create the
-Web Site* section to take the site out of maintenance mode.
+know it's ready. Use the following commands to take the new site out
+of maintenance mode.
+
+* log onto the web server using ssh
+* `sudo` to the drupal account
+* change to the /local/drupal/ebms directory
+* run the command `drush state:set system.maintenance_mode 0`
 
 When the server name is changed, be sure to edit the line near the
 bottom of `web/sites/default/settings.php` to reflect the new host
