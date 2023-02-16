@@ -136,6 +136,7 @@ rsync -a ../unversioned/files ../web/sites/default/
 cd ..
 migration/apply-deltas.sh
 migration/install-help-pages.sh
+drush sql:dump | gzip > ~/ebms-final.sql.gz
 ```
 
 ## Bring the New Server Online
