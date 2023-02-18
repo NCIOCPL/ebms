@@ -845,12 +845,12 @@ tests: # Individual value sets used by each test method.
     searches:
       -
         parms: {  }
-        expected: [ 1, 2, 3 ]
-        message: 'Default search should order the articles by EBMS ID.'
+        expected: [ 3, 2, 1 ]
+        message: 'Default search should order the articles by EBMS ID, highest first.'
       -
         parms: { sort: 'ebms-id' }
-        expected: [ 1, 2, 3 ]
-        message: 'Search should order the articles by EBMS ID.'
+        expected: [ 3, 2, 1 ]
+        message: 'Search should order the articles by EBMS ID, highest to lowest.'
       -
         parms: { sort: 'pmid' }
         expected: [ 1, 3, 2 ]
