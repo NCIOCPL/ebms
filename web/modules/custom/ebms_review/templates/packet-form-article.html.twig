@@ -2,7 +2,7 @@
   {% if author %}
     <span>{{ author }}; </span>
   {% endif %}
-  <span><a href="{{ article_url }}" target="_blank">{{ title }}</a> </span>
+  <span><a href="{{ article_url }}" target="_blank">{{ title|raw }}</a> </span>
   {% if journal %}
     <span>{{ journal }}; </span>
   {% endif %}

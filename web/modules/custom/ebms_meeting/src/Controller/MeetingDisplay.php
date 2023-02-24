@@ -55,29 +55,52 @@ class MeetingDisplay extends ControllerBase {
         'label' => 'Calendar',
       ],
     ];
+
+    // Handle the extremely rare edge case: multiple meetings at exactly
+    // the same date and time, all visible to the current user.
     $storage = $this->entityTypeManager()->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE)
-      ->condition('dates', $meeting->dates->value, '<=')
-      ->condition('id', $meeting->id(), '<>')
-      ->sort('dates.value', 'DESC')
+      ->condition('dates', $meeting->dates->value)
+      ->condition('id', $meeting->id(), '<')
       ->sort('id', 'DESC')
       ->range(0, 1);
     Meeting::applyMeetingFilters($query, $user);
     $ids = $query->execute();
+    if (empty($ids)) {
+
+      // The normal case: previous meeting is actually earier than this one.
+      $query = $storage->getQuery()->accessCheck(FALSE)
+        ->condition('dates', $meeting->dates->value, '<')
+        ->sort('dates.value', 'DESC')
+        ->sort('id', 'DESC')
+        ->range(0, 1);
+      Meeting::applyMeetingFilters($query, $user);
+      $ids = $query->execute();
+    }
     if (!empty($ids)) {
       $buttons[] = [
         'url' => Url::fromRoute('ebms_meeting.meeting', ['meeting' => reset($ids)], $options),
         'label' => 'Previous',
       ];
     }
+
+    // Same approach for the Next button.
     $query = $storage->getQuery()->accessCheck(FALSE)
-      ->condition('dates', $meeting->dates->value, '>=')
-      ->condition('id', $meeting->id(), '<>')
-      ->sort('dates.value')
+      ->condition('dates', $meeting->dates->value)
+      ->condition('id', $meeting->id(), '>')
       ->sort('id')
       ->range(0, 1);
     Meeting::applyMeetingFilters($query, $user);
     $ids = $query->execute();
+    if (empty($ids)) {
+      $query = $storage->getQuery()->accessCheck(FALSE)
+        ->condition('dates', $meeting->dates->value, '>')
+        ->sort('dates.value')
+        ->sort('id')
+        ->range(0, 1);
+      Meeting::applyMeetingFilters($query, $user);
+      $ids = $query->execute();
+    }
     if (!empty($ids)) {
       $buttons[] = [
         'url' => Url::fromRoute('ebms_meeting.meeting', ['meeting' => reset($ids)], $options),
@@ -105,6 +128,13 @@ class MeetingDisplay extends ControllerBase {
       $archive = Url::fromRoute('ebms_meeting.archive', ['meeting' => $meeting->id()], $options)->toString();
     }
 
+    // Determine if the user should see the meeting's agenda.
+    $agenda_visible = FALSE;
+    if ($meeting->agenda_published->value || $this->currentUser()->hasPermission('view all meetings')) {
+      $agenda_visible = TRUE;
+    }
+    $agenda = $agenda_visible ? $meeting->agenda->value : '';
+
     // Assemble and return the render array for the page.
     return [
       '#title' => $meeting->name->value,
@@ -121,7 +151,7 @@ class MeetingDisplay extends ControllerBase {
           'scheduled' => $when,
           'type' => $meeting->type->entity->name->value,
           'participants' => implode('; ', $participants),
-          'agenda' => $meeting->agenda->value,
+          'agenda' => $agenda,
           'notes' => $meeting->notes->value,
           'user' => $meeting->user->entity->name->value,
           'submitted' => substr($meeting->entered->value, 0, 10),

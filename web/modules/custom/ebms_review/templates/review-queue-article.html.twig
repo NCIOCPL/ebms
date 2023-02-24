@@ -2,7 +2,7 @@
   {% if article.authors %}
   <div><strong>{{ article.authors }}</strong></div>
   {% endif %}
-  <div><em>{{ article.link }}</em></div>
+  <div><a href="{{ article.url }}"><em>{{ article.title|raw }}</em></a></div>
   {% if article.publication %}
   <div>{{ article.publication }}</div>
   {% endif %}
@@ -17,9 +17,12 @@
   {% if article.types %}
   <div>Publication types: {{ article.types }}</div>
   {% endif %}
+  {% for related in article.related %}
+  <div class="related">[Related article: {{ related.citation }} PMID <a href="{{ related.url }}" target="_blank">{{ related.pmid }}</a>]</div>
+  {% endfor %}
   {% if article.abstract %}
   {% for paragraph in article.abstract %}
-  <p><strong>{{ paragraph.label}}</strong> {{ paragraph.text }}</p>
+  <p><strong>{{ paragraph.label}}</strong> {{ paragraph.text|raw }}</p>
   {% endfor %}
   {% endif %}
   <div class="article-review-buttons">
@@ -39,7 +42,7 @@
     {% endif %}
     {% if article.full_text_url %}
     <button class="button usa-button usa-button--outline">
-      <a href="{{ article.full_text_url }}">Download Full Text</a>
+      <a href="{{ article.full_text_url }}" target="_blank">Download Full Text</a>
     </button>
     {% endif %}
   </div>

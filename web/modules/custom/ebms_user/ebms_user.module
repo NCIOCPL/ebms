@@ -231,6 +231,11 @@ function ebms_user_theme($existing, $type, $theme, $path): array {
         'profile' => NULL,
       ],
     ],
+    'user_topic_assignments' => [
+      'variables' => [
+        'users' => [],
+      ],
+    ],
   ];
 }
 

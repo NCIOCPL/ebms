@@ -9,6 +9,7 @@ use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_group\Entity\Group;
 use Drupal\ebms_meeting\Entity\Meeting;
 use Drupal\ebms_message\Entity\Message;
+use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -48,7 +49,7 @@ class MeetingForm extends FormBase {
 
     // Set some defaults.
     $name = $category = $type = $status = $meeting_id = $agenda = $notes = '';
-    $selected_boards = $selected_groups = $selected_individuals = [];
+    $files = $selected_boards = $selected_groups = $selected_individuals = [];
     $published = TRUE;
     $agenda_published = FALSE;
     $boards = Board::boards();
@@ -211,6 +212,7 @@ class MeetingForm extends FormBase {
           '#description' => "The nature of the meeting's scope.",
           '#options' => $categories,
           '#default_value' => $category,
+          '#required' => TRUE,
         ],
       ],
       'participants' => [
@@ -248,8 +250,9 @@ class MeetingForm extends FormBase {
           '#type' => 'managed_file',
           '#title' => 'Files',
           '#description' => 'Supporting files for this meeting.',
+          '#upload_location' => 'public://',
           '#upload_validators' => [
-            'file_validate_extensions' => ['pdf rtf doc docx pptx'],
+            'file_validate_extensions' => ['pdf rtf doc docx pptx xlsx'],
           ],
           '#default_value' => $files,
           '#multiple' => TRUE,
@@ -329,6 +332,16 @@ class MeetingForm extends FormBase {
         $old_values['published'] = $meeting->published->value;
         $old_values['type'] = $meeting->type->target_id;
       }
+      $files = [];
+      foreach ($form_state->getValue('files') ?: [] as $fid) {
+        $file = File::load($fid);
+        if ($file->status->value != FILE_STATUS_PERMANENT) {
+          ebms_debug_log("making file $fid permanent");
+          $file->status = FILE_STATUS_PERMANENT;
+          $file->save();
+        }
+        $files[] = $fid;
+      }
       $meeting->set('name', $form_state->getValue('name'));
       $meeting->set('dates', $dates);
       $meeting->set('agenda', $form_state->getValue('agenda'));
@@ -341,7 +354,7 @@ class MeetingForm extends FormBase {
       $meeting->set('individuals', $form_state->getValue('individuals'));
       $meeting->set('published', $form_state->getValue('published'));
       $meeting->set('agenda_published', $form_state->getValue('agenda-published'));
-      $meeting->set('documents', $form_state->getValue('files'));
+      $meeting->set('documents', $files);
       if (!empty($meeting->agenda[0]->value)) {
         $meeting->agenda[0]->set('format', 'filtered_html');
       }

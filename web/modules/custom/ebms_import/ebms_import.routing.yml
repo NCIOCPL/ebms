@@ -22,3 +22,16 @@ ebms_import.import_internal_articles:
     parameters:
       request_id:
         type: integer
+ebms_import.dates:
+  path: /articles/import/dates
+  defaults:
+    _controller: Drupal\ebms_import\Controller\ArticleImportDates::list
+  requirements:
+    _access: 'TRUE'
+ebms_import.data_refresh:
+  path: /articles/import/refresh
+  defaults:
+    _controller: Drupal\ebms_import\Controller\ArticleImportRefresh::run
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'

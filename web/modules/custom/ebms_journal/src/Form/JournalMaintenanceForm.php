@@ -32,7 +32,7 @@ class JournalMaintenanceForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, int $queue_id = 0): array {
-    $board = $brief_title = $full_title = $journal_id = $changes_json = '';
+    $board = $brief_title = $full_title = $journal_id = $changes_json = $change_items = '';
     $inclusion_exclusion = 'excluded';
     $per_page = 10;
     if (!empty($queue_id)) {
@@ -47,6 +47,7 @@ class JournalMaintenanceForm extends FormBase {
       $change_items = $this->getQueuedChangeListItems($changes_json);
       $changes = json_decode($changes_json, TRUE);
     }
+    ebms_debug_log('$change_items: ' . print_r($change_items, TRUE), 3);
     $boards = Board::boards();
     $form = [
       '#title' => 'Journal Maintenance',
@@ -137,7 +138,7 @@ class JournalMaintenanceForm extends FormBase {
     ];
     $method = $this->getRequest()->getMethod();
     ebms_debug_log("JournalMaintenanceForm::buildForm(): request method is $method");
-    if (!empty($queue_id) && !empty($board) && $method !== 'POST') {
+    if (!empty($queue_id) && !empty($board)) {
       $header = [
         'brief' => [
           'data' => 'Brief Title',

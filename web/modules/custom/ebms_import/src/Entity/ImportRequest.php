@@ -146,7 +146,9 @@ class ImportRequest extends ContentEntityBase implements ContentEntityInterface 
         }
         if (!empty($ebms_id) && !array_key_exists($ebms_id, $labels)) {
           $entity = $storage->load($ebms_id);
-          $labels[$ebms_id] = $entity->getLabel();
+          if (!empty($entity)) {
+            $labels[$ebms_id] = $entity->getLabel();
+          }
         }
       }
     }

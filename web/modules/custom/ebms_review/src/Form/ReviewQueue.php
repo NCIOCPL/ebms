@@ -6,7 +6,6 @@ use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
@@ -63,29 +62,37 @@ class ReviewQueue extends FormBase {
   /**
    * Decisions the reviewer can make about each article-topic combination.
    */
-  const DECISIONS = ['None', 'Approve', 'Reject', 'FYI', 'On Hold'];
+  const DECISIONS = ['None', 'FYI', 'On Hold', 'Reject', 'Approve'];
 
   /**
    * States used when applying decisions.
+   *
+   * Made trickier by OCEEBMS-698, because the queues no longer share
+   * all the decisions at the front of the a common decisions array
+   * (that ticket jumbled the order of the decision radio buttons).
+   * The keys here represent the position in the array of decision
+   * buttons shown for each article/topic combination for the selected
+   * queue (with zero being the position of the "None" button, which
+   * never triggers storage of a new state).
    */
   const DECISION_STATES = [
     'Librarian Review' => [
-      1 => 'passed_init_review',
-      2 => 'reject_init_review',
+      3 => 'reject_init_review',
+      4 => 'passed_init_review',
     ],
     'Abstract Review' => [
-      1 => 'passed_bm_review',
-      2 => 'reject_bm_review',
+      3 => 'reject_bm_review',
+      4 => 'passed_bm_review',
     ],
     'Full Text Review' => [
-      1 => 'passed_full_review',
-      2 => 'reject_full_review',
-      3 => 'fyi',
-      4 => 'on_hold',
+      1 => 'fyi',
+      2 => 'on_hold',
+      3 => 'reject_full_review',
+      4 => 'passed_full_review',
     ],
     'On Hold Review' => [
-      1 => 'passed_full_review',
-      2 => 'reject_full_review',
+      3 => 'reject_full_review',
+      4 => 'passed_full_review',
     ],
   ];
 
@@ -261,7 +268,7 @@ class ReviewQueue extends FormBase {
       'state.article' => 'EBMS ID #',
       'article.source_id' => 'PMID #',
       'author' => 'Author',
-      'article.title' => 'Title',
+      'article.search_title' => 'Title',
       'article.journal_title' => 'Journal',
       'article.year' => 'Publication Date',
       'core' => 'Core Journals',
@@ -278,6 +285,8 @@ class ReviewQueue extends FormBase {
       $query->distinct();
       $query->condition('state.value', State::getStateId($state));
       $query->condition('state.current', 1);
+      $query->join('ebms_topic', 'topic', 'topic.id = state.topic');
+      $query->condition('topic.active', 1);
       if ($sort === 'state.article') {
         $have_article_join = FALSE;
       }
@@ -304,7 +313,7 @@ class ReviewQueue extends FormBase {
             $query->join('ebms_article', 'article', 'article.id = state.article');
             $have_article_join = TRUE;
           }
-          $query->condition('article.title', "%$title%", 'LIKE');
+          $query->condition('article.search_title', "%$title%", 'LIKE');
         }
         if (!empty($journal)) {
           if (!$have_article_join) {
@@ -316,17 +325,18 @@ class ReviewQueue extends FormBase {
       }
       if (!empty($cycle)) {
         $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
-        $query->join('ebms_article_topic', 'topic', 'topic.id = topics.topics_target_id');
-        $query->condition('topic.cycle', $cycle);
+        $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
+        $query->condition('article_topic.cycle', $cycle);
       }
       if ($queue_type !== 'Librarian Review') {
         if (!empty($tag)) {
           if (empty($cycle)) {
             $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
+            $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
           }
           $query->leftJoin('ebms_article__tags', 'article_tags', 'article_tags.entity_id = state.article');
           $query->leftJoin('ebms_article_tag', 'article_tag', 'article_tag.id = article_tags.tags_target_id');
-          $query->leftJoin('ebms_article_topic__tags', 'topic_tags', 'topic_tags.entity_id = topics.topics_target_id');
+          $query->leftJoin('ebms_article_topic__tags', 'topic_tags', 'topic_tags.entity_id = article_topic.id');
           $query->leftJoin('ebms_article_tag', 'topic_tag', 'topic_tag.id = topic_tags.tags_target_id');
           $group = $query->orConditionGroup();
           $group->condition('article_tag.tag', $tag);
@@ -338,18 +348,41 @@ class ReviewQueue extends FormBase {
       $count = $count_query->execute()->fetchField();
       if ($sort === 'core') {
         $query->leftJoin('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
+        $query->addField('journal', 'core');
+        $query->addField('article', 'journal_title');
+        $query->addField('article', 'title');
         $query->orderBy('journal.core', 'DESC');
         $query->orderBy('article.journal_title');
         $query->orderBy('article.title');
       }
       elseif ($sort === 'author') {
         $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
+        $query->addField('author', 'authors_search_name');
+        $query->addField('article', 'title');
         $query->orderBy('author.authors_search_name');
+        $query->orderBy('article.title');
+      }
+      elseif ($sort === 'article.year') {
+        $query->addField('article', 'year');
+        $query->addField('article', 'title');
+        $query->orderBy('article.year');
+        $query->orderBy('article.title');
+      }
+      elseif ($sort === 'article.journal_title') {
+        $query->addField('article', 'journal_title');
+        $query->addField('article', 'title');
+        $query->orderBy('article.journal_title');
         $query->orderBy('article.title');
       }
       else {
         if (!array_key_exists($sort, $sorts)) {
           $sort = 'state.article';
+        }
+        if ($sort === 'article.source_id') {
+          $query->addField('article', 'source_id');
+        }
+        elseif ($sort === 'article.title') {
+          $query->addField('article', 'title');
         }
         $query->orderBy($sort);
       }
@@ -714,7 +747,7 @@ class ReviewQueue extends FormBase {
       $default_queue_type = reset($queue_types);
     }
     $parameters = $form_state->getValues();
-    ebms_debug_log(print_r($parameters['topic'], TRUE), 3);
+    ebms_debug_log('createQueue() topic=' . print_r($parameters['topic'] ?? 'no topic', TRUE), 3);
     $spec = [
       'board' => $parameters['board'] ?? Board::defaultBoard($user),
       'topic' => $parameters['topic'] ?? [],
@@ -790,7 +823,7 @@ class ReviewQueue extends FormBase {
       $actions = self::DECISIONS;
     }
     else {
-      $actions = array_slice(self::DECISIONS, 0, 3);
+      $actions = ['None', 3 => 'Reject', 4 => 'Approve'];
     }
     $boards = [];
 
@@ -927,13 +960,15 @@ class ReviewQueue extends FormBase {
       '#theme' => 'review_queue_article',
       '#article' => [
         'authors' => $authors,
-        'link' => Link::createFromRoute($title, $route, $parameters, $options),
+        'title' => $title,
+        'url' => Url::fromRoute($route, $parameters, $options),
         'pmid' => $article->source_id->value,
         'ebms_id' => $article_id,
         'legacy_id' => $article->legacy_id->value,
         'publication' => $article->getLabel(),
         'tags' => $tags,
         'types' => $types,
+        'related' => $this->getRelatedArticles($article),
         'abstract' => $abstract,
         'abstract_url' => $abstract_url,
         'full_text_url' => $full_text_url,
@@ -967,11 +1002,12 @@ class ReviewQueue extends FormBase {
   private function getTopics(mixed $board, string $state): array {
 
     // Load the `Topic` entities which belong to this board.
-    ebms_debug_log('top of ReviewQueue::getTopics()');
+    ebms_debug_log("top of ReviewQueue::getTopics(board=$board, state=$state)");
     $storage = $this->entityTypeManager->getStorage('ebms_topic');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $operator = is_array($board) ? 'IN' : '=';
     $query->condition('board', $board, $operator);
+    $query->condition('active', 1);
     $query->sort('name');
     $topic_ids = $query->execute();
     $topics = $storage->loadMultiple($topic_ids);
@@ -987,19 +1023,20 @@ class ReviewQueue extends FormBase {
     // This was originally implemented using the entity query API. That
     // worked OK in the version which just loads up a small set of sample
     // test data for development, but when the production data was loaded
-    // This took over a minute for the boards with the smallest number of
+    // this took over a minute for the boards with the smallest number of
     // topics, and three minutes for the boards with lots of topics. So we
     // talk directly to the database (or rather, to the database API), and
     // now this step takes around 5 seconds.
-    ebms_debug_log('fetched the integer state ID');
+    $state_id = State::getStateId($state);
+    ebms_debug_log("integer state ID is $state_id");
     $query = \Drupal::database()->select('ebms_state', 'state');
-    $query->condition('state.value', State::getStateId($state));
+    $query->condition('state.value', $state_id);
     $query->condition('state.topic', $topic_ids, 'IN');
     $query->condition('state.current', 1);
     $query->addExpression('COUNT(*)', 'count');
     $query->addField('state', 'topic');
     $query->groupBy('state.topic');
-    if ($state !== 'published') {
+    if ($state !== 'published' && $state !== 'ready_init_review') {
       $query->join('ebms_article', 'article', 'article.id = state.article');
       $query->isNotNull('article.full_text__file');
     }
@@ -1055,6 +1092,9 @@ class ReviewQueue extends FormBase {
 
   /**
    * Collect the strings to display decisions waiting to be saved.
+   *
+   * This is now hidden, because the librarians didn't want to see it.
+   * Kept in place (for now) in case that decision gets overridden.
    */
   private function getQueuedDecisionsListItems($decisions_json): array {
     $items = [];
@@ -1074,6 +1114,43 @@ class ReviewQueue extends FormBase {
       }
     }
     return $items;
+  }
+
+  /**
+   * Find the articles related in some way to this one.
+   *
+   * @param object $article
+   * @return array
+   */
+  private function getRelatedArticles(object $article): array {
+    $values = [];
+    foreach ($article->getRelatedArticles() as $related_article) {
+      $citation = [];
+      foreach ($related_article->authors as $author) {
+        if (!empty($author->last_name)) {
+          $citation[] = $author->last_name;
+          break;
+        }
+      }
+      $journal = trim($related_article->brief_journal_title->value ?? '');
+      if (!empty($journal)) {
+        $citation[] = $journal;
+      }
+      $year = trim($related_article->year->value ?? '');
+      if (!empty($year)) {
+        $citation[] = $year;
+      }
+      $pmid = trim($related_article->source_id->value);
+      $values[] = [
+        'citation' => implode(' ', $citation),
+        'url' => "https://pubmed.ncbi.nlm.nih.gov/$pmid",
+        'pmid' => $pmid,
+      ];
+    }
+    usort($values, function ($a, $b) {
+      return strtolower($a['citation']) <=> strtolower($b['citation']);
+    });
+    return $values;
   }
 
 }

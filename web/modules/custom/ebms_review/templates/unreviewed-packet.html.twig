@@ -10,7 +10,7 @@
   {% for article in articles %}
   <div class="packet-article">
     <div class="authors">{{ article.authors|join('; ')}}</div>
-    <div class="title"><a href="{{ article.url }}" target="_blank">{{ article.title }}</a></div>
+    <div class="title"><a href="{{ article.url }}" target="_blank">{{ article.title|raw }}</a></div>
     <div class="publication">{{ article.publication }}</div>
     <div class="ids">PMID: <span class="pmid">{{ article.pmid }}</span> EBMS ID: <span class="ebmsid">{{ article.id }}</span></div>
     {% if article.tags %}

@@ -1,6 +1,6 @@
 <div class="assigned-article">
   <div class="authors">{{ article.authors|join('; ') }}</div>
-  <div class="title">{{ article.title }}</div>
+  <div class="title">{{ article.title|raw }}</div>
   <div class="publication">{{ article.publication }}</div>
   <div class="pmid">PMID: {{ article.pmid }}</div>
   {% if article.agendas %}

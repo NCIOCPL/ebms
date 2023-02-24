@@ -103,7 +103,7 @@ class AssignedPacket extends ControllerBase {
         $full_text_url = $file->createFileUrl();
       }
       $current_state = $article->getCurrentState($topic_id);
-      if ($current_state->field_text_id->value === 'on_agenda') {
+      if ($current_state->value->entity->field_text_id->value === 'on_agenda') {
         $meetings = [];
         foreach ($current_state->meetings as $meeting) {
           $name = $meeting->entity->name->value;
@@ -178,10 +178,8 @@ class AssignedPacket extends ControllerBase {
         ],
       ],
       'reviewers' => [
-        '#theme' => 'item_list',
-        '#title' => 'Reviewers',
-        '#list_type' => 'ul',
-        '#items' => $reviewers,
+        '#theme' => 'packet_assigned_reviewers',
+        '#reviewers' => $reviewers,
       ],
       'summaries' => [
         '#theme' => 'item_list',

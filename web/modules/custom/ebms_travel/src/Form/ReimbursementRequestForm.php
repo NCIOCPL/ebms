@@ -279,6 +279,14 @@ class ReimbursementRequestForm extends FormBase {
       ];
     }
 
+    // Find the ID for the "I paid for my hotel" option.
+    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $query = $storage->getQuery()->accessCheck(FALSE);
+    $query->condition('vid', 'hotel_payment_methods');
+    $query->condition('field_text_id', 'i_paid');
+    $ids = $query->execute();
+    $i_paid = reset($ids);
+
     // Assemble and return the render array for the form.
     return [
       '#attached' => ['library' => ['ebms_travel/reimbursement']],
@@ -311,6 +319,9 @@ class ReimbursementRequestForm extends FormBase {
           '#title' => 'Hotel Amount',
           '#description' => 'How much was paid for the hotel room?',
           '#step' => .01,
+          '#states' => [
+            'visible' => [':input[name="hotel-payment-method"]' => ['value' => $i_paid]],
+          ],
         ],
       ],
       'options' => [

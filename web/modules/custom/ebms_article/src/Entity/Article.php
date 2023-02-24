@@ -84,6 +84,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $fields['source_id'] = BaseFieldDefinition::create('string')
       ->setLabel('Source ID')
       ->setRequired(TRUE)
+      ->addConstraint('UniqueField')
       ->setSettings(['max_length' => 32])
       ->setDescription('Identifier for the article, unique for the source.');
     $fields['source_journal_id'] = BaseFieldDefinition::create('string')
@@ -465,13 +466,16 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     foreach ($parent->tags as $tag) {
       $entity = $tag->entity;
       if ($entity->tag->target_id == $tag_term->id()) {
-        $existing_tag = $entity;
-        break;
+        if ($entity->active->value) {
+          $existing_tag = $entity;
+          break;
+        }
       }
     }
-    if ($existing_tag) {
+    if (!empty($existing_tag)) {
       if (!empty($comment)) {
         $existing_tag->comment[] = $comment;
+        $existing_tag->save();
       }
       return $existing_tag;
     }
@@ -602,6 +606,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $authors = array_slice($authors, 0, $max);
       $authors[] = 'et al.';
     }
+    ebms_debug_log('returning ' . count($authors) . ' authors', 3);
     return $authors;
   }
 
@@ -650,6 +655,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $datetime = new \DateTime($date);
       $cycles[] = $datetime->format('F Y');
     }
+    ebms_debug_log('returning cycles ' . implode('|', $cycles), 3);
     return $cycles;
   }
 
@@ -811,7 +817,18 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       throw new \Exception('MedlineJournalInfo block not found.');
     }
     $title = trim($article->ArticleTitle ?? '');
-    $search_title = substr(self::normalize($title), 0, 512);
+    if (!empty($title)) {
+      $title_xml = $article->ArticleTitle->asXML();
+      $title = preg_replace('#<\s*/?\s*ArticleTitle[^>]*>#', '', $title_xml);
+      $node = \dom_import_simplexml($article->ArticleTitle);
+      $text = $node->textContent ?? '';
+      ebms_debug_log("title textContent=$text", 3);
+      $search_title = trim(substr(self::normalize($text), 0, 512));
+      ebms_debug_log("search_title=$search_title", 3);
+    }
+    else {
+      $search_title = '';
+    }
     $authors = [];
     $last_author_name = NULL;
     if (!empty($article->AuthorList->Author)) {
@@ -849,6 +866,8 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       foreach ($article->Abstract->AbstractText as $node) {
         $text = trim($node ?? '');
         if (!empty($text)) {
+          $text_xml = $node->asXML();
+          $text = preg_replace('#<\s*/?\s*AbstractText[^>]*>#', '', $text_xml);
           $paragraph = ['paragraph_text' => $text];
           $label = trim($node['Label'] ?? '');
           if (!empty($label)) {
@@ -967,7 +986,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $simple = [
       'title', 'source', 'source_id', 'source_journal_id', 'source_status',
       'journal_title', 'brief_journal_title', 'volume', 'issue', 'pagination',
-      'year',
+      'year', 'search_title',
     ];
     foreach ($simple as $name) {
       $old = $this->get($name)->value;
@@ -976,9 +995,6 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
         if ($old != $new) {
           $this->set($name, $new);
           $changed = TRUE;
-          if ($name === 'title') {
-            $this->set('search_title', '');
-          }
         }
       }
     }

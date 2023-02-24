@@ -232,6 +232,17 @@ ebms_article.delete_article_relationship:
     parameters:
       ebms_article_relationship:
         type: 'entity:ebms_article_relationship'
+ebms_article.inactivate_article_tag:
+  path: /articles/tags/inactivate/{ebms_article_tag}
+  defaults:
+    _title: 'Confirm Article Tag Inactivation'
+    _entity_form: ebms_article_tag.inactivate
+  requirements:
+    _permission: 'manage articles'
+  options:
+    parameters:
+      ebms_article_tag:
+        type: 'entity:ebms_article_tag'
 ebms_article.show_abstract:
   path: /articles/abstract/{article}
   defaults:

@@ -91,7 +91,7 @@ class SearchForm extends FormBase {
     $journal = $params['journal'] ?? '';
     $publication_year = $params['publication-year'] ?? '';
     $publication_month = $params['publication-month'] ?? '';
-    $sort = $params['sort'] ?? $user->search_sort->value ?? $restricted ? 'pmid' : 'ebms-id';
+    $sort = $params['sort'] ?? $user->search_sort->value ?? ($restricted ? 'pmid' : 'ebms-id');
     $per_page_options = [
       '10' => '10',
       '25' => '25',
@@ -339,7 +339,7 @@ class SearchForm extends FormBase {
         'ebms-id-wrapper' => [
           '#type' => 'container',
           '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
-          'pmid' => [
+          'ebms_id' => [
             '#type' => 'textfield',
             '#title' => 'EBMS ID',
             '#default_value' => $ebms_id,
@@ -350,7 +350,7 @@ class SearchForm extends FormBase {
     $form['basic']['authors'] = [
       '#type' => 'textfield',
       '#title' => 'Author',
-      '#description' => 'Separate multiple author last names (optionally followed by space and initials) by semicolons (e.g., Fisher C; Thomas JM).',
+      '#description' => 'Separate multiple author names (surname and initials) with semicolons, using wildcards for partial matches (e.g., Fisher CL; Morris-Rose%; %smith%).',
       '#default_value' => $authors,
     ];
     $form['basic']['author-position'] = [
@@ -373,7 +373,7 @@ class SearchForm extends FormBase {
     $form['basic']['journal'] = [
       '#type' => 'textfield',
       '#title' => 'Journal Title',
-      '#description' => 'Search by full journal title. Wildcards can be used for partial matches.',
+      '#description' => 'Search by full journal title. Wildcards can be used for partial matches (for example, %surgical oncology%).',
       '#default_value' => $journal,
     ];
     $form['basic']['publication-date'] = [

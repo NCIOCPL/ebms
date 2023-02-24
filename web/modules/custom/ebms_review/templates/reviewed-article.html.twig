@@ -2,7 +2,7 @@
   <h2>Reviews for Article</h2>
   <div class="article">
     <div class="authors">{{ authors|join('; ')}}</div>
-    <div class="title"><a href="{{ url }}" target="_blank">{{ title }}</a></div>
+    <div class="title"><a href="{{ url }}" target="_blank">{{ title|raw }}</a></div>
     <div class="publication">{{ publication }}</div>
     <div class="ids">PMID: <span class="pmid">{{ pmid }}</span> EBMS ID: <span class="ebmsid">{{ id }}</span></div>
     <div class="article-buttons">

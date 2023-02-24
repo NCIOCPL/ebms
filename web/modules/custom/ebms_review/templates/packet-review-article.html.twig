@@ -4,7 +4,7 @@
   {% if article.authors %}
     <span>{{ article.authors }}</span><br>
   {% endif %}
-  <span><em>{{ article.title }}</em></span><br>
+  <span><em>{{ article.title|raw }}</em></span><br>
   <span>{{ article.citation }}</span><br><br>
   {% if article.meetings %}
   <span class="mrs">ARTICLE STATE<br>On Agenda: {{ article.meetings}}</span><br><br>

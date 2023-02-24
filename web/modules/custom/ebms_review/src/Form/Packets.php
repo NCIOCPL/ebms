@@ -119,7 +119,7 @@ class Packets extends FormBase {
         $query->condition('topic.entity.board', $selected_boards, 'IN');
       }
       if (!empty($selected_topics)) {
-        $query->condition('topic', $selected_boards, 'IN');
+        $query->condition('topic', $selected_topics, 'IN');
       }
       if (!empty($parms['packet-name'])) {
         $query->condition('title', $parms['packet-name'], 'LIKE');

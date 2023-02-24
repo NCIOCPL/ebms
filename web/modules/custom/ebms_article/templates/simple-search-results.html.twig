@@ -34,7 +34,7 @@ body {
       {% for article in articles %}
       <div class="article">
         <div class="authors">[{{ loop.index }}] {{ article.authors|join('; ') }}</div>
-        <div class="title">{{ article.title }}</div>
+        <div class="title">{{ article.title|raw }}</div>
         <div class="publication">{{ article.publication }}</div>
         <div class="ids">
           <span class="pmid">PMID: {{ article.pmid }}</span>

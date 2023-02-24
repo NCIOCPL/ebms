@@ -47,9 +47,9 @@ h3 {
         <div class="authors">{{ event.authors }}</div>
         <div class="title">
         {% if event.full_text_url %}
-        <a href="{{ event.full_text_url }}" target="_blank">{{ event.article_title }}</a>
+        <a href="{{ event.full_text_url }}" target="_blank">{{ event.article_title|raw }}</a>
         {% else %}
-        {{ event.article_title }}
+        {{ event.article_title|raw }}
         {% endif %}
         </div>
         <div class="publication">{{ event.publication }}</div>

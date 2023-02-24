@@ -70,6 +70,15 @@ foreach ($data as $values) {
 $n = count($data);
 log_success("Successfully loaded: $n article topics");
 
+// Add a uniquenes constraint for the PMIDs.
+$db = \Drupal::database();
+$name = 'unique_pmid_constraint';
+$table = 'INFORMATION_SCHEMA.TABLE_CONSTRAINTS';
+$sql = "SELECT COUNT(*) FROM $table WHERE CONSTRAINT_NAME = '$name'";
+if (empty($db->query($sql)->fetchField())) {
+  $db->query("CREATE UNIQUE INDEX $name ON ebms_article (source_id)");
+}
+
 // Load the articles.
 $json = file_get_contents("$repo_base/testdata/articles.json");
 $data = json_decode($json, true);

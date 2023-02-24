@@ -97,7 +97,7 @@ class ArticlesReports extends FormBase {
         'cycle' => [
           '#type' => 'select',
           '#title' => 'Review Cycle',
-          '#description' => 'Restrict the report to articles assigned to a single review cycle. Required if a cycle range (or date range in the case of the "Articles Not Selected for Full-Text Retrieval" reort) is not specified.',
+          '#description' => 'Restrict the report to articles assigned to a single review cycle. Required if a cycle range (or date range in the case of the "Articles Rejected In Review From Abstract" report) is not specified.',
           '#options' => $cycles,
           '#empty_value' => '',
           '#default_value' => $form_state->getValue('cycle') ?? '',
@@ -111,7 +111,7 @@ class ArticlesReports extends FormBase {
           '#type' => 'container',
           '#attributes' => ['class' => ['inline-fields']],
           '#title' => 'Review Cycle Range',
-          '#description' => 'Optionally restrict the report using a range of review cycles. For the "Articles Not Selected for Full-Text Retrieval" report, specifying a review cycle range will result in the per-topic statistics version of the report, whereas a single cycle or a decision date range will produce a per-article details report.',
+          '#description' => 'Optionally restrict the report using a range of review cycles. For the "Articles Rejected In Review From Abstract" report, specifying a review cycle range will result in the per-topic statistics version of the report, whereas a single cycle or a decision date range will produce a per-article details report.',
           '#states' => [
             'invisible' => [
               ':input[name="report"]' => ['value' => self::TOPIC_CHANGES],
@@ -376,7 +376,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -495,7 +495,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['passed_init_review']) || !empty($board['reject_init_review'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -580,56 +580,81 @@ class ArticlesReports extends FormBase {
       }
     }
 
-    // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
-    $query = $storage->getQuery()->accessCheck(FALSE);
-    $query->condition('value.entity.field_text_id', ['ready_init_review', 'reject_journal_title'], 'IN');
+    // Another report for which the entity query API failed.
+    $term_lookup = \Drupal::service('ebms_core.term_lookup');
+    $ready_init_review = $term_lookup->getState('ready_init_review')->id();
+    $reject_journal_title = $term_lookup->getState('reject_journal_title')->id();
+    $states = [$ready_init_review, $reject_journal_title];
+    $query = \Drupal::database()->select('ebms_state', 's');
+    $query->join('ebms_board', 'b', 'b.id = s.board');
+    $query->join('ebms_article__topics', 'topics', 'topics.entity_id = s.article');
+    $query->join('ebms_article_topic', 'article_topic',
+                 'article_topic.id = topics.topics_target_id AND article_topic.topic = s.topic');
+    $query->condition('article_topic.cycle', $cycle, is_array($cycle) ? 'BETWEEN' : '=');
+    $query->condition('s.value', $states, 'IN');
+    $query->addField('b', 'name', 'board_name');
+    $query->groupBy('b.name');
     if (!empty($values['board'])) {
-      $query->condition('board', $values['board']);
+      $query->condition('b.id', $values['board']);
     }
-    $query->addTag('states_for_cycle');
-    $query->addMetaData('cycle', $cycle);
-    $query->addMetaData('operator', is_array($cycle) ? 'BETWEEN' : '=');
 
-    // Fetch the state entities and collect the data.
-    foreach ($storage->loadMultiple($query->execute()) as $state) {
-      $board_id = $state->board->target_id;
-      $topic_id = $state->topic->target_id;
-      $article_id = $state->article->target_id;
-      $boards[$board_id]['articles'][$article_id] = $article_id;
-      if (!array_key_exists($topic_id, $boards[$board_id]['topics'])) {
-        $boards[$board_id]['topics'][$topic_id] = [
-          'name' => $state->topic->entity->name->value,
-          'count' => 1,
-        ];
+    // Branch off at this point for a separate version of the query
+    // to get the total number of articles for each board (which we
+    // can't get by summing the per-board/topic counts, because an
+    // article can be represented in those counts more than once).
+    $total_query = clone($query);
+    $total_query->addExpression('COUNT(DISTINCT s.article)', 'n');
+    $results = $total_query->execute();
+    $totals = [];
+    foreach ($results as $result) {
+      $totals[$result->board_name] = $result->n;
+    }
+
+    // Resume with the rest of the original query, from which we
+    // need more granularity.
+    $query->join('ebms_topic', 't', 't.id = s.topic');
+    $query->addField('t', 'name', 'topic_name');
+    $query->groupBy('t.name');
+    $query->addExpression('COUNT(DISTINCT s.article)', 'n');
+    $query->orderBy('b.name');
+    $query->orderBy('t.name');
+    ebms_debug_log('Articles Imported report query: ' . (string) $query, 3);
+    ebms_debug_log('states = ' . print_r($states, TRUE), 3);
+    ebms_debug_log('cycle = ' . print_r($cycle, TRUE), 3);
+    ebms_debug_log('board = ' . $values['board'], 3);
+
+    // Collect the query result in an array indexed by board.
+    $results = $query->execute();
+    $stats = [];
+    foreach ($results as $result) {
+      $board_name = $result->board_name;
+      $topic_name = $result->topic_name;
+      $count = $result->n;
+      if (!array_key_exists($board_name, $stats)) {
+        $stats[$board_name] = [];
       }
-      else {
-        $boards[$board_id]['topics'][$topic_id]['count']++;
-      }
+      $stats[$board_name][$topic_name] = $count;
+      ebms_debug_log("board=$board_name topic=$topic_name count=$count", 3);
     }
 
     // Create a separate table for each board.
-    foreach ($boards as &$board) {
-      if (!empty($board['articles'])) {
-        usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
-        });
-        $rows = [];
-        foreach ($board['topics'] as $topic) {
-          $rows[] = [$topic['name'], $topic['count']];
-        }
-        $rows[] = [
-          'data' => ['Total', count($board['articles'])],
-          'class' => ['totals'],
-        ];
-        $report[] = [
-          '#type' => 'table',
-          '#caption' => $board['name'],
-          '#header' => ['Topic', 'Imported'],
-          '#rows' => $rows,
-          '#attributes' => ['class' => ['articles-imported-table']],
-        ];
+    $report = [];
+    foreach ($stats as $board_name => &$topic_array) {
+      $rows = [];
+      foreach ($topic_array as $topic_name => $count) {
+        $rows[] = [$topic_name, $count];
       }
+      $rows[] = [
+        'data' => ['Total', $totals[$board_name]],
+        'class' => ['totals'],
+      ];
+      $report[$board_name] = [
+        '#type' => 'table',
+        '#caption' => $board_name,
+        '#header' => ['Topic', 'Imported'],
+        '#rows' => $rows,
+        '#attributes' => ['class' => ['articles-imported-table']],
+      ];
     }
     return $report;
   }
@@ -731,7 +756,9 @@ class ArticlesReports extends FormBase {
           $topics[$topic]++;
         }
       }
-      ksort($topics);
+      uksort($topics, function($a, $b): int {
+        return strcasecmp($a, $b);
+      });
       foreach ($topics as $name => $count) {
         $rows[] = [$name, $count];
       }
@@ -757,6 +784,12 @@ class ArticlesReports extends FormBase {
           implode('; ', $comments),
         ];
       }
+      usort($rows, function($a, $b) {
+        if ($a[0] == $b[0]) {
+          return $a[2] <=> $b[2];
+        }
+        return $a[0] <=> $b[0];
+      });
     }
 
     // This report gets only a single table.
@@ -833,7 +866,7 @@ class ArticlesReports extends FormBase {
       foreach ($storage->loadMultiple($query->execute()) as $state) {
         $librarian_topics[] = $state->topic->entity->name->value;
       }
-      sort($librarian_topics);
+      natcasesort($librarian_topics);
       $librarian_topics = [
         '#theme' => 'item_list',
         '#items' => $librarian_topics,
@@ -847,7 +880,7 @@ class ArticlesReports extends FormBase {
       foreach ($storage->loadMultiple($query->execute()) as $state) {
         $reviewer_topics[] = $state->topic->entity->name->value;
       }
-      sort($reviewer_topics);
+      natcasesort($reviewer_topics);
       $reviewer_topics = [
         '#theme' => 'item_list',
         '#items' => $reviewer_topics,
@@ -971,7 +1004,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -1105,7 +1138,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {
@@ -1239,7 +1272,7 @@ class ArticlesReports extends FormBase {
     foreach ($boards as &$board) {
       if (!empty($board['articles'])) {
         usort($board['topics'], function(array &$a, array &$b): int {
-          return $a['name'] <=> $b['name'];
+          return strcasecmp($a['name'], $b['name']);
         });
         $rows = [];
         foreach ($board['topics'] as $topic) {

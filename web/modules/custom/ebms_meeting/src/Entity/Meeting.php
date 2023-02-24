@@ -117,6 +117,7 @@ class Meeting extends ContentEntityBase implements ContentEntityInterface {
 
     $fields['category'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel('Meeting Category')
+      ->setRequired(TRUE)
       ->setDescription('Which type of group will be meeting (e.g., Board).')
       ->setSetting('target_type', 'taxonomy_term')
       ->setSetting('handler_settings',

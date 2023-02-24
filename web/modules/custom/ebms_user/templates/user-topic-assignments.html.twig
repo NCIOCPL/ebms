@@ -1,0 +1,26 @@
+<table class="topic-assignment-table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Topics</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.name }}</td>
+      <td>
+        <ul>
+          {% for topic in user.topics %}
+          <li>{{ topic }}</li>
+          {% endfor %}
+        </ul>
+      </td>
+      <td>
+        <a href="{{ user.url }}" class="button" target="_blank">Assign Review Topics</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

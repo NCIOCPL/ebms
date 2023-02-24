@@ -190,7 +190,7 @@ class PublicationForm extends FormBase {
             ':input[name="queued"]' => ['value' => '[]'],
           ],
         ],
-    ],
+      ],
       'queued' => [
         '#type' => 'textfield',
         '#attributes' => ['class' => ['hidden'], 'maxlength' => ''],
@@ -198,6 +198,8 @@ class PublicationForm extends FormBase {
         '#ajax' => [
           'callback' => '::changesCallback',
           'event' => 'change',
+          // Don't really need this any more, but it suppresses ajax errors.
+          'wrapper' => 'queue-list',
         ],
       ],
       'queue-wrapper' => [
@@ -291,7 +293,7 @@ class PublicationForm extends FormBase {
    *   Form values.
    */
   public function cancelSubmit(array &$form, FormStateInterface $form_state) {
-    $this->redirect('ebms_review.publish');
+    $form_state->setRedirect('ebms_review.publish');
   }
 
   /**
@@ -314,6 +316,7 @@ class PublicationForm extends FormBase {
     $parameters_json = json_encode($parameters);
     $request->set('parameters', $parameters_json);
     $request->save();
+    return $form['queue-wrapper'];
   }
 
   /**

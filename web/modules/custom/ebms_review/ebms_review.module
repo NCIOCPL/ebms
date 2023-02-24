@@ -122,6 +122,11 @@ function ebms_review_theme($existing, $type, $theme, $path): array {
         'total' => 0,
       ],
     ],
+    'packet_assigned_reviewers' => [
+      'variables' => [
+        'reviewers' => [],
+      ],
+    ],
   ];
 }
 

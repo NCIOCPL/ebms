@@ -15,7 +15,7 @@
   {% else %}
   <div class="authors">[No authors identified for this article.]</div>
   {% endif %}
-  <div class="title">{{ article.title }}</div>
+  <div class="title">{{ article.title|raw }}</div>
   <div class="publication">{{ article.publication }}</div>
   <div class="pmid">PMID: {{ article.pmid }}</div>
   {% if article.high_priority %}

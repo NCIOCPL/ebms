@@ -46,6 +46,9 @@ manage review packets:
 manage summaries:
   title: Manage Summaries
   description: Create and modify summary topic pages.
+manage topic assignments:
+  title: Manage Topic Assignments
+  description: Assign review topics to board members.
 manage topics:
   title: Manage Topics
   description: Create, modify, and retire topics for each PDQ board.

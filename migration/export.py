@@ -93,6 +93,19 @@ class Exporter:
         OnHold="on_hold",
         FullReviewHold="full_review_hold",
     )
+    STATE_NAMES = dict(
+        ready_init_review="Ready for initial librarian review",
+        passed_init_review="Passed initial librarian review",
+        reject_init_review="Rejected in initial librarian review",
+        passed_bm_review="Passed abstract review",
+        reject_bm_review="Rejected after abstract review",
+        full_review_hold="Held after full text review",
+        not_for_agenda="Minor changes not for board review",
+        on_hold="On hold",
+        agenda_board_discuss="Paper for board discussion",
+        agenda_work_group_discuss="Paper for working group discussion",
+        agenda_no_paper_change="Summary changes for board review (no paper for discussion)",
+    )
     ROLE_MAP = {
         9: "admin_assistant",
         3: "administrator",
@@ -168,6 +181,14 @@ class Exporter:
     PEDIATRIC_BOARD = 3
     PEDIATRIC_GENETICS_BOARD = 7
     MEDICAL_LIBRARIAN = 13
+    # Duplicates which contain no extra information.
+    ARTICLES_TO_DROP = {182374, 392404, 730647, 730649, 878550, 730645}
+    ARTICLE_TO_MERGE = 730645
+    ARTICLE_TO_MERGE_INTO = 730644
+    # General Pediatric Treatment, merged from 730645 into 730644.
+    TOPIC_TO_MERGE = 199
+    BOGUS_DUPLICATE_IMPORTS = 730644, 730646, 878549
+    IMPORT_BATCH_TO_DROP = 41611 # only used for 878550, which is being dropped
 
     def run(self):
         """Top-level processing entry point."""
@@ -302,8 +323,9 @@ class Exporter:
             while True:
                 self.cursor.execute(
                     "SELECT article_id, imported_by, import_date, update_date,"
-                    " data_mod, data_checked, full_text_id FROM ebms_article "
-                    f"ORDER BY article_id LIMIT {offset}, {batch_size}"
+                    " data_mod, data_checked, full_text_id, source_id "
+                    "FROM ebms_article ORDER BY article_id "
+                    f"LIMIT {offset}, {batch_size}"
                 )
                 offset += batch_size
                 rows = self.cursor.fetchall()
@@ -311,8 +333,11 @@ class Exporter:
                     break
                 for row in rows:
                     article_id = row["article_id"]
+                    if article_id in self.ARTICLES_TO_DROP:
+                        continue
                     article = dict(
                         id=article_id,
+                        source_id=row["source_id"],
                         imported_by=row["imported_by"],
                         import_date=str(row["import_date"]),
                     )
@@ -487,7 +512,12 @@ class Exporter:
                     disposition=self.IMPORT_DISPOSITIONS.get(text_id, text_id),
                 )
                 if row["article_id"]:
-                    action["article"] = row["article_id"]
+                    article_id = action["article"] = row["article_id"]
+                    if article_id in self.ARTICLES_TO_DROP:
+                        continue
+                    if article_id in self.BOGUS_DUPLICATE_IMPORTS:
+                        if text_id == "duplicate":
+                            continue
                 if row["message"]:
                     action["message"] = row["message"]
                 batch_id = row["import_batch_id"]
@@ -509,6 +539,8 @@ class Exporter:
                     break
                 for row in rows:
                     batch_id = row["import_batch_id"]
+                    if batch_id == self.IMPORT_BATCH_TO_DROP:
+                        continue
                     batch = dict(
                         id=batch_id,
                         topic=row["topic_id"],
@@ -546,6 +578,8 @@ class Exporter:
                     batch_id = report_data.get("batchId")
                     if batch_id:
                         batch_id = int(batch_id)
+                        if batch_id == self.IMPORT_BATCH_TO_DROP:
+                            continue
                         messages = report_data.get("messages")
                         messages = [messages] if messages else []
                         status = report_data.get("status", "Success")
@@ -903,6 +937,8 @@ class Exporter:
                     review_id = row["review_id"]
                     packet_id = row["packet_id"]
                     article_id = row["article_id"]
+                    if article_id in self.ARTICLES_TO_DROP:
+                        continue
                     values = dict(
                         id=review_id,
                         reviewer=row["reviewer_id"],
@@ -943,6 +979,8 @@ class Exporter:
             for row in self.cursor.fetchall():
                 packet_id = row["packet_id"]
                 article_id = row["article_id"]
+                if article_id in self.ARTICLES_TO_DROP:
+                    continue
                 key = f"{packet_id} {article_id}"
                 packet_article_id = packet_article_ids.get(key)
                 if not packet_article_id:
@@ -1091,10 +1129,16 @@ class Exporter:
                 if not rows:
                     break
                 for row in rows:
+                    article_id = row["article_id"]
+                    if article_id == self.ARTICLE_TO_MERGE:
+                        if row["topic_id"] == self.TOPIC_TO_MERGE:
+                            article_id = self.ARTICLE_TO_MERGE_INTO
+                    if article_id in self.ARTICLES_TO_DROP:
+                        continue
                     article_state_id = row["article_state_id"]
                     state = dict(
                         id=article_state_id,
-                        article=row["article_id"],
+                        article=article_id,
                         value=row["state_id"],
                         board=row["board_id"],
                         topic=row["topic_id"],
@@ -1237,6 +1281,8 @@ class Exporter:
         with open(path, "w", encoding="utf-8") as fp:
             for row in self.cursor.fetchall():
                 article_tag_id = row["article_tag_id"]
+                if row["article_id"] in self.ARTICLES_TO_DROP:
+                    continue
                 tag = dict(
                     id=article_tag_id,
                     tag=row["tag_id"],
@@ -1646,11 +1692,12 @@ class Exporter:
         with open(path, "w", encoding="utf-8") as fp:
             for old_text_id, new_text_id in self.STATE_MACHINE_NAMES.items():
                 row = rows[old_text_id]
+                name = self.STATE_NAMES.get(new_text_id, row["state_name"])
                 values = dict(
                     vid="states",
                     id=row["state_id"],
                     field_text_id=new_text_id,
-                    name=row["state_name"],
+                    name=name,
                     description=row["description"],
                     field_terminal=row["completed"]=="Y",
                     field_sequence=row["sequence"],
@@ -1732,6 +1779,9 @@ class Exporter:
         for row in rows:
             article_id = row["article_id"]
             topic_id = row["topic_id"]
+            if article_id == self.ARTICLE_TO_MERGE:
+                if topic_id == self.TOPIC_TO_MERGE:
+                    article_id = self.ARTICLE_TO_MERGE_INTO
             key = f"{article_id}_{topic_id}"
             if key not in states:
                 states[key] = []
@@ -1754,6 +1804,11 @@ class Exporter:
             for row in rows:
                 article_id = row["article_id"]
                 topic_id = row["topic_id"]
+                if article_id == self.ARTICLE_TO_MERGE:
+                    if topic_id == self.TOPIC_TO_MERGE:
+                        article_id = self.ARTICLE_TO_MERGE_INTO
+                if article_id in self.ARTICLES_TO_DROP:
+                    continue
                 key = f"{article_id}_{topic_id}"
                 values = dict(
                     id=entity_id,
@@ -1788,6 +1843,10 @@ class Exporter:
         path = "../unversioned/exported/article_relationships.json"
         with open(path, "w", encoding="utf-8") as fp:
             for row in self.cursor.fetchall():
+                if row["to_id"] in self.ARTICLES_TO_DROP:
+                    continue
+                if row["from_id"] in self.ARTICLES_TO_DROP:
+                    continue
                 relationship = dict(
                     id=row["relationship_id"],
                     related=row["to_id"],

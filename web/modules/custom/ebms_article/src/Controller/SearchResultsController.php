@@ -104,6 +104,7 @@ class SearchResultsController extends ControllerBase {
         '#items' => $items,
         '#attributes' => ['start' => $start],
         '#cache' => ['max-age' => 0],
+        '#empty' => 'No articles match the search criteria.'
       ],
       'bottom-pager' => [
         '#type' => 'pager',

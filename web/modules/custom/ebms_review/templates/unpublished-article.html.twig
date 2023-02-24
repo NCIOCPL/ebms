@@ -4,7 +4,7 @@
   {% else %}
   <div><strong>[No authors listed]</strong></div>
   {% endif %}
-  <div><em>{{ article.title }}</em></div>
+  <div><em>{{ article.title|raw }}</em></div>
   {% if article.publication %}
     <div>{{ article.publication }}</div>
   {% endif %}

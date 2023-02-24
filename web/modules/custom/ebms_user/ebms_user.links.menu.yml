@@ -15,3 +15,9 @@ ebms_user.users:
   route_name: entity.user.collection
   menu_name: main
   weight: 105
+ebms_user.manage_topic_assignments:
+  title: 'Topic Assignments'
+  route_name: ebms_user.manage_topic_assignments
+  description: 'Manage Topic Assignments.'
+  parent: ebms_core.admin_config_ebms
+  weight: 100

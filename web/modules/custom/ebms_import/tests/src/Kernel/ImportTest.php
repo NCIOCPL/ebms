@@ -391,10 +391,9 @@ class ImportTest extends KernelTestBase {
         $this->assertEquals($this->dispositions['review_ready'], $actions[$article->id()][1]->disposition);
       }
       elseif ($comment === self::NOT_LIST_TEST) {
-        $this->assertCount(3, $actions[$article->id()]);
+        $this->assertCount(2, $actions[$article->id()]);
         $this->assertEquals($this->dispositions['imported'], $actions[$article->id()][0]->disposition);
-        $this->assertEquals($this->dispositions['review_ready'], $actions[$article->id()][1]->disposition);
-        $this->assertEquals($this->dispositions['not_listed'], $actions[$article->id()][2]->disposition);
+        $this->assertEquals($this->dispositions['not_listed'], $actions[$article->id()][1]->disposition);
       }
       elseif ($comment === self::IMPORT_REFRESH_TEST) {
         $this->assertCount(2, $actions[$article->id()]);
@@ -682,7 +681,8 @@ class ImportTest extends KernelTestBase {
     ]);
     $followup = $batch->getFollowup();
     $this->assertCount(1, $followup);
-    $this->assertEquals($related, $followup[0]);
+    $pmids = array_keys($followup);
+    $this->assertEquals($related, $pmids[0]);
   }
 
 }

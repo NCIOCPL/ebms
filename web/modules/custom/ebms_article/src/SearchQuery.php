@@ -172,6 +172,7 @@ class SearchQuery {
 
     // Add sorting and return the query.
     $this->searchOrder();
+    ebms_debug_log((string) $this->query, 3);
     return $this->query;
   }
 
@@ -491,11 +492,6 @@ class SearchQuery {
    * searching by cycle.
    */
   private function searchTopicsOrBoards() {
-
-    // Only perform this filtering for unrestricted searching.
-    if ($this->restricted) {
-      return;
-    }
 
     // Make sure this isn't taken care of elsewhere. Note that checking for
     // whether articles have two or more topic is independent of this test,
@@ -1212,7 +1208,7 @@ class SearchQuery {
       $this->query->addTag('core_journal_sort');
     }
     else {
-      $this->query->sort('id');
+      $this->query->sort('id', 'DESC');
     }
   }
 

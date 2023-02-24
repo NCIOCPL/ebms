@@ -2,9 +2,9 @@
   <div class="article-authors">{{ article.authors|join('; ') }}</div>
   <div class="article-title">
     {% if restricted %}
-    {{ article.title }}
+    {{ article.title|raw }}
     {% else %}
-    <a href="{{ article.url }}">{{ article.title }}</a>
+    <a href="{{ article.url }}">{{ article.title|raw }}</a>
     {% endif %}
   </div>
   <div class="article-citation">{{ article.publication }}</div>

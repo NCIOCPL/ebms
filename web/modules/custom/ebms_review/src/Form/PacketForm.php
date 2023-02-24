@@ -93,7 +93,8 @@ class PacketForm extends FormBase {
       $boards = Board::boards();
       $board_id = $form_state->getValue('board');
       if (empty($board_id)) {
-        $board_id = Board::defaultBoard($this->account) ?: reset(array_keys($boards));
+        $keys = array_keys($boards);
+        $board_id = Board::defaultBoard($this->account) ?: reset($keys);
       }
       $topic_ids = $this->topicsForBoard($board_id);
       $topic_options = $this->topicOptions($board_id);
@@ -424,7 +425,8 @@ class PacketForm extends FormBase {
     $error_field = NULL;
     $ids = [];
     foreach ($fields as $name) {
-      foreach ($form_state->getValue($name) as $key => $value) {
+      $values = $form_state->getValue($name) ?: [];
+      foreach ($values as $key => $value) {
         if (is_null($error_field)) {
           $error_field = $name;
         }
@@ -442,7 +444,7 @@ class PacketForm extends FormBase {
 
     // Collect the IDs for the selected reviewers.
     $ids = [];
-    foreach ($form_state->getValue('reviewers') as $key => $value) {
+    foreach ($form_state->getValue('reviewers') ?: [] as $key => $value) {
       if (!empty($value)) {
         $ids[] = $key;
       }
@@ -456,7 +458,7 @@ class PacketForm extends FormBase {
 
     // Collect the IDs for the selected summary documents (if any).
     $ids = [];
-    foreach ($form_state->getValue('summaries') as $key => $value) {
+    foreach ($form_state->getValue('summaries') ?: [] as $key => $value) {
       if (!empty($value)) {
         $ids[] = $key;
       }
@@ -678,6 +680,16 @@ class PacketForm extends FormBase {
    *   Object for finding review-ready articles.
    */
   private function makeTopicQuery(int $topic_id, string $state_text_id, string $sort): SelectInterface {
+
+    // Use a subquery to avoid articles which are already in a packet for this topic.
+    $subquery = \Drupal::database()->select('ebms_packet_article', 'packet_article');
+    $subquery->join('ebms_packet__articles', 'packet_articles', 'packet_articles.articles_target_id = packet_article.id');
+    $subquery->join('ebms_packet', 'packet', 'packet.id = packet_articles.entity_id');
+    $subquery->addField('packet_article', 'article');
+    $subquery->condition('packet.topic', $topic_id);
+    $subquery->condition('packet_article.dropped', 0);
+    $subquery->distinct();
+
     $state_id = State::getStateId($state_text_id);
     $query = \Drupal::database()->select('ebms_state', 'state');
     $query->join('ebms_article', 'article', 'article.id = state.article');
@@ -689,20 +701,22 @@ class PacketForm extends FormBase {
     if ($state_text_id === 'fyi') {
       $query->condition('state.entered', '2016-02-01', '>=');
     }
-    $query->leftJoin('ebms_packet_article', 'packet_article', 'packet_article.article = article.id AND packet_article.dropped = 0');
-    $query->leftJoin('ebms_packet__articles', 'packet_articles', 'packet_articles.articles_target_id = packet_article.id');
-    $query->leftJoin('ebms_packet', 'packet', 'packet.id = packet_articles.entity_id AND packet.topic = state.topic');
-    $query->isNull('packet.id');
+    $query->condition('article.id', $subquery, 'NOT IN');
     if ($sort === self::SORT_BY_AUTHOR) {
       $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
       $query->orderBy('author.authors_display_name');
+      $query->addField('author', 'authors_display_name');
     }
     else {
       $query->leftJoin('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
       $query->orderBy('journal.core', 'DESC');
       $query->orderBy('article.journal_title');
+      $query->addField('article', 'journal_title');
+      $query->addField('journal', 'core');
     }
-    $query->orderBy('article.title');
+    $query->distinct();
+    $query->orderBy('article.search_title');
+    $query->addField('article', 'search_title');
     ebms_debug_log((string) $query, 3);
     return $query;
   }
@@ -979,6 +993,7 @@ class PacketForm extends FormBase {
                  FROM ebms_packet_article packet_article
                  JOIN ebms_packet__articles packet_articles ON packet_articles.articles_target_id = packet_article.id
                 WHERE packet_articles.entity_id IN (SELECT id FROM ebms_packet WHERE topic = t.id)
+                  AND packet_article.dropped = 0
     EOT;
     $query = <<<EOT
       SELECT t.id, COUNT(DISTINCT a.id) AS count

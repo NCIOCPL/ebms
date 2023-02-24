@@ -39,6 +39,9 @@ $SUDO chmod a+w ${SITE}
 $SUDO rm -rf ${SITE}/files
 $SUDO mkdir ${SITE}/files
 $SUDO chmod 777 ${SITE}/files
+$SUDO rm -rf ${REPO_BASE}/logs
+$SUDO mkdir ${REPO_BASE}/logs
+$SUDO chmod 777 ${REPO_BASE}/logs
 [ -f ${SITE}/settings.php ] && $SUDO chmod +w ${SITE}/settings.php
 cp -f ${SITE}/default.settings.php ${SITE}/settings.php
 $SUDO chmod +w ${SITE}/settings.php
@@ -103,6 +106,9 @@ $DRUSH scr --script-path=$MIGRATION summaries
 $DRUSH scr --script-path=$MIGRATION states
 $DRUSH scr --script-path=$MIGRATION article-tags
 $DRUSH scr --script-path=$MIGRATION article-topics
+/bin/sleep 60
+$DRUSH cache:rebuild
+/bin/sleep 60
 $DRUSH scr --script-path=$MIGRATION articles
 $DRUSH scr --script-path=$MIGRATION relationships
 $DRUSH scr --script-path=$MIGRATION imports

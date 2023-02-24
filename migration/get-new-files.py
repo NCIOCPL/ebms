@@ -13,6 +13,7 @@ subdirectory.
 
 Perform these steps each time this script is run.
 
+  mv ../unversioned/exported ../unversioned/baseline
   ./export.py
   rm -rf ../unversioned/files
   mkdir ../unversioned/files
