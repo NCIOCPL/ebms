@@ -190,6 +190,8 @@ class ReviewQueue extends FormBase {
     $cycle = $params['cycle'];
     $tag = $params['tag'];
     $sort = $params['sort'];
+    $journal_filters = $params['journal-filters'] ?? '';
+    $core = in_array('core', $journal_filters);
     $review_boards = $params['review-boards'];
     $format = $params['format'];
     $per_page = $params['per-page'];
@@ -271,7 +273,6 @@ class ReviewQueue extends FormBase {
       'article.search_title' => 'Title',
       'article.journal_title' => 'Journal',
       'article.year' => 'Publication Date',
-      'core' => 'Core Journals',
     ];
 
     // Assemble the articles to be reviewed if we're not in an Ajax callback.
@@ -287,12 +288,16 @@ class ReviewQueue extends FormBase {
       $query->condition('state.current', 1);
       $query->join('ebms_topic', 'topic', 'topic.id = state.topic');
       $query->condition('topic.active', 1);
-      if ($sort === 'state.article') {
+      if ($sort === 'state.article' && empty($core)) {
         $have_article_join = FALSE;
       }
       else {
         $query->join('ebms_article', 'article', 'article.id = state.article');
         $have_article_join = TRUE;
+      }
+      if (!empty($core)) {
+        $query->join('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
+        $query->condition('journal.core', 1);
       }
       if (!empty($topic)) {
         $query->condition('state.topic', $topic, 'IN');
@@ -346,33 +351,24 @@ class ReviewQueue extends FormBase {
       }
       $count_query = $query->countQuery();
       $count = $count_query->execute()->fetchField();
-      if ($sort === 'core') {
-        $query->leftJoin('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
-        $query->addField('journal', 'core');
-        $query->addField('article', 'journal_title');
-        $query->addField('article', 'title');
-        $query->orderBy('journal.core', 'DESC');
-        $query->orderBy('article.journal_title');
-        $query->orderBy('article.title');
-      }
-      elseif ($sort === 'author') {
+      if ($sort === 'author') {
         $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
         $query->addField('author', 'authors_search_name');
-        $query->addField('article', 'title');
+        $query->addField('article', 'search_title');
         $query->orderBy('author.authors_search_name');
-        $query->orderBy('article.title');
+        $query->orderBy('article.search_title');
       }
       elseif ($sort === 'article.year') {
         $query->addField('article', 'year');
-        $query->addField('article', 'title');
+        $query->addField('article', 'search_title');
         $query->orderBy('article.year');
-        $query->orderBy('article.title');
+        $query->orderBy('article.search_title');
       }
       elseif ($sort === 'article.journal_title') {
         $query->addField('article', 'journal_title');
-        $query->addField('article', 'title');
+        $query->addField('article', 'search_title');
         $query->orderBy('article.journal_title');
-        $query->orderBy('article.title');
+        $query->orderBy('article.search_title');
       }
       else {
         if (!array_key_exists($sort, $sorts)) {
@@ -381,8 +377,8 @@ class ReviewQueue extends FormBase {
         if ($sort === 'article.source_id') {
           $query->addField('article', 'source_id');
         }
-        elseif ($sort === 'article.title') {
-          $query->addField('article', 'title');
+        elseif ($sort === 'article.search_title') {
+          $query->addField('article', 'search_title');
         }
         $query->orderBy($sort);
       }
@@ -511,6 +507,13 @@ class ReviewQueue extends FormBase {
               ':input[name="type"]' => ['value' => 'Librarian Review'],
             ],
           ],
+        ],
+        'journal-filters' => [
+          '#type' => 'checkboxes',
+          '#title' => 'Filtering by journal',
+          '#options' => ['core' => 'Core journals'],
+          '#default_value' => $journal_filters,
+          '#description' => 'Only include articles published in core journals',
         ],
       ],
       'display-options' => [
@@ -763,6 +766,7 @@ class ReviewQueue extends FormBase {
       'type' => $parameters['type'] ?? $default_queue_type,
       'form_id' => 'ebms_review_queue',
       'filtered' => $filtered,
+      'journal-filters' => $parameters['journal-filters'] ?? [],
     ];
     return SavedRequest::saveParameters('review queue', $spec);
   }
