@@ -873,7 +873,7 @@ class ArticleController extends ControllerBase {
       $term = $this->termStorage->load($tag->tag);
       $internal_tags[] = [
         'name' => $term->getName(),
-        'assigned' => $tag->added->value,
+        'assigned' => $tag->added,
       ];
     }
     ebms_debug_log('returning ' . count($internal_tags) . ' internal tags', 3);
@@ -903,7 +903,7 @@ class ArticleController extends ControllerBase {
         $opts['query']['delta'] = $delta + 1;
         $values[] = [
           'user' => $this->userStorage->load($comment->user)->getDisplayName(),
-          'entered' => $comment->entered->value,
+          'entered' => $comment->entered,
           'body' => $comment->body,
           'edit' => Url::fromRoute('ebms_article.edit_internal_comment', $parms, $opts),
           'delete' => Url::fromRoute('ebms_article.delete_internal_comment', $parms, $opts),
