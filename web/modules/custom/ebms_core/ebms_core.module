@@ -187,6 +187,7 @@ function _ebms_core_role_permissions(): array {
       'create terms in topic_groups',
       'create terms in transportation_expense_types',
       'delete terms in article_tags',
+      'edit any page content',
       'edit terms in article_tags',
       'edit terms in doc_tags',
       'edit terms in hotels',
