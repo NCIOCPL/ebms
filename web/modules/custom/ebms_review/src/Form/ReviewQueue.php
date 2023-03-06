@@ -1080,11 +1080,15 @@ class ReviewQueue extends FormBase {
     foreach ($options as $id => $name) {
       if (in_array($id, $my_topics)) {
         $mine[$id] = $name;
-        $my_count += $counts[$id];
+        if (!empty($counts[$id])) {
+          $my_count += $counts[$id];
+        }
       }
       else {
         $other[$id] = $name;
-        $other_count += $counts[$id];
+        if (!empty($counts[$id])) {
+          $other_count += $counts[$id];
+        }
       }
     }
     ebms_debug_log('collected the topics into "mine" and "others" piles');
