@@ -10,25 +10,10 @@ use Drupal\Tests\BrowserTestBase;
  * @group ebms
  */
 class MonthTest extends BrowserTestBase {
-  protected static $modules = [
-    'datetime',
-    'datetime_range',
-    'ebms_board',
-    'ebms_core',
-    'ebms_group',
-    'ebms_meeting',
-    'ebms_topic',
-    'ebms_user',
-    'file',
-    'options',
-    'role_delegation',
-    'taxonomy',
-    'user',
-  ];
+  protected static $modules = ['ebms_meeting'];
   protected $defaultTheme = 'stark';
   public function setUp(): void {
     parent::setUp();
-    $this->container->get('router.builder')->rebuild();
   }
   public function testMonthPage() {
     $account = $this->drupalCreateUser(['view calendar']);

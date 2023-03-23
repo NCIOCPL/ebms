@@ -4,10 +4,18 @@ type: module
 package: EBMS
 core_version_requirement: ^9
 dependencies:
+  - datetime
+  - datetime_range
   - ebms_board
   - ebms_core
   - ebms_group
   - ebms_topic
+  - ebms_user
+  - editor_advanced_link
   - file
+  - node
+  - options
+  - role_delegation
+  - system
   - taxonomy
   - user

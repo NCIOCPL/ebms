@@ -60,6 +60,7 @@ class ImportTest extends KernelTestBase {
     'ebms_message',
     'ebms_state',
     'ebms_topic',
+    'editor_advanced_link',
     'field',
     'file',
     'filter',

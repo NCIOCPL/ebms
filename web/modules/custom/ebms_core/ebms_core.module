@@ -3,6 +3,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\Role;
 
 /**
@@ -20,6 +21,16 @@ function ebms_core_user_logout(AccountInterface $account) {
  * Implements hook_install().
  */
 function ebms_core_install($is_syncing) {
+
+  // Create the page content type when running under phpunit.
+  // See https://drupal.stackexchange.com/questions/315176.
+  $types = \Drupal::entityTypeManager()
+    ->getStorage('node_type')
+    ->loadMultiple();
+  if (!array_key_exists('page', $types)) {
+    $type = NodeType::create(['type' => 'page', 'name' => 'Basic page']);
+    $type->save();
+  }
   $roles = _ebms_core_roles();
   _ebms_core_drop_roles();
   foreach ($roles as $values) {

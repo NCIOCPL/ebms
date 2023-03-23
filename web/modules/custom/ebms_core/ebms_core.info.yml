@@ -7,5 +7,6 @@ dependencies:
   - ckeditor5
   - editor
   - linkit
+  - node
   - taxonomy
   - user

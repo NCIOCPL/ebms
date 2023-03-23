@@ -77,6 +77,7 @@ class SearchTest extends KernelTestBase {
     'ebms_review',
     'ebms_state',
     'ebms_topic',
+    'editor_advanced_link',
     'field',
     'file',
     'filter',
