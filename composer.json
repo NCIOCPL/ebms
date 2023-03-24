@@ -27,7 +27,7 @@
         "drupal/externalauth": "^2.0",
         "drupal/linkit": "^6.0@beta",
         "drupal/role_delegation": "^1.1",
-        "drupal/uswds_base": "^3.0",
+        "drupal/uswds_base": "^3.3",
         "drush/drush": "*",
         "league/container": "*",
         "phpoffice/phpspreadsheet": "^1.23",

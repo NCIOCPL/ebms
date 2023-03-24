@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a2e4a8e761c29e5704077c087b368310",
+    "content-hash": "f4c09585250586b68aecc48eaadb10a3",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2012,17 +2012,17 @@
         },
         {
             "name": "drupal/uswds_base",
-            "version": "3.0.2",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/uswds_base.git",
-                "reference": "3.0.2"
+                "reference": "3.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/uswds_base-3.0.2.zip",
-                "reference": "3.0.2",
-                "shasum": "5556bbcc3929a322aef7652fe75081f1ee4a5911"
+                "url": "https://ftp.drupal.org/files/projects/uswds_base-3.3.0.zip",
+                "reference": "3.3.0",
+                "shasum": "294b03826ccb6e0c022b35148dcb8127b672d3d8"
             },
             "require": {
                 "drupal/core": "^9 || ^10"
@@ -2030,8 +2030,8 @@
             "type": "drupal-theme",
             "extra": {
                 "drupal": {
-                    "version": "3.0.2",
-                    "datestamp": "1675992439",
+                    "version": "3.3.0",
+                    "datestamp": "1679447868",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
