@@ -59,7 +59,7 @@ class AddArticleTagForm extends FormBase {
 
     // Build the picklist for available tags.
     $storage = $this->entityTypeManager->getStorage('taxonomy_term');
-    $query = $storage->getQuery()->condition('vid', 'article_tags');
+    $query = $storage->getQuery()->accessCheck(FALSE)->condition('vid', 'article_tags');
     $topic_id = $this->getRequest()->get('topic');
     if (empty($topic_id)) {
       $query->condition('field_topic_required', FALSE);
