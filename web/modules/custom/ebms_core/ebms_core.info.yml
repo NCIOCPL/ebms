@@ -5,8 +5,11 @@ package: EBMS
 core_version_requirement: ^9
 dependencies:
   - ckeditor5
+  - datetime
   - editor
+  - editor_advanced_link
   - linkit
   - node
+  - role_delegation
   - taxonomy
   - user
