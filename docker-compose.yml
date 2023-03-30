@@ -35,5 +35,25 @@ services:
     networks:
       net:
 
+  chrome:
+    image: drupalci/webdriver-chromedriver:production
+    volumes:
+      - ./testdata/browser:/usr/local/share/testdata
+    ulimits:
+      core:
+        soft: -1
+        hard: -1
+    ports:
+      - "4444:4444"
+      - "9515:9515"
+    entrypoint:
+      - chromedriver
+      - "--log-path=/tmp/chromedriver.log"
+      - "--verbose"
+      - "--allowed-ips="
+      - "--allowed-origins=*"
+    networks:
+      net:
+
 networks:
   net:

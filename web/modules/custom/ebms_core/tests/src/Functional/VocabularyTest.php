@@ -66,7 +66,7 @@ class VocabularyTest extends BrowserTestBase {
   protected static $modules = ['ebms_core'];
 
   /**
-   * Use a very simple theme.
+   * Use the administrative theme.
    */
   protected $defaultTheme = 'claro';
 
