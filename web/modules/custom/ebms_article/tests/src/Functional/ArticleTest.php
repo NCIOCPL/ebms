@@ -82,12 +82,13 @@ class ArticleTest extends BrowserTestBase {
     // Navigate to the full history page for the first article.
     $this->drupalLogin($account);
     $this->drupalGet('articles/500001');
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains('Article A');
+    $assert_session = $this->assertSession();
+    $assert_session->statusCodeEquals(200);
+    $assert_session->pageTextContains('Article A');
 
     // Bring up the form to link this article to others.
     $this->clickLink('Related');
-    $this->assertSession()->statusCodeEquals(200);
+    $assert_session->statusCodeEquals(200);
 
     // Fill in the form and submit it.
     $form = $this->getSession()->getPage();
@@ -98,13 +99,13 @@ class ArticleTest extends BrowserTestBase {
     $form->pressButton('Submit');
 
     // Confirm that the relationships appear on the first article's page.
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains('Article A');
-    $this->assertSession()->pageTextMatches('#Article/Editorial.+Yadissimo!.+Article/Editorial.+Yadissimo!#');
-    $this->assertSession()->linkExists('500002');
-    $this->assertSession()->linkExists('500003');
-    $this->assertSession()->linkExists('10000002');
-    $this->assertSession()->linkExists('10000003');
+    $assert_session->statusCodeEquals(200);
+    $assert_session->pageTextContains('Article A');
+    $assert_session->pageTextMatches('#Article/Editorial.+Yadissimo!.+Article/Editorial.+Yadissimo!#');
+    $assert_session->linkExists('500002');
+    $assert_session->linkExists('500003');
+    $assert_session->linkExists('10000002');
+    $assert_session->linkExists('10000003');
   }
 
 }

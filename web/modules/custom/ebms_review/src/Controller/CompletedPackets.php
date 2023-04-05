@@ -20,7 +20,8 @@ class CompletedPackets extends ControllerBase {
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'states');
     $query->condition('field_text_id', 'fyi');
-    $fyi = $storage->load(reset($query->execute()));
+    $ids = $query->execute();
+    $fyi = $storage->load(reset($ids));
     $fyi_sequence = $fyi->field_sequence->value;
 
     // We're not interested in packets reviewed more than two years ago.

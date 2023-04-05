@@ -1,4 +1,5 @@
 # EBMS 4.0
+
 This version of the PDQ® Editorial Board Management System has been
 rewritten to use Drupal 9.x. The project directory was initialized
 with the command `composer create-project drupal/recommended-project
@@ -33,7 +34,7 @@ Adjust the `unversioned/dburl` file to use the correct database hostname,
 port, and password. In the following commands, replace "localhost" with
 the name of the database server if appropriate.
 
-```
+```sql
 CREATE DATABASE ebms;
 CREATE USER 'ebms'@'localhost' IDENTIFIED BY '<your-strong-db-password>';
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON ebms.* TO 'ebms'@'localhost';
@@ -44,7 +45,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORA
 To update Drupal core (for example, when a new version of Drupal is
 released to address serious bugs or security vulnerabilities), run
 
-```
+```bash
 chmod 777 web/sites/default
 composer update drupal/core "drupal/core-*" --with-all-dependencies
 chmod 555 web/sites/default
@@ -53,7 +54,7 @@ chmod 555 web/sites/default
 Commit the updated `composer.*` files. When other developers pull down
 to those files, they should run
 
-```
+```bash
 composer install
 ```
 
@@ -62,6 +63,33 @@ composer install
 If settings are changed in `docker-compose.yml` or `Dockerfile` you
 will need to rebuild the images and containers with
 
-```
+```bash
 docker compose up --build
 ```
+
+## Testing
+
+To run the complete set of regression tests, navigate to the base
+directory of the project and run:
+
+```bash
+vendor/bin/phpunit web/modules/custom
+```
+
+You can run tests for just one module, for example:
+
+```bash
+vendor/bin/phpunit web/modules/custom/ebms_review
+```
+
+Or even a specific test:
+
+```bash
+vendor/bin/phpunit web/modules/custom/ebms_article/tests/src/Kernel/SearchTest.php
+```
+
+Until we move to Drupal 10 the tests will trigger annoying bogus deprecation
+warnings complaining about an older version of Guzzle which can be ignored.
+There is a [ticket](https://www.drupal.org/project/drupal/issues/3281667) filed
+with the Drupal issue tracker following the progress of the efforts to deal
+with the problem.

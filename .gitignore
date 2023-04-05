@@ -3,6 +3,7 @@ unversioned
 __pycache__
 /testdata/maps.json
 /testdata/dumps
+/testdata/screenshots/*.png
 /migration/maps.json
 /migration/exported*
 /migration/files.tar

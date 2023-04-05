@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\ebms_import\FunctionalJavascript;
 
-use Drupal\Component\Utility\Random;
-use Drupal\Core\Url;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_import\Entity\PubmedSearchResults;
 use Drupal\ebms_import\Entity\ImportRequest;
@@ -75,7 +73,6 @@ class ImportTest extends WebDriverTestBase {
       ];
       $term = Term::create($values);
       $term->save();
-      $this->importTypes[$text_id] = $term->id();
     }
     $dispositions = [
       'Duplicate',
@@ -95,7 +92,6 @@ class ImportTest extends WebDriverTestBase {
       ];
       $term = Term::create($values);
       $term->save();
-      $this->dispositions[$text_id] = $term->id();
     }
 
     // Create a board, a couple of topics, and a meeting.
@@ -120,21 +116,22 @@ class ImportTest extends WebDriverTestBase {
 
     // Log in as a user with the necessary permissions.
     $this->drupalLogin($this->createUser(['import articles']));
+    $assert_session = $this->assertSession();
 
     // Bring up the form.
     $this->drupalGet('articles/import');
 
     // Broken. See https://stackoverflow.com/questions/6509628
     // and https://drupal.stackexchange.com/questions/291164.
-    // $this->assertSession()->statusCodeEquals(200);
+    // $assert_session->statusCodeEquals(200);
 
     // Make sure the fields are present.
-    $this->assertSession()->fieldExists('files[file]');
-    $this->assertSession()->fieldExists('cycle');
-    $this->assertSession()->fieldExists('board');
-    $this->assertSession()->fieldExists('topic');
-    $this->assertSession()->fieldExists('import-comments');
-    $this->assertSession()->fieldExists('mgr-comment');
+    $assert_session->fieldExists('files[file]');
+    $assert_session->fieldExists('cycle');
+    $assert_session->fieldExists('board');
+    $assert_session->fieldExists('topic');
+    $assert_session->fieldExists('import-comments');
+    $assert_session->fieldExists('mgr-comment');
 
     // Submit the import form with the test data.
     $fields = [
@@ -152,7 +149,7 @@ class ImportTest extends WebDriverTestBase {
       else {
         $form->selectFieldOption($name, $value);
         if ($name === 'board') {
-          $this->assertSession()->assertWaitOnAjaxRequest();
+          $assert_session->assertWaitOnAjaxRequest();
         }
       }
     }
@@ -165,20 +162,19 @@ class ImportTest extends WebDriverTestBase {
 
     // Fetch the PubmedSearchResults entity and test it.
     $pubmed_search_results = PubmedSearchResults::load(1);
-    $this->assertSession()->assert(str_contains($pubmed_search_results->results->value, 'PMID'), 'PubMed search results not saved.');
+    $this->assertStringContainsString('PMID', $pubmed_search_results->results->value);
 
     // Fetch the ImportRequest entity and test it.
     $import_request = ImportRequest::load(1);
     $parameters = json_decode($import_request->params->value, TRUE);
     foreach ($fields as $name => $value) {
-      $this->assertSession()->assert($parameters[$name] == $value , "Mismatch in $name parameter.");
+      $this->assertEquals($value, $parameters[$name]);
     }
     $article_count = count($parameters['article-ids']);
     $report = json_decode($import_request->report->value, TRUE);
-    $this->assertSession()->assert(!empty($report['success'][0]['value']), 'Report says import failed.');
-    $this->assertSession()->assert(!empty($report['actions']), 'Import actions not present in report.');
-    $report_article_count = (int) $report['article_count'][0]['value'];
-    $this->assertSession()->assert($report_article_count === $article_count, "$article_count articles requested but $report_article_count articles reported.");
+    $this->assertNotEmpty($report['success'][0]['value']);
+    $this->assertNotEmpty($report['actions']);
+    $this->assertEquals($article_count, $report['article_count'][0]['value']);
   }
 
 }

@@ -12,4 +12,5 @@ dependencies:
   - node
   - role_delegation
   - taxonomy
+  - text
   - user
