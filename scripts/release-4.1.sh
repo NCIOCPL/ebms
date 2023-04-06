@@ -1,4 +1,4 @@
-# Script for deploying EBMS Release 4.1 ("Fiordland") to a tier.
+# Script for deploying EBMS Release 4.1 ("Fiordland") to a CBIIT tier.
 
 echo Verifying account running script
 if [ $(whoami) != "drupal" ]
@@ -52,9 +52,14 @@ drush state:set system.maintenance_mode 1 || {
   echo failure setting maintenance mode; exit;
 }
 
-echo Clearing directories which will be refreshed from GitHub
+echo Clearing out obsolete files and directories
 cd $BASEDIR
-rm -rf migration composer.* scheduled/* web/modules/custom/*
+rm -rf migration testdata templates install.sh phpunit.xml
+rm -rf docker-compose.yml Dockerfile .gitattributes .gitignore
+
+echo Clearing files and directories which will be refreshed from GitHub
+cd $BASEDIR
+rm -rf README.md composer.* scheduled/* web/modules/custom/*
 
 echo Refreshing those directories
 cd $WORKDIR/ebms
@@ -63,6 +68,7 @@ cp -r web/modules/custom $BASEDIR/web/modules/ || {
   echo cp custom modules failed; exit;
 }
 cp scheduled/* $BASEDIR/scheduled/ || { echo cp scheduled failed; exit; }
+cp README.md $BASEDIR/ || { echo cp README.md failed; exit; }
 
 echo Applying PHP upgrades
 cd $BASEDIR
@@ -87,6 +93,10 @@ else
 fi
 
 echo Clearing Drupal caches
+drush cr
+
+echo Running the database update script
+drush updb -y
 drush cr
 
 echo Putting site back into live mode
