@@ -350,7 +350,7 @@ class SearchForm extends FormBase {
     $form['basic']['authors'] = [
       '#type' => 'textfield',
       '#title' => 'Author',
-      '#description' => 'Separate multiple author names (surname and initials) with semicolons, using wildcards for partial matches (e.g., Fisher CL; Morris-Rose%; %smith%).',
+      '#description' => 'Separate multiple author names (surname and initials) with semicolons, using wildcards for partial matches (e.g., Fisher CL; Morris-Rose%; %smith%). Include first initial(s) or a wildcard with surnames (e.g., Fischer CL or fischer%).',
       '#default_value' => $authors,
     ];
     $form['basic']['author-position'] = [
