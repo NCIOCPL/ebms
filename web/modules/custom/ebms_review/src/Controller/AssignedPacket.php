@@ -139,6 +139,26 @@ class AssignedPacket extends ControllerBase {
           }
         }
       }
+
+      // Find any articles related to this one.
+      $related = [];
+      foreach ($article->getRelatedArticles() as $related_article) {
+        $display = [];
+        foreach ($related_article->authors as $author) {
+          if (!empty($author->last_name)) {
+            $display[] = $author->last_name;
+            break;
+          }
+        }
+        $display[] = $related_article->brief_journal_title->value;
+        $display[] = $related_article->year->value;
+        $values = [
+          'citation' => implode(' ', $display),
+          'pmid' => $related_article->source_id->value,
+        ];
+        $related[] = $values;
+      }
+
       $items[] = [
         '#theme' => 'assigned_article',
         '#article' => [
@@ -154,6 +174,7 @@ class AssignedPacket extends ControllerBase {
           'other_reviews' => $other_reviews_url,
           'review_url' => $review_url,
           'quick_rejection' => $quick_rejection_url,
+          'related' => $related,
         ],
       ];
     }
