@@ -159,4 +159,38 @@ class Packet extends ContentEntityBase implements ContentEntityInterface {
     return $query->count()->execute();
   }
 
+  /**
+   * Create a database query to find packets which a need review.
+   *
+   * @param $uid string
+   *   ID of the board member whose unreviewed packets we want
+   *
+   * @return object
+   *  Ddatabase query object.
+   */
+  public static function makeUnreviewedPacketsQuery($uid): object {
+    $db = \Drupal::database();
+    $subquery = $db->select('ebms_packet_article__reviews', 'reviews')->distinct();
+    $subquery->addField('reviews', 'entity_id');
+    $subquery->join('ebms_review', 'review', 'review.id = reviews.reviews_target_id');
+    $subquery->condition('review.reviewer', $uid);
+    $query = $db->select('ebms_packet', 'packet');
+    $query->addField('packet', 'id', 'packet_id');
+    $query->addExpression('MAX(packet.created)', 'created');
+    $query->join('ebms_packet__reviewers', 'reviewers', 'reviewers.entity_id = packet.id');
+    $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
+    $query->join('ebms_packet_article', 'article', 'article.id = articles.articles_target_id');
+    $query->join('ebms_state', 'state', 'state.article = article.article AND state.topic = packet.topic');
+    $query->join('taxonomy_term__field_text_id', 'state_id', 'state_id.entity_id = state.value');
+    $query->where('packet.active = 1');
+    $query->where('article.dropped = 0');
+    $query->where('state.current = 1');
+    $query->where("state_id.field_text_id_value NOT IN ('fyi', 'final_board_decision')");
+    $query->condition('reviewers.reviewers_target_id', $uid);
+    $query->condition('article.id', $subquery, 'NOT IN');
+    $query->groupBy('packet.id');
+    $query->orderBy('created', 'DESC');
+    return $query;
+  }
+
 }

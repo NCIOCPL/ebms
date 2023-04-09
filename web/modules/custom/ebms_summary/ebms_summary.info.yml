@@ -8,4 +8,5 @@ dependencies:
   - ebms_doc
   - ebms_message
   - ebms_topic
+  - link
   - user

@@ -19,7 +19,7 @@ use Drupal\taxonomy\Entity\Term;
  */
 class PacketTest extends WebDriverTestBase {
 
-  protected static $modules = ['ebms_review', 'ebms_report'];
+  protected static $modules = ['ebms_review', 'ebms_report', 'ebms_summary'];
 
   /**
    * Use a very simple theme.
@@ -42,7 +42,7 @@ class PacketTest extends WebDriverTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    // Create the taxonomy terms needed by the import form.
+    // Create the taxonomy terms needed by the tests.
     $states = [
       'published' => 40,
       'passed_full_review' => 60,
@@ -72,7 +72,7 @@ class PacketTest extends WebDriverTestBase {
       ];
       Topic::create($values)->save();
     }
-    for ($i = 1; $i <= 2; ++$i) {
+    for ($i = 1; $i <= 3; ++$i) {
       File::create([
         'fid' => 1000 + $i,
         'uid' => 1,
@@ -86,7 +86,7 @@ class PacketTest extends WebDriverTestBase {
         'source_id' => 10000000 + $i,
         'full_text' => ['file' => 1000 + $i],
       ]);
-      $article->addState('passed_full_review', 2);
+      $article->addState($i === 3 ? 'fyi' : 'passed_full_review', 2);
       $article->save();
     }
 
@@ -135,17 +135,24 @@ class PacketTest extends WebDriverTestBase {
     $board_member->set('topics', [1, 2]);
     $board_member->set('roles', ['board_member']);
     $board_member->save();
-    $other_board_member = $this->createUser(['review literature']);
-    $other_board_member->set('boards', [1]);
-    $other_board_member->set('topics', [2]);
-    $other_board_member->set('roles', ['board_member']);
-    $other_board_member->save();
-    $other_board_member_name = $other_board_member->name->value;
+    $second_board_member = $this->createUser(['review literature']);
+    $second_board_member->set('boards', [1]);
+    $second_board_member->set('topics', [2]);
+    $second_board_member->set('roles', ['board_member']);
+    $second_board_member->save();
+    $second_board_member_name = $second_board_member->name->value;
+    $third_board_member = $this->createUser(['review literature']);
+    $third_board_member->set('boards', [1]);
+    $third_board_member->set('topics', [2]);
+    $third_board_member->set('roles', ['board_member']);
+    $third_board_member->save();
+    $third_board_member_name = $third_board_member->name->value;
 
     // Start out logged in as the board manager.
     $this->drupalLogin($board_manager);
 
     // Create a new packet.
+    $this->getSession()->resizeWindow(800, 1000, 'current');
     $url = Url::fromRoute('ebms_review.packet_form')->toString();
     $this->drupalGet($url);
     $assert_session = $this->assertSession();
@@ -153,7 +160,7 @@ class PacketTest extends WebDriverTestBase {
     $form = $this->getSession()->getPage();
     $form->selectFieldOption('topic', '2');
     $assert_session->assertWaitOnAjaxRequest();
-    $form->uncheckField($other_board_member_name);
+    $form->uncheckField($second_board_member_name);
     $this->createScreenshot('../testdata/screenshots/create-packet-page.png');
     $today = date('Y-m-d');
     $form->findButton('Submit')->click();
@@ -162,8 +169,8 @@ class PacketTest extends WebDriverTestBase {
     $packet = Packet::load(1);
     $month_year = date('F Y');
     $packet_title = "Topic 2 ($month_year)";
-    $this->assertCount(2, $packet->articles);
-    $this->assertCount(1, $packet->reviewers);
+    $this->assertCount(3, $packet->articles);
+    $this->assertCount(2, $packet->reviewers);
     $this->assertEquals($packet_title, $packet->title->value);
     $this->assertEquals(2, $packet->topic->target_id);
     $this->assertEmpty($packet->starred->value);
@@ -212,10 +219,20 @@ class PacketTest extends WebDriverTestBase {
     $this->clickLink("$packet_title [Packet #1]");
     $this->createScreenshot('../testdata/screenshots/unreviewed-packet.png');
     $assert_session->pageTextContains("Unreviewed Packet $packet_title");
-    $assert_session->pageTextContains("Assigned $today for review to: $board_member_name");
+    $assigned_to = [$board_member_name, $third_board_member_name];
+    sort($assigned_to);
+    $assigned_to = implode(', ', $assigned_to);
+    $assert_session->pageTextContains("Assigned $today for review to: $assigned_to");
+
+    // Try the Reviewed Packets page and make sure it's empty.
+    $url = Url::fromRoute('ebms_review.reviewed_packets')->toString();
+    $this->drupalGet($url);
+    $this->createScreenshot('../testdata/screenshots/empty-reviewed-packets.png');
+    $assert_session->pageTextContains('Reviewed Packets');
+    $assert_session->pageTextContains('No packets match');
 
     // Try the FYI packets page.
-    $this->drupalLogin($other_board_member);
+    $this->drupalLogin($second_board_member);
     $url = Url::fromRoute('ebms_review.fyi_packets')->toString();
     $this->drupalGet($url);
     $this->createScreenshot('../testdata/screenshots/fyi-packets.png');
@@ -229,6 +246,7 @@ class PacketTest extends WebDriverTestBase {
     $assert_session->pageTextContains('No summaries have been posted for this packet.');
     $assert_session->pageTextContains('PMID: 10000001');
     $assert_session->pageTextContains('PMID: 10000002');
+    $assert_session->pageTextContains('PMID: 10000003');
 
     // These tests fail because NLM blocks test user agents.
     // Bug report submitted (CAS-1089548-T2C3V3).
@@ -249,11 +267,23 @@ class PacketTest extends WebDriverTestBase {
     $assert_session->pageTextContains($packet_title);
 
     // Drill down to the specific packet page.
-    $this->clickLink("$packet_title (2 articles)");
+    $this->clickLink("$packet_title (3 articles)");
     $this->createScreenshot('../testdata/screenshots/assigned-packet.png');
     $assert_session->pageTextContains($packet_title);
     $assert_session->pageTextContains('Review articles. Use the REJECT button');
     $assert_session->pageTextContains($board_member_name);
+
+    // Post a document to the packet.
+    $this->clickLink('Post Reviewer Document');
+    $this->createScreenshot('../testdata/screenshots/post-reviewer-document.png');
+    $assert_session->pageTextContainsOnce("Post document for $packet_title");
+    $form = $this->getSession()->getPage();
+    $file_field = $form->findField('files[doc]');
+    $file_field->attachFile('/usr/local/share/testdata/test.docx');
+    $form->fillField('notes', 'Yada yada some doc yada');
+    $form->findButton('Upload File')->click();
+    $this->createScreenshot('../testdata/screenshots/reviewer-document-posted.png');
+    $assert_session->pageTextContainsOnce('Yada yada some doc yada');
 
     // Review the first article in the packet.
     $this->clickLink('Review');
@@ -347,7 +377,7 @@ class PacketTest extends WebDriverTestBase {
     // Move the the page for the reviewer's packets.
     $form->findButton('Submit')->click();
     $this->createScreenshot('../testdata/screenshots/reviewer-obo-packets.png');
-    $link_label = "$packet_title (2 articles)";
+    $link_label = "$packet_title (3 articles)";
     $assert_session->pageTextContainsOnce("Assigned Packets for $board_member_name");
     $assert_session->pageTextContainsOnce($link_label);
 
@@ -378,12 +408,19 @@ class PacketTest extends WebDriverTestBase {
     $this->assertEquals($this->reasons['Boring'], $review->reasons[0]->target_id);
     $this->assertEquals($this->reasons['Too long'], $review->reasons[1]->target_id);
 
-    // Now the packet should turn up on the Complete Packets page.
+    // Make sure the packet is gone from the Assigned Packets page.
     $this->drupalLogin($board_member);
+    $assert_session = $this->assertSession();
+    $url = Url::fromRoute('ebms_review.assigned_packets')->toString();
+    $this->drupalGet($url);
+    $this->createScreenshot('../testdata/screenshots/no-assigned-packets.png');
+    $assert_session->pageTextContainsOnce('Assigned Packets');
+    $assert_session->pageTextContainsOnce('There are no review packets in your queue.');
+
+    // Now the packet should turn up on the Completed Packets page.
     $url = Url::fromRoute('ebms_review.completed_packets')->toString();
     $this->drupalGet($url);
     $this->createScreenshot('../testdata/screenshots/completed-packets.png');
-    $assert_session = $this->assertSession();
     $assert_session->pageTextContainsOnce('Completed Packets');
 
     // Drill down to the single packet's page.
@@ -393,6 +430,48 @@ class PacketTest extends WebDriverTestBase {
     $assert_session->pageTextContainsOnce('No summaries have been posted for this packet.');
     $assert_session->pageTextMatches('/Comments\s+Exciting!/');
     $assert_session->pageTextContainsOnce('LOE Info: Levels of evidence yada yada yada');
+
+    // Now complicate things by having another board member add a review.
+    $this->drupalLogin($third_board_member);
+    $url = Url::fromRoute('ebms_review.assigned_packets')->toString();
+    $this->drupalGet($url);
+    $this->createScreenshot('../testdata/screenshots/assigned-packets-reviewer3.png');
+    $assert_session = $this->assertSession();
+    $assert_session->pageTextContains('Assigned Packets');
+    $assert_session->pageTextContains($packet_title);
+
+    // Drill down to the specific packet page.
+    $this->clickLink("$packet_title (3 articles)");
+    $this->createScreenshot('../testdata/screenshots/assigned-packet-reviewer3.png');
+    $this->clickLink('Reject');
+    $assert_session->assertWaitOnAjaxRequest();
+    $form->checkField('Sloppy work');
+    $this->setRichTextValue('.ck-editor__editable', 'Be more careful');
+    $this->createScreenshot('../testdata/screenshots/reject-reviewer3.png');
+    $form->findButton('Submit')->click();
+    $this->createScreenshot('../testdata/screenshots/review-submitted-reviewer3.png');
+    $assert_session->pageTextContains('Review successfully stored.');
+
+    // The packet should still appear on the Completed Packets page for the first reviewer.
+    $this->drupalLogin($board_member);
+    $assert_session = $this->assertSession();
+    $url = Url::fromRoute('ebms_review.completed_packets')->toString();
+    $this->drupalGet($url);
+    $this->createScreenshot('../testdata/screenshots/completed-packets-final.png');
+    $assert_session->pageTextContainsOnce('Completed Packets');
+    $this->clickLink($packet_title);
+    $this->createScreenshot('../testdata/screenshots/completed-packet-final.png');
+    $assert_session->pageTextContainsOnce($packet_title);
+    $assert_session->pageTextContainsOnce('No summaries have been posted for this packet.');
+    $assert_session->pageTextMatches('/Comments\s+Exciting!/');
+    $assert_session->pageTextContainsOnce('LOE Info: Levels of evidence yada yada yada');
+
+    // Make sure the packet is still gone from the Assigned Packets page for the first reviewer.
+    $url = Url::fromRoute('ebms_review.assigned_packets')->toString();
+    $this->drupalGet($url);
+    $this->createScreenshot('../testdata/screenshots/no-assigned-packets-final.png');
+    $assert_session->pageTextContainsOnce('Assigned Packets');
+    $assert_session->pageTextContainsOnce('There are no review packets in your queue.');
   }
 
   private function setRichTextValue(string $selector, string $value) {

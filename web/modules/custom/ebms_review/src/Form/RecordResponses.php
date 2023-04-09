@@ -5,6 +5,7 @@ namespace Drupal\ebms_review\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_board\Entity\Board;
+use Drupal\ebms_review\Entity\Packet;
 
 /**
  * Choose a packet in which to record reviews on behalf of a board member.
@@ -182,15 +183,15 @@ class RecordResponses extends FormBase {
    *   Packets with unreviewed articles, indexed by packet entity IDs.
    */
   public static function getPackets(int $member_id, int $board_id): array {
+    $query = Packet::makeUnreviewedPacketsQuery($member_id);
+    $query->condition('state.board', $board_id);
+    $result = $query->execute();
+    $ids = [];
+    foreach ($result as $row) {
+      $ids[$row->packet_id] = $row->packet_id;
+    }
     $storage = \Drupal::entityTypeManager()->getStorage('ebms_packet');
-    $query = $storage->getQuery()->accessCheck(FALSE);
-    $query->condition('active', 1);
-    $query->condition('reviewers', $member_id);
-    $query->condition('articles.entity.dropped', 0);
-    $query->condition('topic.entity.board', $board_id);
-    $query->addTag('packets_with_unreviewed_articles');
-    $query->sort('created', 'DESC');
-    $entities = $storage->loadMultiple($query->execute());
+    $entities = $storage->loadMultiple($ids);
     $packets = [];
     foreach ($entities as $packet) {
       $packets[$packet->id()] = $packet->title->value;
