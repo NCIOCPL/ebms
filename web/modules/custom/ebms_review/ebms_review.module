@@ -20,7 +20,7 @@ function ebms_review_theme($existing, $type, $theme, $path): array {
         'title' => NULL,
         'article_url' => NULL,
         'journal' => NULL,
-        'date' => NULL,
+        'year' => NULL,
         'pmid' => NULL,
         'full_text_url' => NULL,
         'related' => NULL,
