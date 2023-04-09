@@ -7,6 +7,7 @@ use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\ebms_review\Entity\Review;
+use Drupal\ebms_review\Entity\ReviewerDoc;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\file\Entity\File;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -281,9 +282,19 @@ class PacketTest extends WebDriverTestBase {
     $file_field = $form->findField('files[doc]');
     $file_field->attachFile('/usr/local/share/testdata/test.docx');
     $form->fillField('notes', 'Yada yada some doc yada');
+    $now = date('Y-m-d H:i:s');
     $form->findButton('Upload File')->click();
     $this->createScreenshot('../testdata/screenshots/reviewer-document-posted.png');
     $assert_session->pageTextContainsOnce('Yada yada some doc yada');
+
+    // Check the ReviewerDoc entity's properties.
+    $reviewer_doc = ReviewerDoc::load(1);
+    $this->assertNotEmpty($reviewer_doc);
+    $this->assertEmpty($reviewer_doc->dropped->value);
+    $this->assertLessThanOrEqual($now, $reviewer_doc->posted->value);
+    $this->assertEquals($board_member->id(), $reviewer_doc->reviewer->target_id);
+    $this->assertEquals('test.docx', $reviewer_doc->file->entity->filename->value);
+    $this->assertEquals('Yada yada some doc yada', $reviewer_doc->description->value);
 
     // Review the first article in the packet.
     $this->clickLink('Review');
