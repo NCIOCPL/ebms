@@ -60,7 +60,8 @@ class PublicationForm extends FormBase {
     // Build up the query to identify the queue's articles.
     $values = SavedRequest::loadParameters($queue_id);
     $per_page = $values['per-page'] ?? 10;
-    $queued_json = $values['queued'] ?? '[]';
+    $queued_json = $form_state->getUserInput()['queued'] ?? $values['queued'] ?? '[]';
+    ebms_debug_log("queued_json=$queued_json", 3);
     $queued = json_decode($queued_json, TRUE);
     $query = $this->makeQuery($values);
     $count_query = $query->countQuery();
@@ -198,8 +199,6 @@ class PublicationForm extends FormBase {
         '#ajax' => [
           'callback' => '::changesCallback',
           'event' => 'change',
-          // Don't really need this any more, but it suppresses ajax errors.
-          'wrapper' => 'queue-list',
         ],
       ],
       'queue-wrapper' => [
