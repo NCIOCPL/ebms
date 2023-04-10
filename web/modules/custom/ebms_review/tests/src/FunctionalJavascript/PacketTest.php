@@ -291,7 +291,7 @@ class PacketTest extends WebDriverTestBase {
     $reviewer_doc = ReviewerDoc::load(1);
     $this->assertNotEmpty($reviewer_doc);
     $this->assertEmpty($reviewer_doc->dropped->value);
-    $this->assertLessThanOrEqual($now, $reviewer_doc->posted->value);
+    $this->assertGreaterThanOrEqual($now, $reviewer_doc->posted->value);
     $this->assertEquals($board_member->id(), $reviewer_doc->reviewer->target_id);
     $this->assertEquals('test.docx', $reviewer_doc->file->entity->filename->value);
     $this->assertEquals('Yada yada some doc yada', $reviewer_doc->description->value);
