@@ -12,7 +12,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\Url;
 
 /**
- * Test the parts of import which need a browser with JavaScript.
+ * Test the summary pages and entities.
  *
  * @group ebms
  */
@@ -94,6 +94,8 @@ class SummaryTest extends WebDriverTestBase {
       'boards' => [1],
       'posted' => $now,
     ])->save();
+
+    // And the other for the summary page.
     $file = File::create([
       'uid' => $this->board_manager->id(),
       'filename' => 'summary-document.txt',
