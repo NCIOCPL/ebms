@@ -96,7 +96,7 @@ class NewStateForm extends FormBase {
     $entities = $storage->loadMultiple($query->execute());
     $states = [];
     foreach ($entities as $entity) {
-      $states[$entity->field_text_id->value] = $entity->getName();
+      $states[$entity->field_text_id->value] = $entity->name->value;
     }
 
     // Populate the decision picklist.
@@ -107,7 +107,7 @@ class NewStateForm extends FormBase {
     $decisions = [];
     $decision = '';
     foreach ($entities as $entity) {
-      $decisions[$entity->id()] = $entity->getName();
+      $decisions[$entity->id()] = $entity->name->value;
       if (empty($decision)) {
         $decision = $entity->id();
       }
@@ -147,7 +147,7 @@ class NewStateForm extends FormBase {
     $query->condition('boards', $board_id);
     $entities = $storage->loadMultiple($query->execute());
     foreach ($entities as $user) {
-      $users[$user->id()] = $user->getDisplayName();
+      $users[$user->id()] = $user->name->value;
     }
     natcasesort($users);
 
@@ -163,6 +163,7 @@ class NewStateForm extends FormBase {
       'article' => ['#type' => 'hidden', '#value' => $article_id],
       'cycle' => ['#type' => 'hidden', '#value' => $cycle],
       'topic' => ['#type' => 'hidden', '#value' => $topic_id],
+      'article-topic' => ['#type' => 'hidden', '#value' => $article_topic_id],
       'state' => [
         '#type' => 'radios',
         '#title' => 'State',
@@ -213,6 +214,11 @@ class NewStateForm extends FormBase {
         '#title' => 'Comment',
         '#description' => 'Optional notes about the new state.',
       ],
+      'stay' => [
+        '#type' => 'checkbox',
+        '#title' => 'Stay on this form',
+        '#description' => 'Check this box if you want to add another state following this one.',
+      ],
       'submit' => [
         '#type' => 'submit',
         '#value' => 'Submit',
@@ -253,6 +259,7 @@ class NewStateForm extends FormBase {
 
     // Load the article entity.
     $storage = $this->entityTypeManager->getStorage('ebms_article');
+    /** @var Article $article */
     $article = $storage->load($article_id);
 
     // Create the new state entity.
@@ -274,8 +281,21 @@ class NewStateForm extends FormBase {
       $state->save();
     }
 
-    // Back to the article page.
+    // Back to the article page or stay on this form, as requested.
+    if (!empty($form_state->getValue('stay'))) {
     $this->returnToArticle($article_id, $form_state);
+      $route = 'ebms_article.add_new_state';
+      $parameters = [
+        'article_id' => $article_id,
+        'article_topic_id' => $form_state->getValue('article-topic'),
+      ];
+      $query = $this->getRequest()->query->all();
+      $options = ['query' => $query];
+      $form_state->setRedirect($route, $parameters, $options);
+    }
+    else {
+      $this->returnToArticle($article_id, $form_state);
+    }
   }
 
   /**
