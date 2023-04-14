@@ -7,7 +7,7 @@ ebms_summary.board:
   requirements:
     _permission: 'view summary pages'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
     parameters:
       board_id:
         type: integer

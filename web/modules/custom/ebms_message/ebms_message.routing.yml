@@ -5,7 +5,7 @@ ebms_message.recent_activity:
   requirements:
     _user_is_logged_in: 'TRUE'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
     parameters:
       group:
         type: string
