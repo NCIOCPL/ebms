@@ -1,0 +1,20 @@
+ebms_travel.email:
+  type: config_object
+  label: 'Travel email addresses'
+  mapping:
+    developers:
+      type: string
+      label: 'Developer email address(es)'
+    travel_manager:
+      type: string
+      label: 'Travel manager email address(es)'
+ebms_travel.instructions:
+  type: config_object
+  label: 'Travel request form instructions'
+  mapping:
+    hotel:
+      type: text
+      label: 'Instructions for submitting out a hotel request'
+    reimbursement:
+      type: text
+      label: 'Instructions for submitting out a travel reimbursement request'

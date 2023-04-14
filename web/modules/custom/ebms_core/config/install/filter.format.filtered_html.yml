@@ -1,6 +1,8 @@
 langcode: en
 status: true
-dependencies: {  }
+dependencies:
+  module:
+    - editor
 name: 'Filtered HTML'
 format: filtered_html
 weight: 0
