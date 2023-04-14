@@ -85,7 +85,7 @@ class FullTextQueue extends FormBase {
       // $page = $this->getRequest()->get('page') ?: 0;
       // $start += $page * $per_page;
     }
-    $articles = $storage->loadMultiple($query->execute());
+    $articles = Article::loadMultiple($query->execute());
 
     // Build the list of render arrays for the articles.
     $items = [];
@@ -96,10 +96,13 @@ class FullTextQueue extends FormBase {
         $tags[] = $article_tag->entity->tag->entity->name->value;
       }
       foreach ($article->topics as $article_topic) {
-        $article_board = $article_topic->entity->topic->entity->board->entity->name->value;
-        $article_boards[$article_board] = $article_board;
-        foreach ($article_topic->entity->tags as $topic_tag) {
-          $tags[] = $topic_tag->entity->tag->entity->name->value;
+        $state = $article->getCurrentState($article_topic->entity->topic->target_id);
+        if (!empty($state) && $state->value->entity->field_text_id->value == 'passed_bm_review') {
+          $article_board = $article_topic->entity->topic->entity->board->entity->name->value;
+          $article_boards[$article_board] = $article_board;
+          foreach ($article_topic->entity->tags as $topic_tag) {
+            $tags[] = $topic_tag->entity->tag->entity->name->value;
+          }
         }
       }
       sort($article_boards);
@@ -313,7 +316,7 @@ class FullTextQueue extends FormBase {
             $article = Article::load($article_id);
             if (empty($article)) {
               $message = "Unable to load article $article_id for attaching $name.";
-              $this->messager()->addWarning($message);
+              $this->messenger()->addWarning($message);
               $logger->error($message);
             }
             else {
