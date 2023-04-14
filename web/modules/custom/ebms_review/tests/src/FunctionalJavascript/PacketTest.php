@@ -134,18 +134,18 @@ class PacketTest extends WebDriverTestBase {
     $board_member_name = $board_member->name->value;
     $board_member->set('boards', [1]);
     $board_member->set('topics', [1, 2]);
-    $board_member->set('roles', ['board_member']);
+    $board_member->addRole('board_member');
     $board_member->save();
     $second_board_member = $this->createUser(['review literature']);
     $second_board_member->set('boards', [1]);
     $second_board_member->set('topics', [2]);
-    $second_board_member->set('roles', ['board_member']);
+    $second_board_member->addRole('board_member');
     $second_board_member->save();
     $second_board_member_name = $second_board_member->name->value;
     $third_board_member = $this->createUser(['review literature']);
     $third_board_member->set('boards', [1]);
     $third_board_member->set('topics', [2]);
-    $third_board_member->set('roles', ['board_member']);
+    $third_board_member->addRole('board_member');
     $third_board_member->save();
     $third_board_member_name = $third_board_member->name->value;
 
@@ -251,6 +251,7 @@ class PacketTest extends WebDriverTestBase {
 
     // These tests fail because NLM blocks test user agents.
     // Bug report submitted (CAS-1089548-T2C3V3).
+    $form = $this->getSession()->getPage();
     $form->clickLink('View Abstract');
     $tabs = $this->getSession()->getWindowNames();
     $this->getSession()->switchToWindow($tabs[1]);
@@ -342,6 +343,7 @@ class PacketTest extends WebDriverTestBase {
     $form->selectFieldOption('Packet', 1);
     $form->findButton('Submit')->click();
     $this->createScreenshot('../testdata/screenshots/print-packet-submitted.png');
+    $form = $this->getSession()->getPage();
     $link = $form->findLink('Download');
     $this->assertNotEmpty($link);
 
@@ -377,6 +379,7 @@ class PacketTest extends WebDriverTestBase {
     // Bring up the Record Responses page and pick a board and reviewer.
     $url = Url::fromRoute('ebms_review.record_responses')->toString();
     $this->drupalGet($url);
+    $form = $this->getSession()->getPage();
     $form->selectFieldOption('Board', '1');
     $assert_session->assertWaitOnAjaxRequest();
     $form->selectFieldOption('Board Member', $board_member_name);
@@ -385,7 +388,7 @@ class PacketTest extends WebDriverTestBase {
     $assert_session->pageTextContainsOnce('Record Responses');
     $assert_session->pageTextMatches('/Select the board for which.+Select the board member.+Select a packet/');
 
-    // Move the the page for the reviewer's packets.
+    // Move to the page for the reviewer's packets.
     $form->findButton('Submit')->click();
     $this->createScreenshot('../testdata/screenshots/reviewer-obo-packets.png');
     $link_label = "$packet_title (3 articles)";
@@ -401,6 +404,7 @@ class PacketTest extends WebDriverTestBase {
     $this->clickLink('Reject');
     $assert_session->assertWaitOnAjaxRequest();
     $this->createScreenshot('../testdata/screenshots/review-obo.png');
+    $form = $this->getSession()->getPage();
     $form->checkField('Boring');
     $form->checkField('Too long');
     $this->setRichTextValue('.ck-editor__editable', 'Ennuyeux!');
@@ -456,6 +460,7 @@ class PacketTest extends WebDriverTestBase {
     $this->createScreenshot('../testdata/screenshots/assigned-packet-reviewer3.png');
     $this->clickLink('Reject');
     $assert_session->assertWaitOnAjaxRequest();
+    $form = $this->getSession()->getPage();
     $form->checkField('Sloppy work');
     $this->setRichTextValue('.ck-editor__editable', 'Be more careful');
     $this->createScreenshot('../testdata/screenshots/reject-reviewer3.png');
@@ -488,7 +493,7 @@ class PacketTest extends WebDriverTestBase {
   private function setRichTextValue(string $selector, string $value) {
     $this->getSession()->executeScript(<<<JS
       const domEditableElement = document.querySelector("$selector");
-      if (domEditableElement.ckeditorInstance) {
+      if (domEditableElement) {
         const editorInstance = domEditableElement.ckeditorInstance;
         if (editorInstance) {
           editorInstance.setData("$value");
@@ -500,5 +505,6 @@ class PacketTest extends WebDriverTestBase {
       }
     JS);
   }
+
 }
 
