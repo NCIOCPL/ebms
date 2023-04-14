@@ -156,6 +156,7 @@ class PacketTest extends WebDriverTestBase {
     $this->getSession()->resizeWindow(800, 1000, 'current');
     $url = Url::fromRoute('ebms_review.packet_form')->toString();
     $this->drupalGet($url);
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
     $assert_session->pageTextContains('Add New Literature Surveillance Packet');
     $form = $this->getSession()->getPage();
@@ -264,6 +265,7 @@ class PacketTest extends WebDriverTestBase {
     $url = Url::fromRoute('ebms_review.assigned_packets')->toString();
     $this->drupalGet($url);
     $this->createScreenshot('../testdata/screenshots/assigned-packets.png');
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
     $assert_session->pageTextContains('Assigned Packets');
     $assert_session->pageTextContains($packet_title);
@@ -336,6 +338,7 @@ class PacketTest extends WebDriverTestBase {
     $this->createScreenshot('../testdata/screenshots/print-packet-form.png');
     $form = $this->getSession()->getPage();
     $form->selectFieldOption('Board', '1');
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
     $assert_session->assertWaitOnAjaxRequest();
     $form->selectFieldOption('Board Member', $board_member_name);
@@ -353,6 +356,7 @@ class PacketTest extends WebDriverTestBase {
     $this->drupalGet($url);
     $this->createScreenshot('../testdata/screenshots/reviewed-packets.png');
     $link_label = "$packet_title [Packet #1]";
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
     $assert_session->pageTextContainsOnce('Reviewed Packets');
     $assert_session->pageTextContainsOnce('Packets (1, most-recently-reviewed first)');
@@ -451,6 +455,7 @@ class PacketTest extends WebDriverTestBase {
     $url = Url::fromRoute('ebms_review.assigned_packets')->toString();
     $this->drupalGet($url);
     $this->createScreenshot('../testdata/screenshots/assigned-packets-reviewer3.png');
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
     $assert_session->pageTextContains('Assigned Packets');
     $assert_session->pageTextContains($packet_title);

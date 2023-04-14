@@ -232,6 +232,7 @@ class TravelTest extends WebDriverTestBase {
     $year = date('Y');
     $month = date('m') + 2;
     $this->clickLink('Hotel Request');
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session->pageTextContains('please complete this hotel request form');
     $form = $this->getSession()->getPage();
     $form->selectFieldOption('Meeting', 9);
