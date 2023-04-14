@@ -2,10 +2,10 @@ name: EBMS Help Pages
 description: Manual pages for users of the EBMS.
 type: module
 package: EBMS
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 dependencies:
-  - block
-  - ebms_core
-  - file
-  - system
-  - user
+  - drupal:block
+  - drupal:file
+  - drupal:system
+  - drupal:user
+  - ebms_core:ebms_core
