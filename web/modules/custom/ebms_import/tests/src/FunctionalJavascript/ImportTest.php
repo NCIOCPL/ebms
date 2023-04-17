@@ -149,6 +149,7 @@ class ImportTest extends WebDriverTestBase {
       else {
         $form->selectFieldOption($name, $value);
         if ($name === 'board') {
+          /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
           $assert_session->assertWaitOnAjaxRequest();
         }
       }

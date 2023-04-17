@@ -15,5 +15,6 @@ dependencies:
   - ebms_board:ebms_board
   - ebms_core:ebms_core
   - ebms_group:ebms_group
+  - ebms_message:ebms_message
   - ebms_topic:ebms_topic
   - ebms_user:ebms_user

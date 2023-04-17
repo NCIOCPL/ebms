@@ -85,6 +85,7 @@ class DocTest extends WebDriverTestBase {
     $file_field->attachFile('/usr/local/share/testdata/test.docx');
     $form->fillField('EBMS Name', 'My test document');
     $form->checkField('boards[1]');
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session->assertWaitOnAjaxRequest();
     $form->checkField('tags[' .  $this->tag_ids['Summary'] . ']');
     $assert_session->assertWaitOnAjaxRequest();
