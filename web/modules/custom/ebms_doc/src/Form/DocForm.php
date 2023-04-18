@@ -246,7 +246,7 @@ class DocForm extends FormBase {
     }
     $doc_id = $form_state->getValue('doc-id');
     if (empty($doc_id)) {
-      $validators = ['file_validate_extensions' => ['pdf rtf doc docx xslx']];
+      $validators = ['file_validate_extensions' => ['pdf rtf doc docx xlsx']];
       $file = file_save_upload('file', $validators, 'public://', 0);
       $file->setPermanent();
       $file->save();
