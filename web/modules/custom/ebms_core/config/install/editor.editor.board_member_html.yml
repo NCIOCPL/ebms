@@ -22,8 +22,6 @@ settings:
       - '|'
       - blockQuote
       - drupalInsertImage
-      - '|'
-      - code
   plugins:
     ckeditor5_heading:
       enabled_headings:

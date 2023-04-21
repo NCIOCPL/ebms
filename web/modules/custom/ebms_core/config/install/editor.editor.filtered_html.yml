@@ -34,11 +34,8 @@ settings:
       - '|'
       - horizontalLine
       - blockQuote
-      - drupalInsertImage
       - insertTable
       - specialCharacters
-      - '|'
-      - code
   plugins:
     ckeditor5_heading:
       enabled_headings:
