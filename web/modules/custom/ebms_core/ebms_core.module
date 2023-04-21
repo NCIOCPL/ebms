@@ -216,6 +216,7 @@ function _ebms_core_role_permissions(): array {
       'manage users',
       'perform full search',
       'use text format filtered_html',
+      'use text format full_html',
       'view alerts',
       'view all meetings',
       'view review alerts',
@@ -274,6 +275,14 @@ function template_preprocess_ebms_local_actions(&$variables) {
  */
 function ebms_core_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form['#submit'][] = 'ebms_core_user_login_form_submit';
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function ebms_core_preprocess_page(&$variables) {
+  $variables['#attached']['library'][] = 'ebms_core/admin';
+  ebms_debug_log($variables['#attached']['library']);
 }
 
 /**

@@ -2,3 +2,7 @@ login:
   css:
     theme:
       css/login.css: {}
+admin:
+  css:
+    theme:
+      css/admin.css: {}
