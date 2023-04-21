@@ -392,7 +392,6 @@ display: inline-block;
 /* Things we want to suppress */
 .usa-footer,
 .menu--account,
-#block-ebms-powered,
-#edit-body-0-format {
+#block-ebms-powered {
   display: none;
 }
