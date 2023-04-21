@@ -511,9 +511,9 @@ class ReviewQueue extends FormBase {
         'journal-filters' => [
           '#type' => 'checkboxes',
           '#title' => 'Filtering by journal',
-          '#options' => ['core' => 'Core journals'],
+          '#options' => ['core' => 'Core journals only'],
           '#default_value' => $journal_filters,
-          '#description' => 'Only include articles published in core journals',
+          '#description' => 'Only include articles published in core journals.',
         ],
       ],
       'display-options' => [
