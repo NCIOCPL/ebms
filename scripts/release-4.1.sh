@@ -12,6 +12,7 @@ echo Setting locations
 export NCIOCPL=https://api.github.com/repos/NCIOCPL
 export URL=$NCIOCPL/ebms/tarball/fiordland
 export WORKDIR=/tmp/ebms-4.1
+export EDITOR_CONFIG=$WORKDIR/editor-config
 export BASEDIR=/local/drupal/ebms
 export BACKUP=`/bin/date +"/tmp/ebms-backup-%Y%m%d%H%M%S.tgz"`
 export CURL="curl -L -s -k"
@@ -72,7 +73,9 @@ cp README.md $BASEDIR/ || { echo cp README.md failed; exit; }
 
 echo Applying PHP upgrades
 cd $BASEDIR
+chmod +w web/sites/default || { chmod sites-default failed; exit; }
 composer install || { echo composer install failed; exit; }
+chmod -w web/sites/default || { chmod sites-default failed; exit; }
 
 echo Disabling obsolete module
 drush cr
@@ -97,6 +100,18 @@ drush cr
 
 echo Running the database update script
 drush updb -y
+
+echo Upgrading rich text editor
+mkdir $EDITOR_CONFIG || { echo mkdir editor-config failed; exit; }
+cp $WORKDIR/ebms/web/modules/custom/ebms_core/config/install/editor*.yml \
+   $WORKDIR/ebms/web/modules/custom/ebms_core/config/install/filter*.yml \
+   $WORKDIR/ebms/web/modules/custom/ebms_core/config/install/linkit*.yml \
+   $EDITOR_CONFIG/ || {
+  echo cp editor-config failed; exit;
+}
+drush config:import --source=$EDITOR_CONFIG --partial -y -q || {
+  echo import editor-config failed; exit;
+}
 drush cr
 
 echo Putting site back into live mode
