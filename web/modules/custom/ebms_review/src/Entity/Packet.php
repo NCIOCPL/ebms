@@ -141,6 +141,7 @@ class Packet extends ContentEntityBase implements ContentEntityInterface {
   public static function getReviewerArticleCount(int $user_id): int {
     $term_lookup = \Drupal::service('ebms_core.term_lookup');
     static $max_sequence = NULL;
+    static $passed_full_review = NULL;
     static $fyi = NULL;
     if (empty($passed_full_review)) {
       $passed_full_review = $term_lookup->getState('passed_full_review');

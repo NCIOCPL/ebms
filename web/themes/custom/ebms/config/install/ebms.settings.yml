@@ -1,4 +1,3 @@
-schemas: []
 features:
   node_user_picture: false
   comment_user_picture: false
@@ -9,11 +8,6 @@ logo:
 favicon:
   use_default: true
 cdn_provider: ''
-cdn_custom_img: 'https://cdn.jsdelivr.net/npm/uswds@2.12.2/dist/img'
-cdn_custom_css: 'https://cdn.jsdelivr.net/npm/uswds@2.12.2/dist/css/uswds.css'
-cdn_custom_css_min: 'https://cdn.jsdelivr.net/npm/uswds@2.12.2/dist/css/uswds.min.css'
-cdn_custom_js: 'https://cdn.jsdelivr.net/npm/uswds@2.12.2/dist/js/uswds.js'
-cdn_custom_js_min: 'https://cdn.jsdelivr.net/npm/uswds@2.12.2/dist/js/uswds.min.js'
 uswds_header_style: 'extended'
 uswds_header_mega: 0
 uswds_header_mega_display_second: 0
