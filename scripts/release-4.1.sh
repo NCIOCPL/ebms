@@ -73,6 +73,10 @@ cp README.md $BASEDIR/ || { echo cp README.md failed; exit; }
 
 echo Applying PHP upgrades
 cd $BASEDIR
+# This shouldn't be necessary in theory, but in practice ...
+# See "Known issues and workarounds" on the Drupal documentation page
+# https://www.drupal.org/docs/updating-drupal/updating-drupal-core-via-composer
+rm -rf web/core web/modules/contrib web/themes/contrib
 chmod +w web/sites/default || { chmod sites-default failed; exit; }
 composer install || { echo composer install failed; exit; }
 chmod -w web/sites/default || { chmod sites-default failed; exit; }
