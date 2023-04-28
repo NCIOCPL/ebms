@@ -128,7 +128,7 @@ if [[ -L "ebms.nci.nih.gov" ]]
 then
     echo Symlink ebms.nci.nih.gov already exists.
 else
-    ln -s default ebms.nci.nih.gov || echo { symlink creation failed; exit; }
+    ln -s default ebms.nci.nih.gov || { echo symlink creation failed; exit; }
 fi
 
 echo Putting site back into live mode
