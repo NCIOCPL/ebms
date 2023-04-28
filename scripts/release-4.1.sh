@@ -122,6 +122,15 @@ drush role:perm:add site_manager 'use text format full_html' || {
 }
 drush cr
 
+echo Creating symlink for site
+cd $BASEDIR/web/sites || { echo cd sites failed; exit; }
+if [[ -L "ebms.nci.nih.gov" ]]
+then
+    echo Symlink ebms.nci.nih.gov already exists.
+else
+    ln -s default ebms.nci.nih.gov || echo { symlink creation failed; exit; }
+fi
+
 echo Putting site back into live mode
 drush state:set system.maintenance_mode 0 || {
   echo failure leaving maintenance mode; exit;
