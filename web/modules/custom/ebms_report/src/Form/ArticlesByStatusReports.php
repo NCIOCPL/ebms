@@ -1093,7 +1093,7 @@ class ArticlesByStatusReports extends FormBase {
     $meeting_s = $meeting_count === 1 ? '' : 's';
     return [
       '#theme' => 'articles_by_status',
-      '#title' => "Board Manager Actions ($article_count Article$article_s, $topic_count Topic$topic_s, $meeting_count Meeting$meeting_s)",
+      '#title' => "On Agenda ($article_count Article$article_s, $topic_count Topic$topic_s, $meeting_count Meeting$meeting_s)",
       '#articles' => $articles,
     ];
   }
