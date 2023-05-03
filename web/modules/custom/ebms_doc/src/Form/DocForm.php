@@ -111,7 +111,7 @@ class DocForm extends FormBase {
         '#type' => 'file',
         '#attributes' => [
           'class' => ['usa-file-input', 'required'],
-          'accept' => ['.pdf,.rtf,.doc,.docx,.xlsx'],
+          'accept' => ['.pdf,.rtf,.doc,.docx,.xlsx,.pptx'],
         ],
         '#description' => 'Find the file for the document on your computer.',
         '#required' => TRUE,
