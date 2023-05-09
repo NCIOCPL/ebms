@@ -172,6 +172,7 @@ class Topic extends ContentEntityBase implements ContentEntityInterface {
     }
     $entities = $storage->loadMultiple($query->execute());
     $topics = [];
+    /** @var $entity Topic */
     foreach ($entities as $entity) {
       $topics[$entity->id()] = $entity->getName();
     }

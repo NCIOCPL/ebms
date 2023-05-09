@@ -4,7 +4,9 @@ type: module
 package: EBMS
 core_version_requirement: ^9 || ^10
 dependencies:
+  - drupal:options
   - drupal:user
   - ebms_board:ebms_board
+  - ebms_core:ebms_core
   - ebms_group:ebms_group
   - ebms_topic:ebms_topic

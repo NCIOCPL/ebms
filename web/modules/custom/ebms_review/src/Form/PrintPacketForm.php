@@ -30,7 +30,7 @@ class PrintPacketForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $request_id = 0): array|Response {
+  public function buildForm(array $form, FormStateInterface $form_state, $request_id = 0): array {
 
     // If we have a job request, fetch its parameters.
     $parameters = empty($request_id) ? [] : SavedRequest::loadParameters($request_id);

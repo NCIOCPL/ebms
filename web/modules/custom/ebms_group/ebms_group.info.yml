@@ -3,3 +3,6 @@ description: EBMS group, which can be optionally associated with one or more PDQ
 type: module
 package: EBMS
 core_version_requirement: ^9 || ^10
+dependencies:
+  - ebms_board:ebms_board
+  - ebms_core:ebms_core

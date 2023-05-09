@@ -269,7 +269,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     // Get the board to which the topic belongs.
     $topics = \Drupal::entityTypeManager()->getStorage('ebms_topic');
     $topic = $topics->load($topic_id);
-    $board_id = $topic->get('board')->target_id;
+    $board_id = $topic->board->target_id;
 
     // Use the current time if date/time not provided.
     if (empty($entered)) {
@@ -367,7 +367,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     }
     $state = State::create($values);
     $state->save();
-    $article_topic->states[] = $state->id();
+    $article_topic->states->appendItem($state->id());
     $article_topic->save();
     if ($new_topic) {
       $this->topics[] = $article_topic->id();
@@ -439,7 +439,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       }
       if (empty($parent)) {
         $topics = \Drupal::entityTypeManager()->getStorage('ebms_topic');
-        $topic_name = $topics->load($topic)->getName();
+        $topic_name = $topics->load($topic)->name->value;
         $id = $this->id();
         throw new \Exception("Topic '$topic_name' not assigned to article $id.");
       }
@@ -776,7 +776,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $ids = $query->execute();
       if (count($ids) === 1) {
         $journal = $storage->load(reset($ids));
-        $journals[$journal_id] = $journal->get('core')->value;
+        $journals[$journal_id] = $journal->core->value;
       }
     }
     return $journals[$journal_id];

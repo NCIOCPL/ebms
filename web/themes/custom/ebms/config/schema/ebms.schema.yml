@@ -1,0 +1,49 @@
+ebms.settings:
+  type: theme_settings
+  label: 'EBMS Theme Settings'
+  mapping:
+    cdn_provider:
+      type: string
+      label: 'CDN Provider'
+    uswds_header_style:
+      type: string
+      label: 'Choose a style of header to use'
+    uswds_header_mega:
+      type: integer
+      label: 'Use megamenu in header'
+    uswds_header_mega_display_second:
+      type: integer
+      label: 'Megamenu: Display second level as headers'
+    uswds_footer_style:
+      type: string
+      label: 'Choose a style of footer to use'
+    uswds_footer_agency:
+      type: integer
+      label: 'Add agency information in the footer?'
+    uswds_government_banner:
+      type: integer
+      label: 'Display the official U.S. government banner at the top of each page?'
+    uswds_paragraphs_edge_to_edge:
+      type: integer
+      label: 'paragraphs edge to edge'
+    uswds_menu_accordion_duplicate_parent:
+      type: integer
+      label: 'Duplicate parent menu items as first item in dropdowns.'
+    uswds_menu_bypass:
+      type: config_object
+      mapping:
+        primary_menu:
+          type: integer
+          label: 'Bypass primary menu'
+        secondary_menu:
+          type: integer
+          label: 'Bypass secondary menu'
+        sidebar_first:
+          type: integer
+          label: 'Bypass sidebar first menu'
+        sidebar_second:
+          type: integer
+          label: 'Bypass sidebar second menu'
+        footer_menu:
+          type: integer
+          label: 'Bypass footer menu'
