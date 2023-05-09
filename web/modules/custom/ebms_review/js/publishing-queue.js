@@ -2,7 +2,7 @@
 jQuery(document).ready(function () {
 
   // Drupal's handling of nested fields is broken, so we handle them.
-  jQuery('.unpublished-topics input:checkbox').click(function() {
+  jQuery(document).on('click', '.unpublished-topics input:checkbox', function() {
     let checkbox_id = this.getAttribute('id');
     console.log('id is ' + checkbox_id);
     let parsed = /unpublished-topic-(\d+)-(\d+)/.exec(checkbox_id);

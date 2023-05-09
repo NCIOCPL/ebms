@@ -127,6 +127,25 @@ class ReviewForm extends FormBase {
       $reasons[$term->id()] = $display;
     }
 
+    // Find any articles related to this one.
+    $related = [];
+    foreach ($article->getRelatedArticles() as $related_article) {
+      $display = [];
+      foreach ($related_article->authors as $author) {
+        if (!empty($author->last_name)) {
+          $display[] = $author->last_name;
+          break;
+        }
+      }
+      $display[] = $related_article->brief_journal_title->value;
+      $display[] = $related_article->year->value;
+      $values = [
+        'citation' => implode(' ', $display),
+        'pmid' => $related_article->source_id->value,
+      ];
+      $related[] = $values;
+    }
+
     // Drupal's AJAX is broken, so we roll our own JavaScript.
     // For example, https://www.drupal.org/project/drupal/issues/3207786.
     $form = [
@@ -152,6 +171,7 @@ class ReviewForm extends FormBase {
           'full_text_url' => $full_text_url,
           'meetings' => $meetings,
           'other_url' => $other_url,
+          'related' => $related,
         ],
       ],
       'dispositions' => [

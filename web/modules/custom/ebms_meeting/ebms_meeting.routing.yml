@@ -7,7 +7,7 @@ ebms_meeting.calendar:
   requirements:
     _permission: 'view calendar'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
 ebms_meeting.calendar_month:
   path: /calendar/{month}
   defaults:
@@ -17,7 +17,7 @@ ebms_meeting.calendar_month:
   requirements:
     _permission: 'view calendar'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
     parameters:
       month:
         type: string
@@ -48,7 +48,7 @@ ebms_meeting.meeting:
   requirements:
     _permission: 'view calendar'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
     parameters:
       meeting:
         type: entity:ebms_meeting
@@ -60,7 +60,7 @@ ebms_meeting.ical_event:
   requirements:
     _permission: 'view calendar'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
     parameters:
       meeting:
         type: entity:ebms_meeting

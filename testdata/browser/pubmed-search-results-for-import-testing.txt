@@ -1,0 +1,923 @@
+PMID- 36994673
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 2046-5556 (Electronic)
+IS  - 0264-8725 (Linking)
+DP  - 2023 Mar 30
+TI  - Effects of daphnetin on the mechanism of epithelial-mesenchymal transition 
+      induced by HMGB1 in human lung adenocarcinoma cells (A549 cell line).
+PG  - 1-22
+LID - 10.1080/02648725.2023.2194092 [doi]
+AB  - As a cancer with the highest incidence in recent years, lung cancer is mainly 
+      composed of three diseases: non-small cell lung cancer, small cell lung cancer 
+      and neuroendocrine tumor. The morbidity and mortality of this malignant tumor are 
+      the highest in both male and female populations worldwide. In my country, lung 
+      cancer has become the most common cancer disease and the leading cause of cancer 
+      death, so it is extremely important to find lung cancer therapeutic targets. 
+      Based on previous studies, we speculated that the TLR4-Myd88-NFκB pathway may be 
+      involved in hmgb1-induced EMT in A549 cells, and daphnetin may also inhibit 
+      hmgb1-induced EMT through the TLR4-Myd88-NFκB pathway in A549 cells, but related 
+      studies have not linked it to hmgb1-induced EMT. Therefore, the innovation of 
+      this study is to test these two conjectures and analyze how daphnetin affects the 
+      epithelial-mesenchymal transition (EMT) mechanism induced by HMGB1 in human lung 
+      adenocarcinoma cells (A549 cell line), aiming at lung adenocarcinoma cells, 
+      foundation for clinical treatment. The proliferation rate and the migrating cell 
+      number presented an obvious decrease in the HMGB1+TLR4-shRNA group and the 
+      HMGB1+daphnetin group relative to the HMGB1 group (P < 0.0001). The intracellular 
+      expression of TLR4, Myd88, NFκB, vimentin and snail1 proteins were significantly 
+      decreased (P < 0.001), while that of E-cadherin presented a remarkable increase 
+      (P < 0.001) in the HMGB1+TLR4-shRNA and HMGB1+daphnetin group compared with the 
+      HMGB1 group. TLR4-MyD88-NFκB pathway is associated with HMGB1-induced EMT in A549 
+      cells. Daphnetin had an inhibitory effect on HMGB1-induced EMT via the 
+      TLR4-Myd88-NF-κB pathway in A549 cells.
+FAU - Gong, Shu-Qi
+AU  - Gong SQ
+AD  - Nanchang University, Nan Chang city, China.
+AD  - Department of Clinical Laboratory, The Fourth Affiliated Hospital of Nanchang 
+      University, Nan Chang city, China.
+FAU - Liu, Hua
+AU  - Liu H
+AD  - Nanchang University, Nan Chang city, China.
+AD  - Department of Clinical Laboratory, The Fourth Affiliated Hospital of Nanchang 
+      University, Nan Chang city, China.
+FAU - Wu, Jin-Lan
+AU  - Wu JL
+AD  - Nanchang University, Nan Chang city, China.
+AD  - Department of Clinical Laboratory, The Fourth Affiliated Hospital of Nanchang 
+      University, Nan Chang city, China.
+FAU - Xu, Jiang-Xia
+AU  - Xu JX
+AD  - Nanchang University, Nan Chang city, China.
+AD  - Department of Clinical Laboratory, The Fourth Affiliated Hospital of Nanchang 
+      University, Nan Chang city, China.
+LA  - eng
+PT  - Journal Article
+DEP - 20230330
+PL  - England
+TA  - Biotechnol Genet Eng Rev
+JT  - Biotechnology & genetic engineering reviews
+JID - 8510274
+SB  - IM
+OTO - NOTNLM
+OT  - Daphnetin
+OT  - HMGB1
+OT  - TLR4
+OT  - epithelial-mesenchymal transition
+OT  - human lung adenocarcinoma cells
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 04:43
+PHST- 2023/03/30 04:43 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.1080/02648725.2023.2194092 [doi]
+PST - aheadofprint
+SO  - Biotechnol Genet Eng Rev. 2023 Mar 30:1-22. doi: 10.1080/02648725.2023.2194092.
+
+PMID- 36994643
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 1305-3612 (Electronic)
+IS  - 1305-3825 (Linking)
+DP  - 2023 Mar 20
+TI  - Long-term results of liver thermal ablation in patients with hepatocellular 
+      carcinoma and colorectal cancer liver metastasis regarding spatial features and 
+      tumor-specific variables.
+LID - 10.4274/dir.2023.221986 [doi]
+AB  - PURPOSE: Colorectal cancer liver metastasis (CRLM) and hepatocellular carcinoma 
+      (HCC) are widely treated using microwave and radiofrequency ablation. Local tumor 
+      progression (LTP) may develop depending on the shortest vascular distance and 
+      large lesion diameter. This study aims to explore the effect of these spatial 
+      features and to investigate the correlation between tumor-specific variables and 
+      LTP. METHODS: This is a retrospective study covering the period between January 
+      2007 and January 2019. One hundred twenty-five patients (CRLM: HCC: 64:61) with 
+      262 lesions (CRLM: HCC: 142:120) were enrolled. The correlation between LTP and 
+      the variables was analyzed using the chi-square test, Fischer's exact test, or 
+      the Fisher-Freeman-Halton test where applicable. The local progression-free 
+      survival (Loc-PFS) was analyzed using the Kaplan-Meier method. Univariable and 
+      multivariable Cox regression analyses were performed to identify prognostic 
+      factors. RESULTS: Significant correlations were observed for LTP in both CRLM and 
+      HCC at a lesion diameter of 30-50 mm (P = 0.019 and P < 0.001, respectively) and 
+      SVD of ≤3 mm (P < 0.001 for both). No correlation was found between the ablation 
+      type and LTP (CRLM: P = 0.141; HCC: P = 0.771). There was no relationship between 
+      residue and the ablation type, but a strong correlation with tumor size was 
+      observed (P = 0.127 and P < 0.001, respectively). In CRLM, LTP was associated 
+      with mutant K-ras and concomitant lung metastasis (P < 0.001 and P = 0.003, 
+      respectively). In HCC, a similar correlation was found for Child-Pugh B, serum 
+      alpha-fetoprotein (AFP) level of >10 ng/mL, predisposing factors, and moderate 
+      histopathological differentiation (P < 0.001, P = 0.008, P = 0.027, and P <0.001, 
+      respectively). In CRLM, SVD of ≤3 mm proved to be the variable with the greatest 
+      negative effect on Loc-PFS (P = 0.007), followed by concomitant lung metastasis 
+      (P = 0.027). In HCC, a serum AFP level of >10 ng/mL proved to be the variable 
+      with the greatest negative effect on Loc-PFS (P = 0.045). CONCLUSION: In addition 
+      to the lesions' spatial features, tumor-specific variables may also have an 
+      impact on LTP.
+FAU - Akhan, Okan
+AU  - Akhan O
+AUID- ORCID: 0000-0002-6864-0229
+AD  - Department of Radiology, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+FAU - Erdemir, Ahmet Gürkan
+AU  - Erdemir AG
+AUID- ORCID: 0000-0001-7427-1039
+AD  - Department of Radiology, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+FAU - Karahan, Sevilay
+AU  - Karahan S
+AUID- ORCID: 0000-0002-8692-7266
+AD  - Department of Biostatistics, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+FAU - Ünal, Emre
+AU  - Ünal E
+AUID- ORCID: 0000-0002-1520-2487
+AD  - Department of Radiology, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+FAU - Çiftçi, Türkmen Turan
+AU  - Çiftçi TT
+AUID- ORCID: 0000-0002-1284-859X
+AD  - Department of Radiology, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+FAU - Akıncı, Devrim
+AU  - Akıncı D
+AUID- ORCID: 0000-0002-8189-4688
+AD  - Department of Radiology, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+FAU - Yalçın, Şuayib
+AU  - Yalçın Ş
+AUID- ORCID: 0000-0001-7850-6798
+AD  - Department of Medical Oncology, Hacettepe University Faculty of Medicine, Ankara, 
+      Turkey.
+LA  - eng
+PT  - Journal Article
+DEP - 20230320
+PL  - Turkey
+TA  - Diagn Interv Radiol
+JT  - Diagnostic and interventional radiology (Ankara, Turkey)
+JID - 101241152
+SB  - IM
+OTO - NOTNLM
+OT  - Ablation techniques (D055011)
+OT  - colorectal neoplasm (D015179)
+OT  - hepatocellular carcinoma (D006528)
+OT  - local tumor progression (D009364)
+OT  - survival analysis (D016019)
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 04:23
+PHST- 2023/03/30 04:23 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.4274/dir.2023.221986 [doi]
+PST - aheadofprint
+SO  - Diagn Interv Radiol. 2023 Mar 20. doi: 10.4274/dir.2023.221986.
+
+PMID- 36994596
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 1759-7714 (Electronic)
+IS  - 1759-7706 (Linking)
+DP  - 2023 Mar 30
+TI  - Lymphocytopenia and survival after whole-brain radiotherapy in patients with 
+      small-cell lung cancer.
+LID - 10.1111/1759-7714.14868 [doi]
+AB  - BACKGROUND: To investigate whether whole-brain radiotherapy (WBRT) decreases 
+      lymphocyte counts and evaluate the impact of treatment-related lymphopenia on 
+      survival in patients with brain metastasis. METHODS: Medical records from 60 
+      small-cell lung cancer patients treated with WBRT from January 2010 to December 
+      2018 were included in the study. Total lymphocyte count (TLC) was obtained pre 
+      and post treatment (within 1 month). We performed linear and logistic regression 
+      analyses to identify predictors of lymphopenia. The association between 
+      lymphopenia and survival was analyzed using Cox regression analysis. RESULTS: 
+      Thirty-nine patients (65%) developed treatment-related lymphopenia. The median 
+      TLC decrease was -374 cells/μL (interquartile range -50 to -722, p < 0.001). 
+      Baseline lymphocyte count was a significant predictor of TLC difference and 
+      percentage change in TLC. Logistic regression analysis found male sex (odds ratio 
+      [OR] 0.11, 95% confidence interval [CI] 0.00-0.79, p = 0.033) and higher baseline 
+      lymphocyte count (OR 0.91, 95% CI 0.82-0.99, p = 0.005) were associated with a 
+      lower risk of developing ≥grade 2 treatment-related lymphopenia. Cox regression 
+      analysis showed that age at brain metastasis (hazard ratio [HR] 1.03, 95% CI 
+      1.01-1.05, p = 0.013), ≥grade 2 treatment-related lymphopenia, and percentage 
+      change in TLC (per 10%, HR 0.94, 95% CI 0.89-0.99, p = 0.032) were prognostic 
+      factors of survival. CONCLUSIONS: WBRT decreases TLC and the magnitude of 
+      treatment-related lymphopenia is an independent predictor of survival in 
+      small-cell lung cancer patients.
+CI  - © 2023 The Authors. Thoracic Cancer published by China Lung Oncology Group and 
+      John Wiley & Sons Australia, Ltd.
+FAU - Lin, Yu-Jung
+AU  - Lin YJ
+AUID- ORCID: 0000-0002-7475-9904
+AD  - Division of Radiation Oncology, Department of Oncology, Taipei Veterans General 
+      Hospital, No.201, Sec. 2, Shipai Rd., Beitou District, Taipei City, 11217, 
+      Taiwan, ROC.
+AD  - School of Medicine, College of Medicine, National Yang Ming Chiao Tung 
+      University, No. 155, Sec. 2, Linong St. Beitou Dist, Taipei City, 112304, Taiwan, 
+      ROC.
+AD  - Institute of Clinical Medicine, School of Medicine, National Yang Ming Chiao Tung 
+      University, Taipei, Taiwan, ROC.
+FAU - Kang, Yu-Mei
+AU  - Kang YM
+AD  - Division of Radiation Oncology, Department of Oncology, Taipei Veterans General 
+      Hospital, No.201, Sec. 2, Shipai Rd., Beitou District, Taipei City, 11217, 
+      Taiwan, ROC.
+AD  - School of Medicine, College of Medicine, National Yang Ming Chiao Tung 
+      University, No. 155, Sec. 2, Linong St. Beitou Dist, Taipei City, 112304, Taiwan, 
+      ROC.
+AD  - Institute of Clinical Medicine, School of Medicine, National Yang Ming Chiao Tung 
+      University, Taipei, Taiwan, ROC.
+FAU - Wu, Yuan-Hung
+AU  - Wu YH
+AD  - Division of Radiation Oncology, Department of Oncology, Taipei Veterans General 
+      Hospital, No.201, Sec. 2, Shipai Rd., Beitou District, Taipei City, 11217, 
+      Taiwan, ROC.
+AD  - School of Medicine, College of Medicine, National Yang Ming Chiao Tung 
+      University, No. 155, Sec. 2, Linong St. Beitou Dist, Taipei City, 112304, Taiwan, 
+      ROC.
+AD  - Department of Biomedical Imaging and Radiological Sciences, National Yang Ming 
+      Chiao Tung University, Taipei, Taiwan, ROC.
+FAU - Chen, Yi-Wei
+AU  - Chen YW
+AD  - Division of Radiation Oncology, Department of Oncology, Taipei Veterans General 
+      Hospital, No.201, Sec. 2, Shipai Rd., Beitou District, Taipei City, 11217, 
+      Taiwan, ROC.
+AD  - School of Medicine, College of Medicine, National Yang Ming Chiao Tung 
+      University, No. 155, Sec. 2, Linong St. Beitou Dist, Taipei City, 112304, Taiwan, 
+      ROC.
+AD  - Department of Medical Imaging and Radiological Technology, Yuanpei University of 
+      Medical Technology, No. 306, Yuanpei Street, Hsinchu, 30015, Taiwan, ROC.
+FAU - Hu, Yu-Wen
+AU  - Hu YW
+AD  - Division of Radiation Oncology, Department of Oncology, Taipei Veterans General 
+      Hospital, No.201, Sec. 2, Shipai Rd., Beitou District, Taipei City, 11217, 
+      Taiwan, ROC.
+AD  - School of Medicine, College of Medicine, National Yang Ming Chiao Tung 
+      University, No. 155, Sec. 2, Linong St. Beitou Dist, Taipei City, 112304, Taiwan, 
+      ROC.
+AD  - Institute of Public Health, National Yang Ming Chiao Tung University, Taipei, 
+      Taiwan, ROC.
+LA  - eng
+PT  - Journal Article
+DEP - 20230330
+PL  - Singapore
+TA  - Thorac Cancer
+JT  - Thoracic cancer
+JID - 101531441
+SB  - IM
+OTO - NOTNLM
+OT  - brain metastasis
+OT  - small-cell lung carcinoma
+OT  - treatment-related lymphopenia
+OT  - whole-brain radiotherapy
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:44
+PHST- 2023/03/08 00:00 [revised]
+PHST- 2023/02/15 00:00 [received]
+PHST- 2023/03/09 00:00 [accepted]
+PHST- 2023/03/30 03:44 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.1111/1759-7714.14868 [doi]
+PST - aheadofprint
+SO  - Thorac Cancer. 2023 Mar 30. doi: 10.1111/1759-7714.14868.
+
+PMID- 36994542
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 1460-2075 (Electronic)
+IS  - 0261-4189 (Linking)
+DP  - 2023 Mar 30
+TI  - LncRNA LITATS1 suppresses TGF-β-induced EMT and cancer cell plasticity by 
+      potentiating TβRI degradation.
+PG  - e112806
+LID - 10.15252/embj.2022112806 [doi]
+AB  - Epithelial cells acquire mesenchymal phenotypes through epithelial-mesenchymal 
+      transition (EMT) during cancer progression. However, how epithelial cells retain 
+      their epithelial traits and prevent malignant transformation is not well 
+      understood. Here, we report that the long noncoding RNA LITATS1 (LINC01137, 
+      ZC3H12A-DT) is an epithelial gatekeeper in normal epithelial cells and inhibits 
+      EMT in breast and non-small cell lung cancer cells. Transcriptome analysis 
+      identified LITATS1 as a TGF-β target gene. LITATS1 expression is reduced in lung 
+      adenocarcinoma tissues compared with adjacent normal tissues and correlates with 
+      a favorable prognosis in breast and non-small cell lung cancer patients. LITATS1 
+      depletion promotes TGF-β-induced EMT, migration, and extravasation in cancer 
+      cells. Unbiased pathway analysis demonstrated that LITATS1 knockdown potently and 
+      selectively potentiates TGF-β/SMAD signaling. Mechanistically, LITATS1 enhances 
+      the polyubiquitination and proteasomal degradation of TGF-β type I receptor 
+      (TβRI). LITATS1 interacts with TβRI and the E3 ligase SMURF2, promoting the 
+      cytoplasmic retention of SMURF2. Our findings highlight a protective function of 
+      LITATS1 in epithelial integrity maintenance through the attenuation of TGF-β/SMAD 
+      signaling and EMT.
+CI  - © 2023 The Authors. Published under the terms of the CC BY NC ND 4.0 license.
+FAU - Fan, Chuannan
+AU  - Fan C
+AUID- ORCID: 0000-0001-8754-4913
+AD  - Department of Cell and Chemical Biology, Leiden University Medical Center, 
+      Leiden, The Netherlands.
+AD  - Oncode Institute, Leiden University Medical Center, Leiden, The Netherlands.
+FAU - Wang, Qian
+AU  - Wang Q
+AUID- ORCID: 0000-0002-5196-4972
+AD  - Department of Cell and Chemical Biology, Leiden University Medical Center, 
+      Leiden, The Netherlands.
+AD  - Oncode Institute, Leiden University Medical Center, Leiden, The Netherlands.
+FAU - Kuipers, Thomas B
+AU  - Kuipers TB
+AUID- ORCID: 0000-0001-5373-6765
+AD  - Department of Biomedical Data Sciences, Sequencing Analysis Support Core, Leiden 
+      University Medical Center, Leiden, The Netherlands.
+FAU - Cats, Davy
+AU  - Cats D
+AUID- ORCID: 0000-0001-9684-220X
+AD  - Department of Biomedical Data Sciences, Sequencing Analysis Support Core, Leiden 
+      University Medical Center, Leiden, The Netherlands.
+FAU - Iyengar, Prasanna Vasudevan
+AU  - Iyengar PV
+AUID- ORCID: 0000-0002-6495-137X
+AD  - Department of Cell and Chemical Biology, Leiden University Medical Center, 
+      Leiden, The Netherlands.
+AD  - Oncode Institute, Leiden University Medical Center, Leiden, The Netherlands.
+FAU - Hagenaars, Sophie C
+AU  - Hagenaars SC
+AUID- ORCID: 0000-0002-9121-1975
+AD  - Department of Surgery, Leiden University Medical Centre, Leiden, The Netherlands.
+FAU - Mesker, Wilma E
+AU  - Mesker WE
+AUID- ORCID: 0000-0001-5533-4778
+AD  - Department of Surgery, Leiden University Medical Centre, Leiden, The Netherlands.
+FAU - Devilee, Peter
+AU  - Devilee P
+AUID- ORCID: 0000-0002-8023-2009
+AD  - Department of Pathology, Leiden University Medical Center, Leiden, The 
+      Netherlands.
+AD  - Department of Human Genetics, Leiden University Medical Center, Leiden, The 
+      Netherlands.
+FAU - Tollenaar, Rob A E M
+AU  - Tollenaar RAEM
+AUID- ORCID: 0000-0002-6831-6082
+AD  - Department of Surgery, Leiden University Medical Centre, Leiden, The Netherlands.
+FAU - Mei, Hailiang
+AU  - Mei H
+AUID- ORCID: 0000-0003-1781-5508
+AD  - Department of Biomedical Data Sciences, Sequencing Analysis Support Core, Leiden 
+      University Medical Center, Leiden, The Netherlands.
+FAU - Ten Dijke, Peter
+AU  - Ten Dijke P
+AUID- ORCID: 0000-0002-7234-342X
+AD  - Department of Cell and Chemical Biology, Leiden University Medical Center, 
+      Leiden, The Netherlands.
+AD  - Oncode Institute, Leiden University Medical Center, Leiden, The Netherlands.
+LA  - eng
+SI  - GEO/GSE203119
+SI  - GEO/GSE198393
+GR  - Cancer Genomics Centre Netherlands/
+GR  - Chinese Scholarship Council/
+GR  - 09120012010061/ZonMw (Netherlands Organisation for Health Research and 
+      Development)/
+PT  - Journal Article
+DEP - 20230330
+PL  - England
+TA  - EMBO J
+JT  - The EMBO journal
+JID - 8208664
+SB  - IM
+OTO - NOTNLM
+OT  - LINC01137
+OT  - ZC3H12A-DT
+OT  - TGF-β type I receptor
+OT  - epithelial-mesenchymal transition
+OT  - transforming growth factor-β
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:24
+PHST- 2023/02/28 00:00 [revised]
+PHST- 2022/10/13 00:00 [received]
+PHST- 2023/03/02 00:00 [accepted]
+PHST- 2023/03/30 03:24 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.15252/embj.2022112806 [doi]
+PST - aheadofprint
+SO  - EMBO J. 2023 Mar 30:e112806. doi: 10.15252/embj.2022112806.
+
+PMID- 36994539
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 1759-7714 (Electronic)
+IS  - 1759-7706 (Linking)
+DP  - 2023 Mar 30
+TI  - Influencing factors of efficacy and long-term use of amrubicin in patients with 
+      small cell lung cancer.
+LID - 10.1111/1759-7714.14871 [doi]
+AB  - BACKGROUND: Amrubicin (AMR) has become the standard of care for post-relapse 
+      small cell lung cancer (SCLC). It has also been reported to achieve long-term 
+      disease control in patients with good treatment response. However, the optimal 
+      patient population for whom AMR is effective and the factors associated with 
+      long-term disease control are yet to be identified. The aim of the study was to 
+      identify the clinical characteristics and factors associated with long-term 
+      disease control in patients with recurrent SCLC who would benefit from AMR 
+      therapy. METHODS: The clinical records of 33 patients diagnosed with recurrent 
+      SCLC and treated with AMR were retrospectively reviewed. Clinical information was 
+      compared between patients who achieved disease control (effective group) and who 
+      developed disease progression (noneffective group) on the first efficacy 
+      assessment after AMR and between patients who continued AMR for more than 
+      seven cycles (maintenance group) and those who terminated treatment after 
+      1-6 cycles (discontinuation group). RESULTS: The noneffective group included 
+      significantly more patients with AMR dose reductions after the second cycle 
+      (p = 0.006). AMR dose reduction was an independent risk factor for disease 
+      progression. The maintenance group had significantly lower pretreatment lactate 
+      dehydrogenase (LDH) levels than the discontinuation group (p = 0.046). A high LDH 
+      level was an independent risk factor for short AMR discontinuation. Overall 
+      survival was significantly longer in the effective group than in the noneffective 
+      group (p < 0.001). CONCLUSIONS: In AMR therapy for patients with relapsed SCLC, 
+      continuation of AMR without dose reduction after the second cycle may contribute 
+      to disease control and prolonged survival.
+CI  - © 2023 The Authors. Thoracic Cancer published by China Lung Oncology Group and 
+      John Wiley & Sons Australia, Ltd.
+FAU - Takahara, Yutaka
+AU  - Takahara Y
+AUID- ORCID: 0000-0001-6863-0074
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Tanaka, Takuya
+AU  - Tanaka T
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Ishige, Yoko
+AU  - Ishige Y
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Shionoya, Ikuyo
+AU  - Shionoya I
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Yamamura, Kouichi
+AU  - Yamamura K
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Sakuma, Takashi
+AU  - Sakuma T
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Nishiki, Kazuaki
+AU  - Nishiki K
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Nakase, Keisuke
+AU  - Nakase K
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Nojiri, Masafumi
+AU  - Nojiri M
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Kato, Ryo
+AU  - Kato R
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Shinomiya, Shohei
+AU  - Shinomiya S
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Oikawa, Taku
+AU  - Oikawa T
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+FAU - Mizuno, Shiro
+AU  - Mizuno S
+AD  - Department of Respiratory Medicine, Kanazawa Medical University, 1-1 Daigaku, 
+      Uchinada-machi, Kahoku-gun, Ishikawa, 920-0293, Japan.
+LA  - eng
+PT  - Journal Article
+DEP - 20230330
+PL  - Singapore
+TA  - Thorac Cancer
+JT  - Thoracic cancer
+JID - 101531441
+SB  - IM
+OTO - NOTNLM
+OT  - amrubicin
+OT  - chemotherapy
+OT  - prognosis
+OT  - small cell lung cancer
+OT  - therapeutic efficacy
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:23
+PHST- 2023/03/13 00:00 [revised]
+PHST- 2023/02/01 00:00 [received]
+PHST- 2023/03/14 00:00 [accepted]
+PHST- 2023/03/30 03:23 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.1111/1759-7714.14871 [doi]
+PST - aheadofprint
+SO  - Thorac Cancer. 2023 Mar 30. doi: 10.1111/1759-7714.14871.
+
+PMID- 36994380
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 1664-2295 (Print)
+IS  - 1664-2295 (Linking)
+VI  - 14
+DP  - 2023
+TI  - Association of smoking with the survival of patients with brain metastasis of 
+      lung cancer.
+PG  - 1036387
+LID - 10.3389/fneur.2023.1036387 [doi]
+AB  - BACKGROUND: Smoking is associated with increased mortality in patients with 
+      cancer. However, there are limited data on the impact of smoking on the survival 
+      of patients with brain metastases. Therefore, this study aimed to evaluate 
+      whether smoking was associated with survival and whether smoking cessation was 
+      beneficial to these patients. METHODS: This study used lung cancer with a brain 
+      metastasis cohort of the West China Hospital of Sichuan University from 2013 to 
+      2021. Patients were stratified according to smoking history; the distribution, 
+      clinical characteristics, and survival data of each group were estimated. 
+      Kaplan-Meier analysis and risk analysis were performed for the survival endpoint. 
+      RESULTS: Of the 2,647 patients included in the analysis, the median age was 57.8 
+      years, and 55.4% were men. Among them, 67.1% had no smoking history, 18.9% still 
+      smoked, and 14% reported quitting smoking. Compared with never smokers, current 
+      smokers [HR, 1.51 (95% CI, 1.35-1.69), p < 0.01] and former smokers [HR, 1.32 
+      (95% CI, 1.16-1.49), p<0.01] had an increased risk of death. However, quitting 
+      smoking was not associated with improved survival [HR, 0.90 (95% CI, 0.77-1.04), 
+      p = 0.16]. The overall survival increased with the increase of smoking cessation 
+      years. CONCLUSIONS: In lung cancer patients with brain metastases, smoking was 
+      associated with an increased risk of death, but quitting smoking was not 
+      associated with improved survival.
+CI  - Copyright © 2023 Yu, Zhang, Liu, He, Pei, Zhang, Peng and Fang.
+FAU - Yu, Jiayi
+AU  - Yu J
+AD  - School of Medical and Life Sciences, Chengdu University of Traditional Chinese 
+      Medicine, Chengdu, Sichuan, China.
+AD  - Department of Biotherapy, Cancer Center, West China Hospital, Sichuan University, 
+      Chengdu, China.
+FAU - Zhang, Yu
+AU  - Zhang Y
+AD  - Department of Neurosurgery, Affiliated Hospital of Chengdu University, Chengdu, 
+      Sichuan, China.
+FAU - Liu, Zheran
+AU  - Liu Z
+AD  - Department of Biotherapy, Cancer Center, West China Hospital, Sichuan University, 
+      Chengdu, China.
+FAU - He, Yan
+AU  - He Y
+AD  - Department of Biotherapy, Cancer Center, West China Hospital, Sichuan University, 
+      Chengdu, China.
+FAU - Pei, Yiyan
+AU  - Pei Y
+AD  - Department of Biotherapy, Cancer Center, West China Hospital, Sichuan University, 
+      Chengdu, China.
+FAU - Zhang, Renjie
+AU  - Zhang R
+AD  - Department of Neurosurgery, West China Hospital, Sichuan University, Chengdu, 
+      Sichuan, China.
+FAU - Peng, Xingchen
+AU  - Peng X
+AD  - Department of Biotherapy, Cancer Center, West China Hospital, Sichuan University, 
+      Chengdu, China.
+FAU - Fang, Fang
+AU  - Fang F
+AD  - West China Hospital, Sichuan University, Chengdu, Sichuan, China.
+LA  - eng
+PT  - Journal Article
+DEP - 20230313
+PL  - Switzerland
+TA  - Front Neurol
+JT  - Frontiers in neurology
+JID - 101546899
+PMC - PMC10040669
+OTO - NOTNLM
+OT  - brain metastasis
+OT  - lung cancer
+OT  - smoking
+OT  - smoking cessation
+OT  - the overall survival
+COIS- The authors declare that the research was conducted in the absence of any 
+      commercial or financial relationships that could be construed as a potential 
+      conflict of interest.
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:04
+PHST- 2022/09/04 00:00 [received]
+PHST- 2023/02/20 00:00 [accepted]
+PHST- 2023/03/30 03:04 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.3389/fneur.2023.1036387 [doi]
+PST - epublish
+SO  - Front Neurol. 2023 Mar 13;14:1036387. doi: 10.3389/fneur.2023.1036387. 
+      eCollection 2023.
+
+PMID- 36994308
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 2666-3643 (Electronic)
+IS  - 2666-3643 (Linking)
+VI  - 4
+IP  - 4
+DP  - 2023 Apr
+TI  - ALK Deletion Exons 2 to 19: Case Report of a Rare ALK Inhibitor-Responsive Lung 
+      Cancer Driver Oncogene.
+PG  - 100489
+LID - 10.1016/j.jtocrr.2023.100489 [doi]
+AB  - ALK internal deletions of nonkinase domain exons occur in 0.01% of lung cancers 
+      with ALK genomic aberrations. We report a lung adenocarcinoma with a previously 
+      undescribed somatic ALK deletion of exons 2 to 19 with dramatic and sustained 
+      (>23 mo) response to alectinib. Our and other reported cases with ALK nonkinase 
+      domain deletions (between introns and exons 1-19) can display positive results in 
+      nonsequencing-based lung cancer diagnostic tests (such as immunohistochemistry) 
+      used to screen for more common ALK rearrangements. This case report emphasizes 
+      that "ALK-driven" lung cancers should be expanded to encompass those harboring 
+      not only ALK rearrangements with other genes but also ALK nonkinase domain 
+      deletions.
+CI  - © 2023 The Authors.
+FAU - Schoepflin, Zachary R
+AU  - Schoepflin ZR
+AD  - Department of Medicine, Division of Medical Oncology, Beth Israel Deaconess 
+      Medical Center, Harvard Medical School, Boston, Massachusetts.
+FAU - Academia, Emmeline
+AU  - Academia E
+AD  - Department of Medicine, Division of Medical Oncology, Beth Israel Deaconess 
+      Medical Center, Harvard Medical School, Boston, Massachusetts.
+FAU - Osataphan, Soravis A
+AU  - Osataphan SA
+AD  - Department of Medicine, Division of Medical Oncology, Beth Israel Deaconess 
+      Medical Center, Harvard Medical School, Boston, Massachusetts.
+FAU - Rangachari, Deepa
+AU  - Rangachari D
+AD  - Department of Medicine, Division of Medical Oncology, Beth Israel Deaconess 
+      Medical Center, Harvard Medical School, Boston, Massachusetts.
+FAU - Sharifi, Sheida
+AU  - Sharifi S
+AD  - Department of Pathology, Lahey Hospital and Medical Center, Burlington, 
+      Massachusetts.
+FAU - VanderLaan, Paul A
+AU  - VanderLaan PA
+AD  - Department of Pathology, Beth Israel Deaconess Medical Center, Harvard Medical 
+      School, Boston, Massachusetts.
+FAU - Costa, Daniel B
+AU  - Costa DB
+AD  - Department of Medicine, Division of Medical Oncology, Beth Israel Deaconess 
+      Medical Center, Harvard Medical School, Boston, Massachusetts.
+LA  - eng
+PT  - Case Reports
+DEP - 20230224
+PL  - United States
+TA  - JTO Clin Res Rep
+JT  - JTO clinical and research reports
+JID - 101769967
+PMC - PMC10040877
+OTO - NOTNLM
+OT  - ALK
+OT  - Alectinib
+OT  - Case report
+OT  - Deletion
+OT  - Lung cancer
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:03
+PHST- 2022/12/16 00:00 [received]
+PHST- 2023/02/17 00:00 [revised]
+PHST- 2023/02/19 00:00 [accepted]
+PHST- 2023/03/30 03:03 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - S2666-3643(23)00028-0 [pii]
+AID - 10.1016/j.jtocrr.2023.100489 [doi]
+PST - epublish
+SO  - JTO Clin Res Rep. 2023 Feb 24;4(4):100489. doi: 10.1016/j.jtocrr.2023.100489. 
+      eCollection 2023 Apr.
+
+PMID- 36994250
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 2168-8184 (Print)
+IS  - 2168-8184 (Linking)
+VI  - 15
+IP  - 2
+DP  - 2023 Feb
+TI  - A Rare Case of Metastatic Small Cell Carcinoma of Lung in a Follow-Up Patient of 
+      Chronic Myeloid Leukemia on Imatinib Treatment.
+PG  - e35436
+LID - 10.7759/cureus.35436 [doi]
+AB  - Imatinib has an excellent long-term survival rate and significantly ameliorates 
+      the treatment of chronic myeloid leukaemia during the past few decades. There is 
+      now a concern that first-generation tyrosine kinase inhibitors can cause 
+      secondary neoplasms. Here, we describe a case of a 49-year-old non-smoker male 
+      who was diagnosed with chronic myeloid leukaemia and treated with imatinib. After 
+      15 years of treatment, an incidental right cervical lymphadenopathy was noted. 
+      The fine needle aspiration cytology from the lymph node revealed the small round 
+      cell morphology. In order to identify the primary lesion, computerised tomography 
+      of the thorax and abdomen was advised, which revealed a diagnosis of small cell 
+      carcinoma lung. In the index case report, we will discuss the potential side 
+      effects of first-generation tyrosine kinase inhibitors on a long-term basis along 
+      with treatment protocols for metastatic small cell carcinoma lung in a 
+      disease-free follow-up case of chronic myeloid leukaemia.
+CI  - Copyright © 2023, Singh et al.
+FAU - Singh, Anurag
+AU  - Singh A
+AD  - Pathology, King George's Medical University, Lucknow, IND.
+FAU - Shabbir, Nida
+AU  - Shabbir N
+AD  - Pathology, King George's Medical University, Lucknow, IND.
+FAU - Tripathi, Tanya
+AU  - Tripathi T
+AD  - Pathology, King George's Medical University, Lucknow, IND.
+FAU - Kushwaha, Rashmi
+AU  - Kushwaha R
+AD  - Pathology, King George's Medical University, Lucknow, IND.
+FAU - Verma, Shailendra P
+AU  - Verma SP
+AD  - Clinical Hematology, King George's Medical University, Lucknow, IND.
+LA  - eng
+PT  - Case Reports
+DEP - 20230224
+PL  - United States
+TA  - Cureus
+JT  - Cureus
+JID - 101596737
+PMC - PMC10041129
+OTO - NOTNLM
+OT  - chronic myeloid leukaemia
+OT  - imatinib
+OT  - small-cell lung carcinoma
+OT  - tyrosine kinase inhibitor
+OT  - tyrosine kinase receptor inhibitors
+COIS- The authors have declared that no competing interests exist.
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:02
+PHST- 2023/02/24 00:00 [accepted]
+PHST- 2023/03/30 03:02 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.7759/cureus.35436 [doi]
+PST - epublish
+SO  - Cureus. 2023 Feb 24;15(2):e35436. doi: 10.7759/cureus.35436. eCollection 2023 
+      Feb.
+
+PMID- 36994222
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 1658-3612 (Electronic)
+IS  - 1658-3612 (Linking)
+VI  - 18
+IP  - 5
+DP  - 2023 Oct
+TI  - In vitro bio-characterization of solid lipid nanoparticles of favipiravir in A549 
+      human lung epithelial cancer cells.
+PG  - 1076-1086
+LID - 10.1016/j.jtumed.2023.02.014 [doi]
+AB  - OBJECTIVES: Lung cancer is a leading cause of mortality worldwide. In lung cancer 
+      treatment, nebulized solid lipid nanoparticles may be a viable drug delivery 
+      method, helping the drug reach sites of action, and improving its inhalation 
+      efficiency and pulmonary deposition. This research focused on evaluating the 
+      effectiveness of solid lipid nanoparticles of favipiravir (Fav-SLNps) in 
+      facilitating drug delivery to sites of action in lung cancer treatment. METHODS: 
+      The hot-evaporation method was used to formulate Fav-SLNps. The in vitro cell 
+      viability, anti-cancer effects, and cellular uptake activity were evaluated in 
+      A549 human lung adenocarcinoma cells treated with the Fav-SLNp formulation. 
+      RESULTS: The Fav-SLNps were formulated successfully. Importantly, Fav-SLNps at a 
+      concentration of 322.6 μg/ml were found to be safe and non-toxic toward 
+      A549 cells in vitro. The formulation had potential anti-proliferative properties 
+      via increasing the proportions of cells in G2/M and G0/G1 phases to 1.20 and 1.13 
+      times those in untreated cells. Additionally, Fav-SLNp treatment significantly 
+      induced necrosis in A549 cells. Furthermore, the use of SLNps in the Fav 
+      formulation resulted in a macrophage drug uptake 1.23 times that of the free 
+      drug. CONCLUSION: Our results confirmed the internalization and anti-cancer 
+      activity of the Fav-SLNp formulation in the A549 lung cancer cell line. Our 
+      findings suggest that Fav-SLNps could potentially be used as lung cancer 
+      treatment to facilitate drug delivery to sites of action in the lungs.
+CI  - © 2023 [The Author/The Authors].
+FAU - Tulbah, Alaa S
+AU  - Tulbah AS
+AD  - Pharmaceutics Department, College of Pharmacy, Umm Al Qura University, Makkah, 
+      KSA.
+LA  - eng
+PT  - Journal Article
+DEP - 20230310
+PL  - Saudi Arabia
+TA  - J Taibah Univ Med Sci
+JT  - Journal of Taibah University Medical Sciences
+JID - 101621911
+PMC - PMC10040896
+OTO - NOTNLM
+OT  - A549 cells
+OT  - Cell cycle distribution
+OT  - Cytotoxicity
+OT  - Favipiravir
+OT  - Nanoparticles
+OT  - Necrosis
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:02
+PHST- 2022/07/28 00:00 [received]
+PHST- 2023/01/08 00:00 [revised]
+PHST- 2023/02/27 00:00 [accepted]
+PHST- 2023/03/30 03:02 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - S1658-3612(23)00036-7 [pii]
+AID - 10.1016/j.jtumed.2023.02.014 [doi]
+PST - epublish
+SO  - J Taibah Univ Med Sci. 2023 Mar 10;18(5):1076-1086. doi: 
+      10.1016/j.jtumed.2023.02.014. eCollection 2023 Oct.
+
+PMID- 36994217
+OWN - NLM
+STAT- Publisher
+LR  - 20230330
+IS  - 2234-943X (Print)
+IS  - 2234-943X (Linking)
+VI  - 13
+DP  - 2023
+TI  - A novel tool to evaluate and quantify radiation pneumonitis: A retrospective 
+      analysis of correlation of dosimetric parameters with volume of pneumonia patch.
+PG  - 1130406
+LID - 10.3389/fonc.2023.1130406 [doi]
+AB  - INTRODUCTION: In lung cancer, radiation-induced lung injury (RILI) or radiation 
+      pneumonitis (RP) are major concerns after radiotherapy. We investigated the 
+      correlation between volumes of RP lesions and their RP grades after radiotherapy. 
+      METHODS AND MATERIALS: We retrospectively collected data from patients with 
+      non-small lung cancer that received curative doses to the thorax without 
+      undergoing chest radiotherapy before this treatment course. The post-treatment 
+      computed tomography (CT) image was used to register to the planning CT to 
+      evaluate the correlation between dosimetric parameters and volume of pneumonia 
+      patch by using deformable image registration. RESULTS: From January 1, 2019, to 
+      December 30, 2020, 71 patients with non-small cell lung cancer with 169 sets of 
+      CT images met our criteria for evaluation. In all patient groups, we found the 
+      RPv max and RP grade max to be significant (p<0.001). Some parameters that were 
+      related to the dose-volume histogram (DVH) and RP were lung Vx (x=1-66 Gy, 
+      percentage of lung volume received ≥x Gy), and mean lung dose. Comparing these 
+      parameters of the DVH with RP grade max showed that the mean lung dose and lung 
+      V1-V31 were significantly correlated. The cut-off point for the occurrence of 
+      symptoms in all patient groups, the RPv max value, was 4.79%, while the area 
+      under the curve was 0.779. In the groups with grades 1 and 2 RP, the dose curve 
+      of 26 Gy covered ≥80% of RP lesions in >80% of patients. Patients who had 
+      radiotherapy in combination with chemotherapy had significantly shorter 
+      locoregional progression-free survival (p=0.049) than patients who received 
+      radiation therapy in combination with target therapy. Patients with RPv max 
+      >4.79% demonstrated better OS (p=0.082). CONCLUSION: The percentage of RP lesion 
+      volume to total lung volume is a good indicator for quantifying RP. RP lesions 
+      can be projected onto the original radiation therapy plan using coverage of the 
+      26 Gy isodose line to determine whether the lesion is RILI.
+CI  - Copyright © 2023 Huang, Lin, Chang and Chen.
+FAU - Huang, Jing-Wen
+AU  - Huang JW
+AD  - Department of Radiation Oncology, Taichung Veterans General Hospital, Taichung, 
+      Taiwan.
+AD  - Institute of Biomedical Sciences, National Chung Hsing University, Taichung, 
+      Taiwan.
+FAU - Lin, Yi-Hui
+AU  - Lin YH
+AD  - Department of Radiation Oncology, Taichung Veterans General Hospital, Taichung, 
+      Taiwan.
+FAU - Chang, Gee-Chen
+AU  - Chang GC
+AD  - Institute of Biomedical Sciences, National Chung Hsing University, Taichung, 
+      Taiwan.
+AD  - Faculty of Medicine, School of Medicine, National Yang-Ming University, Taipei, 
+      Taiwan.
+AD  - Institute of Medicine, Chung Shan Medical University, Taichung, Taiwan.
+AD  - School of Medicine, Chung Shan Medical University, Taichung, Taiwan.
+FAU - Chen, Jeremy J W
+AU  - Chen JJW
+AD  - Institute of Biomedical Sciences, National Chung Hsing University, Taichung, 
+      Taiwan.
+LA  - eng
+PT  - Journal Article
+DEP - 20230313
+PL  - Switzerland
+TA  - Front Oncol
+JT  - Frontiers in oncology
+JID - 101568867
+PMC - PMC10040686
+OTO - NOTNLM
+OT  - DVH
+OT  - NSCLC
+OT  - pneumonia patch
+OT  - radiation pneumonitis
+OT  - radiotherapy
+COIS- The authors declare that the research was conducted in the absence of any 
+      commercial or financial relationships that could be construed as a potential 
+      conflict of interest.
+EDAT- 2023/03/31 06:00
+MHDA- 2023/03/31 06:00
+CRDT- 2023/03/30 03:01
+PHST- 2022/12/23 00:00 [received]
+PHST- 2023/02/21 00:00 [accepted]
+PHST- 2023/03/30 03:01 [entrez]
+PHST- 2023/03/31 06:00 [pubmed]
+PHST- 2023/03/31 06:00 [medline]
+AID - 10.3389/fonc.2023.1130406 [doi]
+PST - epublish
+SO  - Front Oncol. 2023 Mar 13;13:1130406. doi: 10.3389/fonc.2023.1130406. eCollection 
+      2023.

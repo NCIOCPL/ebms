@@ -96,7 +96,7 @@ class RelatedArticlesForm extends FormBase {
 
     // Build the picklist for available relationship types.
     $storage = $this->entityTypeManager->getStorage('taxonomy_term');
-    $query = $storage->getQuery()->condition('vid', 'relationship_types');
+    $query = $storage->getQuery()->accessCheck(FALSE)->condition('vid', 'relationship_types');
     $terms = $storage->loadMultiple($query->execute());
     $types = [];
     foreach ($terms as $term) {

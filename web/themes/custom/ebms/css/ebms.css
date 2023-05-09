@@ -66,11 +66,11 @@ main#main-content h1 {
   max-width: none;
 }
 .region-header.usa-navbar {
-width: 100%;
-padding-left: 0;
-padding-right: 0;
-flex-flow: wrap;
-height: auto;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  flex-flow: wrap;
+  height: auto;
 }
 #about-pdq-link,
 #ebms-help-link {

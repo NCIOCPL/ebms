@@ -3,7 +3,9 @@
 namespace Drupal\ebms_review\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Url;
+use Drupal\ebms_review\Entity\Packet;
 use Drupal\user\Entity\User;
 
 /**
@@ -30,16 +32,21 @@ class AssignedPackets extends ControllerBase {
       $title .= " for $name";
     }
 
-    // Find the review packets for the board member.
+    // Find the review packets for the board member. This is a case in which
+    // performance was not a problem, but complexity of the query was. Doing
+    // this with the entity query API was so difficult to comprehend from the
+    // code that bugs were inevitable (see, for example, OCEEBMS-761). Doing
+    // this with the Drupal query API is much more straigntforward. And it
+    // works correctly.
+    $query = Packet::makeUnreviewedPacketsQuery($uid);
+    $query = $query->extend(PagerSelectExtender::class);
+    $result = $query->execute();
+    $ids = [];
+    foreach ($result as $row) {
+      $ids[$row->packet_id] = $row->packet_id;
+    }
     $storage = $this->entityTypeManager()->getStorage('ebms_packet');
-    $query = $storage->getQuery()->accessCheck(FALSE);
-    $query->condition('active', 1);
-    $query->condition('reviewers', $uid);
-    $query->condition('articles.entity.dropped', 0);
-    $query->addTag('packets_with_unreviewed_articles');
-    $query->sort('created', 'DESC');
-    $query->pager();
-    $packets = $storage->loadMultiple($query->execute());
+    $packets = $storage->loadMultiple($ids);
     $items = [];
     foreach ($packets as $packet) {
       $articles = count($packet->articles);

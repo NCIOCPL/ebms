@@ -3,6 +3,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\Role;
 
 /**
@@ -20,6 +21,16 @@ function ebms_core_user_logout(AccountInterface $account) {
  * Implements hook_install().
  */
 function ebms_core_install($is_syncing) {
+
+  // Create the page content type when running under phpunit.
+  // See https://drupal.stackexchange.com/questions/315176.
+  $types = \Drupal::entityTypeManager()
+    ->getStorage('node_type')
+    ->loadMultiple();
+  if (!array_key_exists('page', $types)) {
+    $type = NodeType::create(['type' => 'page', 'name' => 'Basic page']);
+    $type->save();
+  }
   $roles = _ebms_core_roles();
   _ebms_core_drop_roles();
   foreach ($roles as $values) {
@@ -187,6 +198,7 @@ function _ebms_core_role_permissions(): array {
       'create terms in topic_groups',
       'create terms in transportation_expense_types',
       'delete terms in article_tags',
+      'edit any page content',
       'edit terms in article_tags',
       'edit terms in doc_tags',
       'edit terms in hotels',
@@ -204,6 +216,7 @@ function _ebms_core_role_permissions(): array {
       'manage users',
       'perform full search',
       'use text format filtered_html',
+      'use text format full_html',
       'view alerts',
       'view all meetings',
       'view review alerts',
@@ -262,6 +275,14 @@ function template_preprocess_ebms_local_actions(&$variables) {
  */
 function ebms_core_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form['#submit'][] = 'ebms_core_user_login_form_submit';
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function ebms_core_preprocess_page(&$variables) {
+  $variables['#attached']['library'][] = 'ebms_core/admin';
+  ebms_debug_log($variables['#attached']['library']);
 }
 
 /**

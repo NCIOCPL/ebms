@@ -2,9 +2,9 @@ name: EBMS Home Pages
 description: Customized home pages for each user rôle.
 type: module
 package: EBMS
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 dependencies:
-  - ebms_core
-  - ebms_message
-  - file
-  - user
+  - drupal:file
+  - drupal:user
+  - ebms_core:ebms_core
+  - ebms_message:ebms_message

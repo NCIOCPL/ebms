@@ -222,6 +222,13 @@ class ReviewedPacket extends ControllerBase {
       $rows[] = [$link, $notes, $reviewer, $posted];
     }
 
+    // Mark this packet as having been seen, if appropriate.
+    $board_manager_id = $packet->topic->entity->board->entity->manager->target_id;
+    if ($this->currentUser()->id() == $board_manager_id) {
+      $packet->set('last_seen', date('Y-m-d H:i:s'));
+      $packet->save();
+    }
+
     // Return the page's render array.
     $opts = ['query' => []];
     if (!empty($filter_id)) {

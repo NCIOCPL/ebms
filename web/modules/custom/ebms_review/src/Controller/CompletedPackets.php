@@ -20,7 +20,8 @@ class CompletedPackets extends ControllerBase {
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'states');
     $query->condition('field_text_id', 'fyi');
-    $fyi = $storage->load(reset($query->execute()));
+    $ids = $query->execute();
+    $fyi = $storage->load(reset($ids));
     $fyi_sequence = $fyi->field_sequence->value;
 
     // We're not interested in packets reviewed more than two years ago.
@@ -60,13 +61,16 @@ class CompletedPackets extends ControllerBase {
 
         // Find out if this user has reviewed the article.
         $reviewed = FALSE;
-        foreach ($packet_article->entity->reviews as $review) {
-          if ($review->entity->reviewer->target_id == $uid) {
+        $packet_article = $packet_article->entity;
+        $article_id = $packet_article->article->target_id;
+        foreach ($packet_article->reviews as $review) {
+          $review = $review->entity;
+          if ($review->reviewer->target_id == $uid) {
             ebms_debug_log("completed packets: found one of the current user's reviews");
             $reviewed = TRUE;
             $count++;
-            if (strcmp($review->entity->posted->value, $latest) > 0) {
-              $latest = $review->entity->posted->value;
+            if (strcmp($review->posted->value, $latest) > 0) {
+              $latest = $review->posted->value;
               ebms_debug_log("completed packets: latest review for this packet is now $latest");
             }
           }
@@ -77,21 +81,21 @@ class CompletedPackets extends ControllerBase {
 
           // OK if the article has been dropped (this is a change from the
           // original logic, which ignored the drop flag in this situation).
-          if (!empty($packet_article->entity->dropped->value)) {
+          if (!empty($packet_article->dropped->value)) {
             continue;
           }
 
           // OK if the article has moved on to a later state.
-          $article = $packet_article->entity->article->entity;
+          $article = $packet_article->article->entity;
           $current_state = $article->getCurrentState($topic_id);
-          if ($current_state->value->entity->field_sequence->value > $fyi_sequence) {
-            $article_id = $article->id();
+          $state = $current_state->value->entity;
+          if ($state->field_sequence->value > $fyi_sequence) {
             ebms_debug_log("completed packets: skipping article $article_id which has moved on to greener pastures");
             continue;
           }
 
           // The reviewer isn't expected to review FYI articles.
-          if ($current_state->value->entity->field_text_id === 'FYI') {
+          if ($state->field_text_id->value === 'fyi') {
             ebms_debug_log('completed packets: skipping FYI article');
             continue;
           }

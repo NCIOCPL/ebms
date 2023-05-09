@@ -6,7 +6,7 @@ services:
     build: .
     volumes:
       - ./:/var/www:cached
-      - ./templates/000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ./templates/default.conf:/etc/apache2/sites-available/000-default.conf
       - ./templates/apache2.conf:/etc/apache2/apache2.conf
     ports:
       - 8081:80
@@ -29,9 +29,23 @@ services:
       net:
 
   mailhog:
-    image: mailhog/mailhog
+    image: teawithfruit/mailhog
     ports:
       - 8025:8025
+    networks:
+      net:
+
+  chrome:
+    image: seleniarm/standalone-chromium:4.1.4-20220429
+    volumes:
+      - ./testdata/browser:/usr/local/share/testdata
+    environment:
+      - JAVA_OPTS=-Dwebdriver.chrome.whitelistedIps=
+    ports:
+      - '5900:5900'
+      - '7900:7900'
+      - '4444:4444'
+    shm_size: 2g
     networks:
       net:
 

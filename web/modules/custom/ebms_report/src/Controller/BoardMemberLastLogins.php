@@ -54,8 +54,10 @@ class BoardMemberLastLogins extends ControllerBase {
 
         // Who has already reviewed the article?
         $reviewed_by = [];
-        foreach ($packet_article->reviews->entity->reviewers as $reviewer) {
-          $reviewed_by[] = $reviewer->target_id;
+        foreach ($packet_article->entity->reviews as $review) {
+          foreach ($review->entity->reviewer as $reviewer) {
+            $reviewed_by[] = $reviewer->target_id;
+          }
         }
 
         // See who was assigned but hasn't yet reviewed the article.

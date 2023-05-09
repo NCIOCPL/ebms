@@ -1,0 +1,15 @@
+# min hour day-of-month month day-of-week (Sunday=0)
+# Make sure the jobs can find PHP. CBIIT has a custom local build.
+PATH=/bin:/usr/bin:/usr/local/php/bin:/usr/local/bin
+
+# Daily job to fetch fresh article data from the NLM.
+0 5 * * * cd /local/drupal/ebms/scheduled && ./update-pubmed-data.py
+
+# Weekly report on articles which NLM say they can no longer find.
+0 6 * * 1 cd /local/drupal/ebms && ./vendor/bin/drush scr --script-path=/local/drupal/ebms/scheduled find-pubmed-drops
+
+# Weekly job to fetch fresh journal data from the NLM.
+0 7 * * 1 cd /local/drupal/ebms && ./vendor/bin/drush scr --script-path=/local/drupal/ebms/scheduled refresh-journal-list
+
+# Monthly job to mark articles unreviewed for more than two years.
+0 8 1 * * cd /local/drupal/ebms && ./vendor/bin/drush scr --script-path=/local/drupal/ebms/scheduled mark-unreviewed-articles

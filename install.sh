@@ -45,7 +45,6 @@ $DRUSH then uswds_base
 $DRUSH then ebms
 $DRUSH en datetime_range
 $DRUSH en devel
-$DRUSH en ckeditor
 $DRUSH en linkit
 $DRUSH en role_delegation
 $DRUSH en editor_advanced_link
@@ -55,11 +54,11 @@ $DRUSH en ebms_journal
 $DRUSH en ebms_group
 $DRUSH en ebms_message
 $DRUSH en ebms_topic
+$DRUSH en ebms_user
 $DRUSH en ebms_meeting
 $DRUSH en ebms_state
 $DRUSH en ebms_article
 $DRUSH en ebms_import
-$DRUSH en ebms_user
 $DRUSH en ebms_doc
 $DRUSH en ebms_review
 $DRUSH en ebms_summary

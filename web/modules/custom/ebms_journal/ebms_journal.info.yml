@@ -2,7 +2,7 @@ name: EBMS Journal Information
 description: Captures information retrieved from NLM for journals in which our articles are published.
 type: module
 package: EBMS
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 dependencies:
-  - ebms_board
-  - user
+  - drupal:user
+  - ebms_board:ebms_board

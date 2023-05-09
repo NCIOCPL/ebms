@@ -2,13 +2,13 @@
 
 namespace Drupal\ebms_article\Controller;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_core\TermLookup;
 use Drupal\ebms_review\Entity\Review;
+use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -366,7 +366,7 @@ class ArticleController extends ControllerBase {
       }
       // PHPStorm doesn't like $state->board but $state->topic is fine.
       // Go figure.
-      $board = $state->get('board')->entity->getName();
+      $board = $state->board->entity->name->value;
       $topic = $state->topic->entity->getName();
       $this->topicBoards[$topic] = $board;
       $route = 'ebms_article.add_state_comment';
@@ -402,7 +402,7 @@ class ArticleController extends ControllerBase {
       foreach ($state->comments as $comment) {
         $user = $this->userStorage->load($comment->user);
         if (!empty($user)) {
-          $user = $user->getDisplayName();
+          $user = $user->name->value;
         }
         else {
           $user = 'Unknown User';
@@ -432,7 +432,7 @@ class ArticleController extends ControllerBase {
   private function getStateNotes(object $state) {
     $notes = [];
     foreach ($state->decisions as $decision) {
-      $name = $this->termStorage->load($decision->decision)->getName();
+      $name = $this->termStorage->load($decision->decision)->name->value;
       if (!empty($decision->discussed->value)) {
         $name .= ' (article discussed)';
       }
@@ -480,7 +480,7 @@ class ArticleController extends ControllerBase {
       $legend = 'info';
     }
     foreach ($state->decisions as $decision) {
-      $name = $this->termStorage->load($decision->decision)->getName();
+      $name = $this->termStorage->load($decision->decision)->name->value;
       if ($name === 'Not cited') {
         $legend = 'no';
       }
@@ -651,12 +651,12 @@ class ArticleController extends ControllerBase {
           '#theme' => 'article_state',
           '#state' => 'Topic-level comment added by board manager',
           '#date' => $comment->entered,
-          '#user' => $this->userStorage->load($comment->user)->getDisplayName(),
+          '#user' => $this->userStorage->load($comment->user)->name->value,
           '#active' => TRUE,
           '#notes' => [$comment->comment],
         ];
         if (!empty($comment->modified)) {
-          $user = $this->userStorage->load($comment->modified_by)->getDisplayName();
+          $user = $this->userStorage->load($comment->modified_by)->name->value;
           $when = substr($comment->modified, 0, 10);
           $state['#notes'][] ="(Comment modified $when by $user.)";
         }
@@ -753,10 +753,9 @@ class ArticleController extends ControllerBase {
    *   (if appropriate), information about unavailability of the file.
    */
   private function getArticleFullTextInformation(Article $article): array {
-    $storage = $this->entityTypeManager()->getStorage('file');
     $ft_filename = $ft_url = $ft_user = $ft_date = $ft_note = NULL;
     if (!empty($article->full_text->file)) {
-      $file = $storage->load($article->full_text->file);
+      $file = File::load($article->full_text->file);
       $ft_url = $file->createFileUrl();
       $ft_filename = $file->getFilename();
       $ft_user = $file->uid->entity->getDisplayName();
@@ -765,7 +764,7 @@ class ArticleController extends ControllerBase {
     elseif ($article->full_text->unavailable) {
       $ft_date = $article->full_text->flagged_as_unavailable;
       $user = $this->userStorage->load($article->full_text->flagged_by);
-      $ft_user = $user->getDisplayName();
+      $ft_user = $user->name->value;
       $ft_note = $article->full_text->notes;
     }
     ebms_debug_log('returning article full text information', 3);
@@ -829,7 +828,7 @@ class ArticleController extends ControllerBase {
           // Don't know why 'user' => $comment->user->entity->getDisplayName(),
           // does not work, when the similar construction immediately below for
           // the tag user (in fact, the same user) works perfectly.
-          'user' => $user->getDisplayName(),
+          'user' => $user->name->value,
           'entered' => $comment->entered, //->value,
           'body' => $comment->body,
         ];
@@ -872,8 +871,8 @@ class ArticleController extends ControllerBase {
     foreach ($article->get('internal_tags') as $tag) {
       $term = $this->termStorage->load($tag->tag);
       $internal_tags[] = [
-        'name' => $term->getName(),
-        'assigned' => $tag->added->value,
+        'name' => $term->name->value,
+        'assigned' => $tag->added,
       ];
     }
     ebms_debug_log('returning ' . count($internal_tags) . ' internal tags', 3);
@@ -902,8 +901,8 @@ class ArticleController extends ControllerBase {
         // because of PHP's very odd behavior with `empty("0")`.
         $opts['query']['delta'] = $delta + 1;
         $values[] = [
-          'user' => $this->userStorage->load($comment->user)->getDisplayName(),
-          'entered' => $comment->entered->value,
+          'user' => $this->userStorage->load($comment->user)->name->value,
+          'entered' => $comment->entered,
           'body' => $comment->body,
           'edit' => Url::fromRoute('ebms_article.edit_internal_comment', $parms, $opts),
           'delete' => Url::fromRoute('ebms_article.delete_internal_comment', $parms, $opts),

@@ -192,7 +192,9 @@ class UnreviewedPackets extends FormBase {
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->sort('title');
     $query->condition('active', 1);
-    $query->condition('id', $with_reviews, 'NOT IN');
+    if (!empty($with_reviews)) {
+      $query->condition('id', $with_reviews, 'NOT IN');
+    }
     if (!empty($selected_topics)) {
       $query->condition('topic', $selected_topics, 'IN');
     }

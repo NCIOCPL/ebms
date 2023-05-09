@@ -655,7 +655,7 @@ class ReimbursementRequestForm extends FormBase {
     // See if we have managers to whom we can send the notification.
     $host = $this->getRequest()->getHost();
     if ($host === 'ebms.nci.nih.gov') {
-      $to = $this->config('ebms_travel.email')->get('manager');
+      $to = $this->config('ebms_travel.email')->get('travel_manager');
     }
     else {
       $to = $this->config('ebms_travel.email')->get('developers');

@@ -7,7 +7,6 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the PDQ Board entity.
@@ -218,7 +217,7 @@ class Board extends ContentEntityBase implements ContentEntityInterface {
     $op = is_array($boards) ? 'IN' : '=';
     $storage = \Drupal::entityTypeManager()->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
-    $query->condition('status.value', 1);
+    $query->condition('status', 1);
     $query->condition('boards', $boards, $op);
     $query->condition('roles', 'board_member');
     $query->sort('name');

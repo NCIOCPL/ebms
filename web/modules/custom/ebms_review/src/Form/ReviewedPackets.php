@@ -355,7 +355,7 @@ class ReviewedPackets extends FormBase {
    * Redirect to the report form.
    */
   public function reportSubmit(array &$form, FormStateInterface $form_state) {
-    $form_state->setRedirect('ebms_review.literature_reviews');
+    $form_state->setRedirect('ebms_report.literature_reviews');
   }
 
   /**

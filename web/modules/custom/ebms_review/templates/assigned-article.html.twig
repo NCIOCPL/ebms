@@ -3,6 +3,11 @@
   <div class="title">{{ article.title|raw }}</div>
   <div class="publication">{{ article.publication }}</div>
   <div class="pmid">PMID: {{ article.pmid }}</div>
+  {% for related in article.related %}
+  <div class="related">Related article: {{ related.citation }}
+    PMID <a href="https://pubmed.ncbi.nlm.nih.gov/{{ related.pmid }}" target="_blank">{{ related.pmid }}</a>
+  </div>
+  {% endfor %}
   {% if article.agendas %}
   <div class="state">Article state: {{ article.agendas }}</div>
   {% endif %}

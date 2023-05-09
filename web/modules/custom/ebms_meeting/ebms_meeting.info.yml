@@ -2,12 +2,19 @@ name: EBMS Meeting Events
 description: Meetings of PDQ Boards and other groups
 type: module
 package: EBMS
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 dependencies:
-  - ebms_board
-  - ebms_core
-  - ebms_group
-  - ebms_topic
-  - file
-  - taxonomy
-  - user
+  - drupal:datetime
+  - drupal:datetime_range
+  - drupal:file
+  - drupal:node
+  - drupal:options
+  - drupal:system
+  - drupal:taxonomy
+  - drupal:user
+  - ebms_board:ebms_board
+  - ebms_core:ebms_core
+  - ebms_group:ebms_group
+  - ebms_message:ebms_message
+  - ebms_topic:ebms_topic
+  - ebms_user:ebms_user

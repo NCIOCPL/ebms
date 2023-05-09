@@ -2,11 +2,13 @@
 
 namespace Drupal\ebms_group\Entity;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the group entity.
@@ -134,4 +136,15 @@ class Group extends ContentEntityBase implements ContentEntityInterface {
     }
     return $groups;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    if ($operation === 'view label') {
+      return $return_as_object ? AccessResult::allowed() : TRUE;
+    }
+    return parent::access($operation, $account, $return_as_object);
+  }
+
 }

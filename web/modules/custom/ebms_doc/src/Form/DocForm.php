@@ -111,7 +111,7 @@ class DocForm extends FormBase {
         '#type' => 'file',
         '#attributes' => [
           'class' => ['usa-file-input', 'required'],
-          'accept' => ['.pdf,.rtf,.doc,.docx'],
+          'accept' => ['.pdf,.rtf,.doc,.docx,.xlsx,.pptx'],
         ],
         '#description' => 'Find the file for the document on your computer.',
         '#required' => TRUE,
@@ -246,7 +246,7 @@ class DocForm extends FormBase {
     }
     $doc_id = $form_state->getValue('doc-id');
     if (empty($doc_id)) {
-      $validators = ['file_validate_extensions' => ['pdf rtf doc docx']];
+      $validators = ['file_validate_extensions' => ['pdf rtf doc docx xlsx pptx']];
       $file = file_save_upload('file', $validators, 'public://', 0);
       $file->setPermanent();
       $file->save();

@@ -6,6 +6,14 @@
   {% endif %}
   <span><em>{{ article.title|raw }}</em></span><br>
   <span>{{ article.citation }}</span><br><br>
+  {% if article.related %}
+  {% for related in article.related %}
+  <div class="related">Related article: {{ related.citation }}
+    PMID <a href="https://pubmed.ncbi.nlm.nih.gov/{{ related.pmid }}" target="_blank">{{ related.pmid }}</a>
+  </div>
+  {% endfor %}
+  <br>
+  {% endif %}
   {% if article.meetings %}
   <span class="mrs">ARTICLE STATE<br>On Agenda: {{ article.meetings}}</span><br><br>
   {% endif %}

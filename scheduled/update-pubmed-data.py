@@ -27,7 +27,7 @@ from datetime import datetime
 from functools import cached_property
 from logging import basicConfig, getLogger
 from pathlib import Path
-from sys import stderr
+from sys import stdin, stderr
 from time import sleep
 from lxml import etree
 from requests import get, post
@@ -70,6 +70,8 @@ class Control:
     def base_url(self):
         """Find the address for talking to the EBMS."""
 
+        if self.opts.base_url:
+            return self.opts.base_url
         path = self.root / "unversioned/sitehost"
         if path.exists():
             host = path.read_text().strip()
@@ -81,10 +83,14 @@ class Control:
     def ebms_dates(self):
         """Dictionary of last-refresh dates indexed by Pubmed IDs."""
 
-        url = f"{self.base_url}/{self.IMPORT_DATES}"
-        response = get(url)
+        if self.opts.pipe_dates:
+            lines = stdin
+        else:
+            url = f"{self.base_url}/{self.IMPORT_DATES}"
+            response = get(url)
+            lines = response.text.splitlines()
         dates = {}
-        for line in response.text.splitlines():
+        for line in lines:
             id, pmid, refreshed = line.strip().split("\t")
             pmid = pmid.strip()
             dates[pmid] = refreshed
@@ -106,12 +112,17 @@ class Control:
 
       parser = ArgumentParser()
       parser.add_argument("--verbose", "-v", action="store_true")
+      parser.add_argument("--pipe-dates", "-p", action="store_true")
+      parser.add_argument("--root", "-r")
+      parser.add_argument("--base-url", "-b")
       return parser.parse_args()
 
     @cached_property
     def root(self):
         """Find the base directory for the site."""
 
+        if self.opts.root:
+            return self.opts.root
         for root in self.ROOTS:
             path = Path(root)
             if (path / self.EBMS_CORE).exists():

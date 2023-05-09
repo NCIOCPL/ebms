@@ -79,6 +79,9 @@ if (empty($db->query($sql)->fetchField())) {
   $db->query("CREATE UNIQUE INDEX $name ON ebms_article (source_id)");
 }
 
+// Speed up sorting by journal title.
+$db->query('CREATE INDEX article_journal_title_key ON ebms_article (journal_title)');
+
 // Load the articles.
 $json = file_get_contents("$repo_base/testdata/articles.json");
 $data = json_decode($json, true);

@@ -129,7 +129,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
           '#options' => [
             'high-priority' => 'High priority',
           ],
-          '#default_value' => $params['tags'],
+          '#default_value' => $params['tags'] ?? [],
           '#description' => 'Restrict the report to article-topic combinations which have been tagged <em>high priority</em>.',
         ],
       ],
@@ -266,6 +266,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
 
     // Add the fields we need in the results set.
     $query->addField('topic', 'name', 'topic_name');
+    $query->addField('topic', 'id', 'topic_id');
     $query->addField('author', 'authors_display_name');
     $query->addField('article', 'title');
     $query->addField('article', 'id', 'article_id');
@@ -279,7 +280,6 @@ class ArticlesWithoutResponsesReport extends FormBase {
       case 'topic':
         $query->orderBy('topic.name');
         $topic_primary_sort = TRUE;
-        $query->addField('topic', 'id', 'topic_id');
         $topic_ids = [];
         break;
       case 'journal':

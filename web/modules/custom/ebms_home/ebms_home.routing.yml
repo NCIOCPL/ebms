@@ -6,4 +6,4 @@ ebms_home.home:
     # Leave this as _access: 'TRUE' to avoid endless redirect loop.
     _access: 'TRUE'
   options:
-    no_cache: 'TRUE'
+    no_cache: TRUE
