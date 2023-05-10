@@ -335,9 +335,9 @@ class MeetingForm extends FormBase {
       $files = [];
       foreach ($form_state->getValue('files') ?: [] as $fid) {
         $file = File::load($fid);
-        if ($file->status->value != FILE_STATUS_PERMANENT) {
+        if ($file->isTemporary()) {
           ebms_debug_log("making file $fid permanent");
-          $file->status = FILE_STATUS_PERMANENT;
+          $file->setPermanent();
           $file->save();
         }
         $files[] = $fid;
