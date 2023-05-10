@@ -162,7 +162,7 @@ class TravelTest extends WebDriverTestBase {
     ]);
     $this->board_member = $this->createUser([
       'submit travel requests',
-       'view travel pages',
+      'view travel pages',
     ]);
     $this->site_manager = $this->createUser([
       'administer site configuration',

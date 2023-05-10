@@ -32,16 +32,8 @@ class FullTextTest extends WebDriverTestBase {
 
     // Create the taxonomy term needed by the tests.
     $state_values = [
-      //['ready_init_review', 'Ready for initial review', 10],
-      //['reject_init_review', 'Rejected in initial review', 30],
-      //['passed_init_review', 'Passed initial review', 30],
       ['published', 'Published', 40],
-      //['reject_bm_review', 'Rejected by Board Manager', 50],
       ['passed_bm_review', 'Passed Board Manager', 50],
-      //['reject_full_review', 'Rejected after full fext review', 60],
-      //['passed_full_review', 'Passed full text review', 60],
-      //['fyi', 'Flagged as FYI', 60],
-      //['on_hold', 'On Hold', 70]
     ];
     $states = [];
     foreach ($state_values as list($text_id, $name, $sequence)) {

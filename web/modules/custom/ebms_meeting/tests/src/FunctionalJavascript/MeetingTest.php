@@ -16,7 +16,6 @@ use Drupal\taxonomy\Entity\Term;
  */
 class MeetingTest extends WebDriverTestBase {
 
-
   protected static $modules = ['ebms_meeting'];
 
   protected $defaultTheme = 'stark';

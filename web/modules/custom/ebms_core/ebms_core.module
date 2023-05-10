@@ -27,7 +27,8 @@ function ebms_core_install($is_syncing) {
   $types = \Drupal::entityTypeManager()
     ->getStorage('node_type')
     ->loadMultiple();
-  if (!array_key_exists('page', $types)) {
+  $testing = !array_key_exists('page', $types);
+  if ($testing) {
     $type = NodeType::create(['type' => 'page', 'name' => 'Basic page']);
     $type->save();
   }
@@ -42,7 +43,11 @@ function ebms_core_install($is_syncing) {
   $roles = $role_storage->loadMultiple(array_keys($role_permissions));
   foreach ($role_permissions as $role_id => $permissions) {
     foreach ($permissions as $permission) {
-      $roles[$role_id]->grantPermission($permission);
+      if (!$testing || $permission !== 'use text format full_html') {
+        /** @var $role Role */
+        $role = $roles[$role_id];
+        $role->grantPermission($permission);
+      }
     }
     $roles[$role_id]->save();
   }

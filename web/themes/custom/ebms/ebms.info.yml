@@ -3,7 +3,7 @@ description: 'Theme for the PDQ® Editorial Board Management System'
 type: theme
 base theme: uswds_base
 version: 1.0.0
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 screenshot: 'screenshot.png'
 libraries:
   - 'ebms/assets'

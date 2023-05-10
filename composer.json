@@ -20,8 +20,9 @@
         "composer/installers": "^1.9",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
         "drupal/coder": "^8.3",
-        "drupal/core-composer-scaffold": "^9.1",
-        "drupal/core-recommended": "^9.1",
+        "drupal/core-composer-scaffold": "^10",
+        "drupal/core-project-message": "^10",
+        "drupal/core-recommended": "^10",
         "drupal/editor_advanced_link": "^2.1",
         "drupal/entity_browser": "^2.6",
         "drupal/externalauth": "^2.0",
@@ -45,7 +46,9 @@
         "allow-plugins": {
             "composer/installers": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "drupal/core-composer-scaffold": true
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true,
+            "phpstan/extension-installer": true
         }
     },
     "extra": {
@@ -109,10 +112,11 @@
         "behat/mink": "^1.10",
         "behat/mink-goutte-driver": "^2.0",
         "behat/mink-selenium2-driver": "^1.6",
+        "drupal/core-dev": "^10",
         "drupal/devel": "^5.1",
         "kint-php/kint": "^3.3",
         "mikey179/vfsstream": "^1.6",
         "phpunit/phpunit": "*",
-        "symfony/phpunit-bridge": "^5.2"
+        "symfony/phpunit-bridge": "*"
     }
 }
