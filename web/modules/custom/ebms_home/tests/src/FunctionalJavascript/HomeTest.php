@@ -114,7 +114,14 @@ class HomeTest extends WebDriverTestBase {
     ])->save();
     Topic::create(['id' => 1, 'name' => 'Test Topic', 'board' => 1])->save();
     for ($i = 1; $i <= 2; ++$i) {
-      $article = Article::create(['id' => $i, 'title' => "Test Article $i"]);
+      $article = Article::create([
+        'id' => $i,
+        'title' => "Test Article $i",
+        'source' => 'Pubmed',
+        'source_id' => 10000000 + $i,
+        'imported_by' => $this->test_users['medical_librarian']->id(),
+        'import_date' => date('Y-m-d H:i:s')
+      ]);
       $article->save();
       $article->addState('passed_full_review', 1);
       $article->save();
@@ -125,6 +132,7 @@ class HomeTest extends WebDriverTestBase {
       'id' => 1,
       'title' => 'Test Packet',
       'topic' => 1,
+      'created_by' => $this->test_users['board_manager']->id(),
       'reviewers' => [$this->test_users['board_member']->id()],
       'active' => TRUE,
       'articles' => [1, 2],
@@ -290,10 +298,20 @@ class HomeTest extends WebDriverTestBase {
     $assert_session->pageTextContains('New Test Board articles posted');
     $assert_session->pageTextContains('Document Activity');
     $assert_session->pageTextContains('Meeting Activity');
-    $this->drupalGet(Url::fromRoute('user.logout')->toString());
-    $assert_session->linkExists('Go To Login Page');
+
+    // Test the quick PubMed ID search.
+    $form = $this->getSession()->getPage();
+    $form->fillField('pmid', '10000002');
+    $form->find('css', '#pmid-search-and-links form button')->click();
+    $this->createScreenshot('../testdata/screenshots/quick-pmid-search.png');
+    $assert_session->pageTextContains('Full Article History');
+    $assert_session->pageTextContains('PubMed ID: 10000002');
+    $assert_session->pageTextContains('Test Article 2');
+    $assert_session->pageTextContains('EBMS ID: 2');
 
     // Log in as a librarian.
+    $this->drupalGet(Url::fromRoute('user.logout')->toString());
+    $assert_session->linkExists('Go To Login Page');
     $this->login('medical_librarian');
     $this->createScreenshot('../testdata/screenshots/librarian-home-page.png');
     $assert_session->pageTextNotContains('Alerts');
