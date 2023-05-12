@@ -664,19 +664,19 @@ class SearchQuery {
       if (!empty($year)) {
         $this->query->condition('year', $year);
       }
-      if (!empty($this->parms['publication-month'])) {
-        $month = $this->parms['publication-month'];
-        if ($month >= 1 && $month <= 12) {
-          $date = new \DateTime(sprintf("2000-%02d-01", $month));
-          $values = [$date->format('m'), $date->format('M')];
-          // Not $this->query->condition('pub_date.month', $values, 'IN');
-          // until Drupal core bug #1518506 is fixed, because that bug breaks
-          // the tests.
-          $group = $this->query->orConditionGroup()
-                        ->condition('pub_date.month', $values[0], 'LIKE')
-                        ->condition('pub_date.month', $values[1], 'LIKE');
-          $this->query->condition($group);
-        }
+    }
+    if (!empty($this->parms['publication-month'])) {
+      $month = $this->parms['publication-month'];
+      if ($month >= 1 && $month <= 12) {
+        $date = new \DateTime(sprintf("2000-%02d-01", $month));
+        $values = [$date->format('m'), $date->format('M')];
+        // Not $this->query->condition('pub_date.month', $values, 'IN');
+        // until Drupal core bug #1518506 is fixed, because that bug breaks
+        // the tests.
+        $group = $this->query->orConditionGroup()
+                      ->condition('pub_date.month', $values[0], 'LIKE')
+                      ->condition('pub_date.month', $values[1], 'LIKE');
+        $this->query->condition($group);
       }
     }
   }
