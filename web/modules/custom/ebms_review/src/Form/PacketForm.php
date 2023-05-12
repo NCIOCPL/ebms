@@ -552,21 +552,6 @@ class PacketForm extends FormBase {
         if ($changed) {
           $packet_article->save();
         }
-
-        // If reviewers have been added, let them know on the home page.
-        $new_reviewer_ids = array_diff($reviewer_ids, $original_reviewer_ids);
-        if (!empty($new_reviewer_ids)) {
-          Message::create([
-            'message_type' => Message::PACKET_CREATED,
-            'user' => $uid,
-            'posted' => $now,
-            'individuals' => array_values($new_reviewer_ids),
-            'extra_values' => json_encode([
-              'packet_id' => $packet->id(),
-              'title' => $title,
-            ]),
-          ])->save();
-        }
       }
 
       // Add new `PacketArticle` entities for the ones we added.
@@ -577,6 +562,22 @@ class PacketForm extends FormBase {
         $packet->articles[] = $article->id();
       }
       $packet->save();
+
+      // If reviewers have been added, let them know on the home page.
+      $new_reviewer_ids = array_diff($reviewer_ids, $original_reviewer_ids);
+      if (!empty($new_reviewer_ids)) {
+        ebms_debug_log(['new_reviewer_ids' => $new_reviewer_ids]);
+        Message::create([
+          'message_type' => Message::PACKET_CREATED,
+          'user' => $uid,
+          'posted' => $now,
+          'individuals' => $new_reviewer_ids,
+          'extra_values' => json_encode([
+            'packet_id' => $packet->id(),
+            'title' => $title,
+          ]),
+        ])->save();
+      }
     }
 
     // Report success and return to the packets list.
