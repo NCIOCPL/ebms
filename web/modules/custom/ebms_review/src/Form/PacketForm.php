@@ -560,8 +560,8 @@ class PacketForm extends FormBase {
             'message_type' => Message::PACKET_CREATED,
             'user' => $uid,
             'posted' => $now,
-            'individuals' => $new_reviewer_ids,
-            'extra_value' => json_encode([
+            'individuals' => array_values($new_reviewer_ids),
+            'extra_values' => json_encode([
               'packet_id' => $packet->id(),
               'title' => $title,
             ]),
