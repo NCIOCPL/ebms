@@ -2,10 +2,12 @@
 
 namespace Drupal\ebms_topic\Entity;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Review topic which can be assigned to an article.
@@ -145,6 +147,21 @@ class Topic extends ContentEntityBase implements ContentEntityInterface {
       ]);
 
     return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+    if ($operation === 'view label') {
+      return $return_as_object ? AccessResult::allowed() : TRUE;
+    }
+    if ($operation === 'create' || $operation === 'edit') {
+      if ($account->hasPermission('manage topics')) {
+        return $return_as_object ? AccessResult::allowed() : TRUE;
+      }
+    }
+    return parent::access($operation, $account, $return_as_object);
   }
 
   /**

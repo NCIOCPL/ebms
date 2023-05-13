@@ -4,5 +4,6 @@ type: module
 package: EBMS
 core_version_requirement: ^9 || ^10
 dependencies:
+  - drupal:taxonomy
   - drupal:user
   - ebms_board:ebms_board
