@@ -44,7 +44,7 @@ h3 {
         {% if event.type == 'literature' %}
         <div><span class="prefix">Review posted {{ event.when }}</span> by {{ event.user }}</div>
         <div class="packet">[Packet: {{ event.packet_title }}]</div>
-        <div class="authors">{{ event.authors }}</div>
+        <div class="authors">{{ event.authors|join('; ') }}</div>
         <div class="title">
         {% if event.full_text_url %}
         <a href="{{ event.full_text_url }}" target="_blank">{{ event.article_title|raw }}</a>
