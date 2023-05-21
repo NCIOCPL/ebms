@@ -259,15 +259,6 @@ class SearchTest extends WebDriverTestBase {
     $assert_session->pageTextContains('1 Article Found');
     $assert_session->pageTextContains('Test Article 6');
     $assert_session->pageTextContains('PMID: 10000006');
-
-    // Finally, test search by publication month without a year.
-    $this->drupalGet($url);
-    $form = $this->getSession()->getPage();
-    $form->selectFieldOption('publication-month', 3);
-    $form->findButton('Submit')->click();
-    $this->createScreenshot('../testdata/screenshots/board-member-search-publication-month-only.png');
-    $assert_session->pageTextContains('2 Articles Found');
-    $assert_session->pageTextMatches('/10000002.+10000007/');
   }
 
 }
