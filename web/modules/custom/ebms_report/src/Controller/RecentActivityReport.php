@@ -120,6 +120,7 @@ class RecentActivityReport extends ControllerBase {
           $query->condition('boards', $board_ids, 'IN');
           $query->condition('message_type', Message::SUMMARY_POSTED);
           $query->condition('posted', [$start, $end], 'BETWEEN');
+          /** @var $message Message */
           foreach ($storage->loadMultiple($query->execute()) as $message) {
             $values = $message->getExtraValues();
             $event = [
@@ -149,6 +150,7 @@ class RecentActivityReport extends ControllerBase {
             ->condition('boards', $board_ids, 'IN')
             ->condition('groups.entity.boards', $board_ids, 'IN');
           $query->condition($or_group);
+          /** @var $message Message */
           foreach ($storage->loadMultiple($query->execute()) as $message) {
             $values = $message->getExtraValues();
             $meeting = Meeting::load($values->meeting_id);
@@ -198,7 +200,7 @@ class RecentActivityReport extends ControllerBase {
     // Sort the events with the most recent at the top in each group.
     foreach ($boards as &$board) {
       foreach ($board['groups'] as &$group) {
-        usort($group['events'], function(&$a, &$b) {
+        usort($group['events'], function($a, $b) {
           return $b['when'] <=> $a['when'];
         });
       }

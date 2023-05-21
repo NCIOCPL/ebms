@@ -626,7 +626,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
       $query->condition('vid', 'import_dispositions');
       $ids = $query->execute();
       foreach ($storage->loadMultiple($ids) as $term) {
-        $this->dispositions[$term->get('field_text_id')->value] = $term->id();
+        $this->dispositions[$term->field_text_id->value] = $term->id();
       }
     }
     $values = [

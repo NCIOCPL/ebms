@@ -1120,7 +1120,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     // Create the query.
     $query = \Drupal::database()->select('ebms_article', 'article');
     $query->addField('article', 'id');
-    $query->addExpression('CONVERT(article.source_id, UNSIGNED INTEGER)', 'pmid');
+    $query->addField('article', 'source_id', 'pmid');
     $query->join('ebms_state', 'state', 'state.article = article.id');
     $query->condition('state.current', 1);
     $query->condition('state.value', $rejection_state_ids, 'NOT IN');
@@ -1130,11 +1130,11 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       ->condition('state_decisions.decisions_decision', $unwanted_decision_ids, 'NOT IN')
       ->isNull('state_decisions.decisions_decision');
     $query->condition($group);
-    $query->orderBy('pmid');
     $active = [];
     foreach ($query->execute() as $row) {
       $active[$row->id] = $row->pmid;
     }
+    asort($active, SORT_NUMERIC);
     return $active;
   }
 }

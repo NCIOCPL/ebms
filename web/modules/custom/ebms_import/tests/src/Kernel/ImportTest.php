@@ -172,10 +172,6 @@ class ImportTest extends KernelTestBase {
       Topic::create($values)->save();
     }
     Meeting::create(['id' => 1]);
-
-    // No need to instatiate this for every batch.
-    $entity_type_manager = $this->container->get('entity_type.manager');
-    $this->storage = $entity_type_manager->getStorage('ebms_article');
   }
 
   /**

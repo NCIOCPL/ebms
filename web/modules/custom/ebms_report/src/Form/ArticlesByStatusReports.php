@@ -392,7 +392,7 @@ class ArticlesByStatusReports extends FormBase {
     $query->sort('weight');
     $terms = [];
     foreach ($storage->loadMultiple($query->execute()) as $term) {
-      $terms[$term->id()] = $term->getName();
+      $terms[$term->id()] = $term->name->value;
     }
     return $terms;
   }
