@@ -784,6 +784,9 @@ class SearchForm extends FormBase {
     else if ($trigger === 'Submit') {
       parent::validateForm($form, $form_state);
       $parameters = $form_state->getValues();
+      if (!empty($parameters['publication-month']) && empty($parameters['publication-year'])) {
+        $form_state->setErrorByName('publication-year', 'Publication year is required when a publication month is specified.');
+      }
       $boards = [];
       if (!empty($parameters['board'])) {
         foreach ($parameters['board'] as $key => $value) {
