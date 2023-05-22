@@ -136,7 +136,8 @@ class BoardMembersReport extends FormBase {
       foreach ($subgroups as $subgroup) {
         $query = $user_storage->getQuery()->accessCheck(FALSE)
           ->condition('groups', $subgroup->id())
-          ->condition('status', 1);
+          ->condition('status', 1)
+          ->sort('name');
         $group_members = $user_storage->loadMultiple($query->execute());
         $group_names = [];
         foreach ($group_members as $member) {
