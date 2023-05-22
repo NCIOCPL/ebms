@@ -47,11 +47,11 @@ class AbandonedArticlesReport extends FormBase {
         'batch' => [
           '#type' => 'number',
           '#title' => 'Batch Size',
-          '#description' => 'The number of articles to check in a single request sent to PubMed.',
+          '#description' => 'The number of articles to check in a single request sent to PubMed. Increasing this value beyond 9,000 will likely cause the report to include articles which are not actually missing from PubMed.',
           '#min' => 1000,
           '#max' => 100000,
           '#step' => 1000,
-          '#default_value' => 10000,
+          '#default_value' => 9000,
         ],
         'delay' => [
           '#type' => 'number',
