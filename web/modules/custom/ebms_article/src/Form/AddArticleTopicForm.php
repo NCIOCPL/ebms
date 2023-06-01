@@ -6,8 +6,10 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_import\Entity\Batch;
+use Drupal\ebms_topic\Entity\Topic;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -74,8 +76,7 @@ class AddArticleTopicForm extends FormBase {
 
     // dpm($article_id);
     $form_state->setValue('article', $article_id);
-    $storage = $this->entityTypeManager->getStorage('ebms_article');
-    $article = $storage->load($article_id);
+    $article = Article::load($article_id);
     $label = $article->getLabel();
     $cycles = Batch::cycles();
     $boards = Board::boards();
@@ -196,8 +197,7 @@ class AddArticleTopicForm extends FormBase {
   private function getTopics(int $board_id, int $article_id): array {
 
     // Load the article entity.
-    $storage = $this->entityTypeManager->getStorage('ebms_article');
-    $article = $storage->load($article_id);
+    $article = Article::load($article_id);
     $existing_topics = [];
     foreach ($article->topics as $article_topic) {
       $existing_topics[] = $article_topic->entity->topic->target_id;
@@ -215,7 +215,7 @@ class AddArticleTopicForm extends FormBase {
         $options = [0 => '- Select a topic -'];
       }
       if (!in_array($topic->id(), $existing_topics)) {
-        $options[$topic->id()] = $topic->getName();
+        $options[$topic->id()] = $topic->name->value;
       }
     }
     if (count($options) === 1) {
@@ -268,8 +268,7 @@ class AddArticleTopicForm extends FormBase {
     $article_id = $form_state->getValue('article');
 
     // Load the article entity.
-    $storage = $this->entityTypeManager->getStorage('ebms_article');
-    $article = $storage->load($article_id);
+    $article = Article::load($article_id);
     $article->addState($state_id, $topic_id, $uid, $entered, $cycle, $comment);
     $article->save();
 
@@ -286,8 +285,7 @@ class AddArticleTopicForm extends FormBase {
     }
 
     // Tell the user what we did.
-    $storage = $this->entityTypeManager->getStorage('ebms_topic');
-    $topic = $storage->load($topic_id);
+    $topic = Topic::load($topic_id);
     $name = $topic->getName();
     $message = "Topic '$name' has been assigned to the article.";
     $this->messenger()->addMessage($message);

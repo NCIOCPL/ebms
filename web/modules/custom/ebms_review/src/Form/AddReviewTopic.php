@@ -206,6 +206,7 @@ class AddReviewTopic extends FormBase {
     $storage = $this->entityTypeManager->getStorage('ebms_topic');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('board', $board_id);
+    $query->condition('active', TRUE);
     $query->sort('name');
     $ids = $query->execute();
     $topics = $storage->loadMultiple($ids);
