@@ -99,7 +99,7 @@ class NewStateForm extends FormBase {
       $states[$entity->field_text_id->value] = $entity->name->value;
     }
 
-    // Populate the decision picklist.
+    // Populate the decision picklists.
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'board_decisions');
     $query->sort('name');
@@ -110,6 +110,18 @@ class NewStateForm extends FormBase {
       $decisions[$entity->id()] = $entity->name->value;
       if (empty($decision)) {
         $decision = $entity->id();
+      }
+    }
+    $query = $storage->getQuery()->accessCheck(FALSE);
+    $query->condition('vid', 'working_group_decisions');
+    $query->sort('name');
+    $entities = $storage->loadMultiple($query->execute());
+    $wg_decisions = [];
+    $wg_decision = '';
+    foreach ($entities as $entity) {
+      $wg_decisions[$entity->id()] = $entity->name->value;
+      if (empty($wg_decision)) {
+        $wg_decision = $entity->id();
       }
     }
 
@@ -190,8 +202,20 @@ class NewStateForm extends FormBase {
           // This is broken, so we pick the first button as the default.
           // See https://www.drupal.org/project/drupal/issues/3267246.
           'required' => [':input[name="state"]' => ['value' => 'final_board_decision']],
-          'default_value' => $decision,
         ],
+        '#default_value' => $decision,
+      ],
+      'wg_decision' => [
+        '#type' => 'radios',
+        '#title' => 'Decision',
+        '#options' => $wg_decisions,
+        '#states' => [
+          'visible' => [':input[name="state"]' => ['value' => 'working_group_decision']],
+          // This is broken, so we pick the first button as the default.
+          // See https://www.drupal.org/project/drupal/issues/3267246.
+          'required' => [':input[name="state"]' => ['value' => 'working_group_decision']],
+        ],
+        '#default_value' => $wg_decision,
       ],
       'users' => [
         '#type' => 'select',
@@ -274,6 +298,10 @@ class NewStateForm extends FormBase {
         'discussed' => (bool) $form_state->getValue('discussed'),
       ];
       $state->deciders = $form_state->getValue('users');
+      $state->save();
+    }
+    elseif ($state_id === 'working_group_decision') {
+      $state->wg_decisions->appendItem($form_state->getValue('wg_decision'));
       $state->save();
     }
     elseif ($state_id === 'on_agenda') {

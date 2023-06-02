@@ -218,5 +218,16 @@
     "status": true,
     "field_sequence": 60,
     "weight": 60
+  },
+  {
+    "vid": "states",
+    "id": 22,
+    "field_text_id": "working_group_decision",
+    "name": "Working group decision",
+    "description": "Article was discussed by a working group and a provisional decision was reached.",
+    "field_terminal": false,
+    "status": true,
+    "field_sequence": 85,
+    "weight": 85
   }
 ]

@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ebms_core
+name: 'Working Group Decisions'
+vid: working_group_decisions
+description: 'Working group decisions made for article/topic combinations.'
+weight: 0

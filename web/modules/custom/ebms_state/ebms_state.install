@@ -1,0 +1,20 @@
+<?php
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+/**
+ * Implements hook_update_N().
+ *
+ * Add a state field for working group decisions (OCEEBMS-760).
+ */
+function ebms_state_update_9501() {
+  $definition = BaseFieldDefinition::create('entity_reference')
+    ->setLabel('Working Group Decision')
+    ->setDescription('Working group decisions made for this state.')
+    ->setDefaultValue('all')
+    ->setSetting('target_type', 'taxonomy_term')
+    ->setSetting('handler_settings', ['target_bundles' => ['working_group_decisions' => 'working_group_decisions']])
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('wg_decisions', 'ebms_state', 'ebms_state', $definition);
+}

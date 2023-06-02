@@ -438,6 +438,10 @@ class ArticleController extends ControllerBase {
       }
       $notes[] = "Decision: $name";
     }
+    foreach ($state->wg_decisions as $decision) {
+      $name = $decision->entity->name->value;
+      $notes[] = "Decision: $name";
+    }
     $deciders = [];
     foreach ($state->deciders as $decider) {
       $deciders[] = $decider->entity->getDisplayName();

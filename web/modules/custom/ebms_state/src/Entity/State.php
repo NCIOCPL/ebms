@@ -92,6 +92,12 @@ class State extends ContentEntityBase implements ContentEntityInterface {
       ->setLabel('Decisions')
       ->setDescription('Board decisions made for this state.')
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $fields['wg_decisions'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel('Working Group Decision')
+      ->setDescription('Working group decisions made for this state.')
+      ->setSetting('target_type', 'taxonomy_term')
+      ->setSetting('handler_settings', ['target_bundles' => ['working_group_decisions' => 'working_group_decisions']])
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     $fields['deciders'] = BaseFieldDefinition::create('entity_reference')
       ->setSetting('target_type', 'user')
       ->setLabel('Deciders')
