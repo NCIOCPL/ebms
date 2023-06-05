@@ -1150,13 +1150,24 @@ class SearchQuery {
   }
 
   /**
-   * Search by final board decision.
+   * Search by final board or working group decision.
    */
   private function searchDecision() {
-    if (!$this->restricted && !empty($this->parms['decision'])) {
+    if ($this->restricted) {
+      return;
+    }
+    if (!empty($this->parms['decision'])) {
       $decision = $this->parms['decision'];
       $group = $this->query->andConditionGroup()
                     ->condition('topics.entity.states.entity.decisions.decision', $decision)
+                    ->condition('topics.entity.states.entity.active', TRUE);
+      $this->addTopicOrBoardCondition($group);
+      $this->query->condition($group);
+    }
+    if (!empty($this->parms['wg-decision'])) {
+      $decision = $this->parms['wg-decision'];
+      $group = $this->query->andConditionGroup()
+                    ->condition('topics.entity.states.entity.wg_decisions', $decision)
                     ->condition('topics.entity.states.entity.active', TRUE);
       $this->addTopicOrBoardCondition($group);
       $this->query->condition($group);
@@ -1237,7 +1248,7 @@ class SearchQuery {
     if (!empty($this->parms['article-tag']) || !empty($this->parms['tag-start']) || !empty($this->parms['tag-end'])) {
       return FALSE;
     }
-    if (!empty($this->parms['decision'])) {
+    if (!empty($this->parms['decision']) || !empty($this->parms['wg-decision'])) {
       return FALSE;
     }
     return TRUE;

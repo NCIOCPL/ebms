@@ -12,6 +12,7 @@ use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_core\TermLookup;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_topic\Entity\Topic;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -115,6 +116,7 @@ class SearchForm extends FormBase {
       $meeting_start = $params['meeting-start'] ?? '';
       $meeting_end = $params['meeting-end'] ?? '';
       $decision = $params['decision'] ?? 0;
+      $wg_decision = $params['wg-decision'] ?? 0;
       $cycle = $params['cycle'] ?? '';
       $cycle_start = $params['cycle-start'] ?? '';
       $cycle_end = $params['cycle-end'] ?? '';
@@ -184,7 +186,7 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'dispositions');
       $query->sort('weight');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $dispositions[$entity->id()] = $entity->getName();
       }
@@ -194,7 +196,7 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'meeting_categories');
       $query->sort('name');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $meeting_categories[$entity->id()] = $entity->getName();
       }
@@ -204,9 +206,19 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'board_decisions');
       $query->sort('name');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $board_decisions[$entity->id()] = $entity->getName();
+      }
+
+      // Working group decisions which can be assigned for an article.
+      $wg_decisions = [];
+      $query = $storage->getQuery()->accessCheck(FALSE);
+      $query->condition('vid', 'working_group_decisions');
+      $query->sort('name');
+      $entities = Term::loadMultiple($query->execute());
+      foreach ($entities as $entity) {
+        $wg_decisions[$entity->id()] = $entity->getName();
       }
 
       // Tags which can be assigned to articles.
@@ -214,7 +226,7 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'article_tags');
       $query->sort('name');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $article_tags[$entity->id()] = $entity->getName();
       }
@@ -505,6 +517,13 @@ class SearchForm extends FormBase {
             ],
           ],
         ],
+        'wg-decision' => [
+          '#type' => 'select',
+          '#title' => 'Working Group Decision',
+          '#options' => $wg_decisions,
+          '#default_value' => $wg_decision,
+          '#empty_value' => '',
+        ],
         'decision' => [
           '#type' => 'select',
           '#title' => 'Board Decision',
@@ -759,7 +778,7 @@ class SearchForm extends FormBase {
     $parameters = $form_state->getValues();
     if (!empty($parameters['persist'])) {
       $storage = $this->entityTypeManager->getStorage('user');
-      $user = $storage->load($this->currentUser()->id());
+      $user = User::load($this->currentUser()->id());
       $user->set('search_per_page', $parameters['per-page'] ?? 10);
       $user->set('search_sort', $parameters['sort'] ?? 'ebms-id');
       $user->save();
