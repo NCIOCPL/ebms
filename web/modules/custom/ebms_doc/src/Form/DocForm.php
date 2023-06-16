@@ -227,21 +227,30 @@ class DocForm extends FormBase {
 
     // Collect the referenced entity IDs.
     $board_ids = [];
-    foreach ($form_state->getValue('boards') as $key => $value) {
-      if (!empty($value)) {
-        $board_ids[] = $key;
+    $boards = $form_state->getValue('boards');
+    if (is_array($boards)) {
+      foreach ($boards as $key => $value) {
+        if (!empty($value)) {
+          $board_ids[] = $key;
+        }
       }
     }
     $tag_ids = [];
-    foreach ($form_state->getValue('tags') as $key => $value) {
-      if (!empty($value)) {
-        $tag_ids[] = $key;
+    $tags = $form_state->getValue('tags');
+    if (is_array($tags)) {
+      foreach ($tags as $key => $value) {
+        if (!empty($value)) {
+          $tag_ids[] = $key;
+        }
       }
     }
     $topic_ids = [];
-    foreach ($form_state->getValue('topics') as $key => $value) {
-      if (!empty($value)) {
-        $topic_ids[] = $key;
+    $topics = $form_state->getValue('topics');
+    if (is_array($topics)) {
+      foreach ($topics as $key => $value) {
+        if (!empty($value)) {
+          $topic_ids[] = $key;
+        }
       }
     }
     $doc_id = $form_state->getValue('doc-id');
