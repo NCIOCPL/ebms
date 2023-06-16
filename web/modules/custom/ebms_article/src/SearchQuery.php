@@ -1100,7 +1100,7 @@ class SearchQuery {
    */
   private function addTopicOrBoardCondition(object $group) {
     if (!empty($this->topics)) {
-      $group->condition('topics', $this->topics, 'IN');
+      $group->condition('topics.entity.topic', $this->topics, 'IN');
     }
     elseif (!empty($this->boards)) {
       $group->condition('topics.entity.topic.entity.board', $this->boards, 'IN');
