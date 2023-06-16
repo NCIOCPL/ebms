@@ -50,7 +50,6 @@ class MeetingForm extends FormBase {
     // Set some defaults.
     $name = $category = $type = $status = $meeting_id = $agenda = $notes = '';
     $files = $selected_boards = $selected_groups = $selected_individuals = [];
-    $published = TRUE;
     $agenda_published = FALSE;
     $boards = Board::boards();
     $groups = Group::groups();
@@ -120,7 +119,6 @@ class MeetingForm extends FormBase {
       $category = $meeting->category->target_id;
       $type = $meeting->type->target_id;
       $status = $meeting->status->target_id;
-      $published = $meeting->published->value;
       $agenda_published = $meeting->agenda_published->value;
       $selected_boards = [];
       foreach ($meeting->boards as $board) {
@@ -261,12 +259,6 @@ class MeetingForm extends FormBase {
       'publication' => [
         '#type' => 'details',
         '#title' => 'Publication',
-        'published' => [
-          '#type' => 'checkbox',
-          '#title' => 'Published?',
-          '#description' => "Don't check this until you are ready for the meeting to appear on the calendar.",
-          '#default_value' => $published,
-        ],
         'agenda-published' => [
           '#type' => 'checkbox',
           '#title' => 'Agenda Published?',
@@ -352,7 +344,7 @@ class MeetingForm extends FormBase {
       $meeting->set('boards', $form_state->getValue('boards'));
       $meeting->set('groups', $form_state->getValue('groups'));
       $meeting->set('individuals', $form_state->getValue('individuals'));
-      $meeting->set('published', $form_state->getValue('published'));
+      $meeting->set('published', TRUE);
       $meeting->set('agenda_published', $form_state->getValue('agenda-published'));
       $meeting->set('documents', $files);
       if (!empty($meeting->agenda[0]->value)) {
@@ -410,22 +402,18 @@ class MeetingForm extends FormBase {
    */
   private function addMessages(Meeting $meeting, array $old_values, FormStateInterface $form_state) {
 
-    // Only record activity for published entities.
-    if (!empty($form_state->getValue('published'))) {
-
-      // Collect the values used for all of the activity messages we create.
-      $values = [
-        'user' => $this->currentUser()->id(),
-        'posted' => date('Y-m-d H:i:s'),
-        'boards' => $form_state->getValue('boards'),
-        'groups' => $form_state->getValue('groups'),
-        'individuals' => $form_state->getValue('individuals'),
-        'extra_values' => json_encode([
-          'meeting_id' => $meeting->id(),
-          'title' => $form_state->getValue('name'),
-        ]),
-      ];
-    }
+    // Collect the values used for all of the activity messages we create.
+    $values = [
+      'user' => $this->currentUser()->id(),
+      'posted' => date('Y-m-d H:i:s'),
+      'boards' => $form_state->getValue('boards'),
+      'groups' => $form_state->getValue('groups'),
+      'individuals' => $form_state->getValue('individuals'),
+      'extra_values' => json_encode([
+        'meeting_id' => $meeting->id(),
+        'title' => $form_state->getValue('name'),
+      ]),
+    ];
 
     // Treat a newly published entity as new.
     if (empty($old_values['published'])) {
