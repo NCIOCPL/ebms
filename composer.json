@@ -20,15 +20,15 @@
         "composer/installers": "^1.9",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
         "drupal/coder": "^8.3",
-        "drupal/core-composer-scaffold": "^9.1",
-        "drupal/core-recommended": "^9.1",
+        "drupal/core-composer-scaffold": "^10.0",
+        "drupal/core-project-message": "^10.0",
+        "drupal/core-recommended": "^10.0",
         "drupal/editor_advanced_link": "^2.1",
-        "drupal/entity_browser": "^2.6",
         "drupal/externalauth": "^2.0",
         "drupal/linkit": "^6.0@RC",
         "drupal/role_delegation": "^1.1",
         "drupal/uswds_base": "^3.3",
-        "drush/drush": "*",
+        "drush/drush": "^11.6",
         "league/container": "*",
         "phpoffice/phpspreadsheet": "^1.23",
         "phpspec/prophecy-phpunit": "^2",
@@ -113,6 +113,6 @@
         "kint-php/kint": "^3.3",
         "mikey179/vfsstream": "^1.6",
         "phpunit/phpunit": "*",
-        "symfony/phpunit-bridge": "^5.2"
+        "symfony/phpunit-bridge": "*"
     }
 }

@@ -87,7 +87,7 @@ log_success('Successfully loaded: 3 static travel pages');
 
 // Install the travel requests.
 $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'hotels');
 $ids = $query->execute();
 $terms = $storage->loadMultiple($ids);
@@ -104,31 +104,31 @@ foreach ($data as $values) {
 $n = count($data);
 log_success("Successfully loaded: $n hotel requests");
 
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'reimbursement_to');
 $terms = $storage->loadMultiple($query->execute());
 $reimburse_to = [];
 foreach ($terms as $term)
   $reimburse_to[$term->field_text_id->value] = $term->id();
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'transportation_expense_types');
 $terms = $storage->loadMultiple($query->execute());
 $transportation_expense_types = [];
 foreach ($terms as $term)
   $transportation_expense_types[$term->field_text_id->value] = $term->id();
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'parking_or_toll_expense_types');
 $terms = $storage->loadMultiple($query->execute());
 $parking_or_toll_expense_types = [];
 foreach ($terms as $term)
   $parking_or_toll_expense_types[$term->field_text_id->value] = $term->id();
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'hotel_payment_methods');
 $terms = $storage->loadMultiple($query->execute());
 $hotel_payment_methods = [];
 foreach ($terms as $term)
   $hotel_payment_methods[$term->field_text_id->value] = $term->id();
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meals_and_incidentals');
 $terms = $storage->loadMultiple($query->execute());
 $meals_and_incidentals = [];
