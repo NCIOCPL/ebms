@@ -83,6 +83,7 @@ cp scheduled/* $BASEDIR/scheduled/ || { echo cp scheduled failed; exit; }
 cp README.md $BASEDIR/ || { echo cp README.md failed; exit; }
 
 echo Applying PHP upgrades
+composer config --no-plugins allow-plugins.drupal/core-project-message true
 echo Ignore warnings about abandoned packages
 cd $BASEDIR
 chmod +w web/sites/default || { chmod sites-default failed; exit; }
