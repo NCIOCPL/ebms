@@ -87,8 +87,17 @@ composer config --no-plugins allow-plugins.drupal/core-project-message true
 echo Ignore warnings about abandoned packages
 cd $BASEDIR
 chmod +w web/sites/default || { chmod sites-default failed; exit; }
+chmod +w web/sites/default/*.yml || { chmod sites-default-yml failed; exit; }
+chmod +w web/sites/default/*.php || { chmod sites-default-php failed; exit; }
 composer install || { echo composer install failed; exit; }
+cat <<EOF > web/sites/default/services.yml
+parameters:
+  session.storage.options:
+    cookie_samesite: Lax
+EOF
 chmod -w web/sites/default || { chmod sites-default failed; exit; }
+chmod -w web/sites/default/*.yml || { chmod sites-default-yml failed; exit; }
+chmod -w web/sites/default/*.php || { chmod sites-default-php failed; exit; }
 
 echo Running the database update script
 drush updatedb -y
