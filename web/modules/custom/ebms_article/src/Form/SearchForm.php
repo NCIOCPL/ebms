@@ -6,6 +6,7 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_article\Search;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
@@ -133,6 +134,7 @@ class SearchForm extends FormBase {
       $import_end = $params['import-end'] ?? '';
       $modified_start = $params['modified-start'] ?? '';
       $modified_end = $params['modified-end'] ?? '';
+      $article_type = $params['article-type'] ?? '';
       if (!empty($params['filters'])) {
         $filters = [];
         foreach ($params['filters'] as $key => $value) {
@@ -266,6 +268,9 @@ class SearchForm extends FormBase {
         'journal' => 'Journal',
         'core' => 'Core Journals',
       ];
+
+      // Create a picklist for searchable article types.
+      $article_types = array_combine(Article::SEARCHABLE_TYPES, Article::SEARCHABLE_TYPES);
     }
 
     $form = [
@@ -637,6 +642,13 @@ class SearchForm extends FormBase {
           '#title' => 'Board Manager Comment',
           '#description' => 'Find articles matching this comment in a topic assignment (wildcards supported).',
           '#default_value' => $board_manager_comment,
+        ],
+        'article-type' => [
+          '#type' => 'select',
+          '#title' => 'Type',
+          '#options' => $article_types,
+          '#default_value' => $article_type,
+          '#empty_value' => '',
         ],
       ];
       $form['admin'] = [

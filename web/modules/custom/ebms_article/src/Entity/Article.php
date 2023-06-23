@@ -58,6 +58,37 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
   const CONVERSION_DATE = '2013-03-18';
 
   /**
+   * The article types the users want to be able to use for filtering.
+   */
+  const SEARCHABLE_TYPES = [
+    'Case Reports',
+    'Clinical Trial',
+    'Clinical Trial, Phase I',
+    'Clinical Trial, Phase II',
+    'Clinical Trial, Phase III',
+    'Clinical Trial, Phase IV',
+    'Clinical Trial Protocol',
+    'Comment',
+    'Controlled Clinical Trial',
+    'Editorial',
+    'Equivalence Trial',
+    'Evaluation Study',
+    'Guideline',
+    'Letter',
+    'Meta-Analysis',
+    'Multicenter Study',
+    'Observational Study',
+    'Practice Guideline',
+    'Preprint',
+    'Pragmatic Clinical Trial',
+    'Published Erratum',
+    'Randomized Controlled Trial',
+    'Review',
+    'Systematic Review',
+    'Validation Study',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {

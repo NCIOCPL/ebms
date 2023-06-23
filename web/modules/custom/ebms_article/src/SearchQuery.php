@@ -168,6 +168,7 @@ class SearchQuery {
     $this->searchModifiedDate();
     $this->searchOnAgenda();
     $this->searchDecision();
+    $this->searchTypes();
     $this->excludeInternalArticles();
 
     // Add sorting and return the query.
@@ -1171,6 +1172,20 @@ class SearchQuery {
                     ->condition('topics.entity.states.entity.active', TRUE);
       $this->addTopicOrBoardCondition($group);
       $this->query->condition($group);
+    }
+  }
+
+  /**
+   * Search by specified article type (e.g., Validation Study).
+   *
+   * See OCEEBMS-616.
+   */
+  private function searchTypes() {
+    if ($this->restricted) {
+      return;
+    }
+    if (!empty($this->parms['article-type'])) {
+      $this->query->condition('types', $this->parms['article-type']);
     }
   }
 
