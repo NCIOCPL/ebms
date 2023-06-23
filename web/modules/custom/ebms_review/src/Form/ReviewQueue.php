@@ -197,8 +197,10 @@ class ReviewQueue extends FormBase {
     $per_page = $params['per-page'];
     $title = $params['title'];
     $journal = $params['journal'];
+    $article_type = $params['article-type'];
 
     // Create options for the form.
+    $article_types = array_combine(Article::SEARCHABLE_TYPES, Article::SEARCHABLE_TYPES);
     $boards = Board::boards();
     $cycles = Batch::cycles();
     $queue_types = $this->getQueueTypes();
@@ -349,6 +351,10 @@ class ReviewQueue extends FormBase {
           $query->condition($group);
         }
       }
+      if (!empty($article_type)) {
+        $query->join('ebms_article__types', 'types', 'types.entity_id = state.article');
+        $query->condition('types.types_value', $article_type);
+      }
       $count_query = $query->countQuery();
       $count = $count_query->execute()->fetchField();
       if ($sort === 'author') {
@@ -486,6 +492,13 @@ class ReviewQueue extends FormBase {
               ],
             ],
           ],
+        ],
+        'article-type' => [
+          '#type' => 'select',
+          '#title' => 'Type',
+          '#options' => $article_types,
+          '#default_value' => $article_type,
+          '#empty_value' => '',
         ],
         'title' => [
           '#type' => 'textfield',
@@ -768,6 +781,7 @@ class ReviewQueue extends FormBase {
       'form_id' => 'ebms_review_queue',
       'filtered' => $filtered,
       'journal-filters' => $parameters['journal-filters'] ?? [],
+      'article-type' => $parameters['article-type'] ?? '',
     ];
     return SavedRequest::saveParameters('review queue', $spec);
   }
