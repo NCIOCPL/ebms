@@ -46,6 +46,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
     $board = $form_state->getValue('board', $params['board'] ?? Board::defaultBoard($user));
     $topics = empty($board) ? [] : Topic::topics($board);
     $selected_topics = $params['topics'] ?? [];
+    $packet_statuses = $params['packet-statuses'] ?? ['active'];
     if (!empty($selected_topics)) {
       foreach ($selected_topics as $topic) {
         if (!array_key_exists($topic, $topics)) {
@@ -122,6 +123,16 @@ class ArticlesWithoutResponsesReport extends FormBase {
             '#type' => 'date',
             '#default_value' => $params['assigned-end'] ?? '',
           ],
+        ],
+        'packet-statuses' => [
+          '#type' => 'checkboxes',
+          '#title' => 'Packet Statuses To Include',
+          '#description' => 'Filter the report based on whether the packets are active or archived.',
+          '#options' => [
+            'active' => 'Active',
+            'archived' => 'Archived',
+          ],
+          '#default_value' => $packet_statuses,
         ],
         'tags' => [
           '#type' => 'checkboxes',
@@ -232,7 +243,10 @@ class ArticlesWithoutResponsesReport extends FormBase {
     $query->leftJoin('ebms_article__authors', 'author', 'author.entity_id = article.id AND author.delta = 0');
 
     // Apply the filtering.
-    $query->condition('packet.active', 1);
+    $packet_statuses = array_diff($params['packet-statuses'], [0]);
+    if (count($packet_statuses) === 1) {
+      $query->condition('packet.active', reset($packet_statuses) === 'active' ? 1 : 0);
+    }
     if (!empty($params['tags']['high-priority'])) {
       $query->join('ebms_article_topic__tags', 'tags' ,'tags.entity_id = article_topic.id');
       $query->join('ebms_article_tag', 'article_tag', 'article_tag.id = tags.tags_target_id');
