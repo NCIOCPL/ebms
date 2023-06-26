@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b5019f8ad954b4add4f5fa509256a978",
+    "content-hash": "18164562d5fe0a68ad7dad683bd765f6",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1651,20 +1651,20 @@
         },
         {
             "name": "drupal/editor_advanced_link",
-            "version": "2.1.1",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/editor_advanced_link.git",
-                "reference": "2.1.1"
+                "reference": "2.2.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/editor_advanced_link-2.1.1.zip",
-                "reference": "2.1.1",
-                "shasum": "ba8f12aee9ac6c4d7b60ee916e7bd69e98c99d4a"
+                "url": "https://ftp.drupal.org/files/projects/editor_advanced_link-2.2.0.zip",
+                "reference": "2.2.0",
+                "shasum": "29fbf46e7aecd91f9a8fdf6f47b1ed53b58ca503"
             },
             "require": {
-                "drupal/core": "^9.2 || ^10"
+                "drupal/core": "^9.2 || ^10.1"
             },
             "require-dev": {
                 "drupal/ckeditor": "*"
@@ -1672,8 +1672,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.1.1",
-                    "datestamp": "1667462197",
+                    "version": "2.2.0",
+                    "datestamp": "1687781052",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
