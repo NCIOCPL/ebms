@@ -1185,7 +1185,7 @@ class SearchQuery {
       return;
     }
     if (!empty($this->parms['article-type'])) {
-      $this->query->condition('types', $this->parms['article-type']);
+      $this->query->condition('types', $this->parms['article-type'], 'IN');
     }
   }
 

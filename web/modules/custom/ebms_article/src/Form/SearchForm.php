@@ -134,7 +134,7 @@ class SearchForm extends FormBase {
       $import_end = $params['import-end'] ?? '';
       $modified_start = $params['modified-start'] ?? '';
       $modified_end = $params['modified-end'] ?? '';
-      $article_type = $params['article-type'] ?? '';
+      $article_type = $params['article-type'] ?? [];
       if (!empty($params['filters'])) {
         $filters = [];
         foreach ($params['filters'] as $key => $value) {
@@ -428,6 +428,13 @@ class SearchForm extends FormBase {
 
     // Advanced and administrator search are only for full searches.
     if (!$restricted) {
+      $form['basic']['article-type'] = [
+        '#type' => 'select',
+        '#title' => 'Publication Type',
+        '#options' => $article_types,
+        '#default_value' => $article_type,
+        '#multiple' => TRUE,
+      ];
       $form['advanced'] = [
         '#type' => 'details',
         '#open' => TRUE,
@@ -642,13 +649,6 @@ class SearchForm extends FormBase {
           '#title' => 'Board Manager Comment',
           '#description' => 'Find articles matching this comment in a topic assignment (wildcards supported).',
           '#default_value' => $board_manager_comment,
-        ],
-        'article-type' => [
-          '#type' => 'select',
-          '#title' => 'Type',
-          '#options' => $article_types,
-          '#default_value' => $article_type,
-          '#empty_value' => '',
         ],
       ];
       $form['admin'] = [
