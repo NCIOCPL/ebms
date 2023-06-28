@@ -353,7 +353,7 @@ class ReviewQueue extends FormBase {
       }
       if (!empty($article_type)) {
         $query->join('ebms_article__types', 'types', 'types.entity_id = state.article');
-        $query->condition('types.types_value', $article_type);
+        $query->condition('types.types_value', $article_type, 'IN');
       }
       $count_query = $query->countQuery();
       $count = $count_query->execute()->fetchField();
@@ -495,10 +495,10 @@ class ReviewQueue extends FormBase {
         ],
         'article-type' => [
           '#type' => 'select',
-          '#title' => 'Type',
+          '#title' => 'Publication Type',
           '#options' => $article_types,
           '#default_value' => $article_type,
-          '#empty_value' => '',
+          '#multiple' => TRUE,
         ],
         'title' => [
           '#type' => 'textfield',
@@ -781,7 +781,7 @@ class ReviewQueue extends FormBase {
       'form_id' => 'ebms_review_queue',
       'filtered' => $filtered,
       'journal-filters' => $parameters['journal-filters'] ?? [],
-      'article-type' => $parameters['article-type'] ?? '',
+      'article-type' => $parameters['article-type'] ?? [],
     ];
     return SavedRequest::saveParameters('review queue', $spec);
   }
