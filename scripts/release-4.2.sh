@@ -102,9 +102,11 @@ chmod -w web/sites/default/*.php || { chmod sites-default-php failed; exit; }
 echo Running the database update script
 drush updatedb -y
 
-echo Installing working group decisions
+echo Installing working group decisions and editor linking changes
+drush cr
 mkdir $CONFIG || { echo mkdir config failed; exit; }
 cp $WORKDIR/ebms/web/modules/custom/ebms_core/config/install/*work*.yml \
+   $WORKDIR/ebms/web/modules/custom/ebms_core/config/install/ed*fi*.yml \
    $CONFIG/ || {
   echo configuration copy failed; exit;
 }

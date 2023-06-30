@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -51,6 +52,23 @@ function ebms_core_install($is_syncing) {
     }
     $roles[$role_id]->save();
   }
+}
+
+/**
+ * Implements hook_ckeditor5_plugin_info_alter().
+ */
+function ebms_core_ckeditor5_plugin_info_alter(array &$plugin_definitions): void {
+  assert($plugin_definitions['ckeditor5_link'] instanceof CKEditor5PluginDefinition);
+  $definition = $plugin_definitions['ckeditor5_link']->toArray();
+  $definition['ckeditor5']['config']['link']['decorators'][] = [
+    'mode' => 'manual',
+    'label' => 'Open in a new tab',
+    'defaultValue' => TRUE,
+    'attributes' => [
+      'target' => '_blank',
+    ],
+  ];
+  $plugin_definitions['ckeditor5_link'] = new CKEditor5PluginDefinition($definition);
 }
 
 /**
