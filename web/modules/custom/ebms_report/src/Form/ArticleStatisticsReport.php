@@ -201,15 +201,13 @@ class ArticleStatisticsReport extends FormBase {
     $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'working_group_decisions');
-    $query->sort('weight');
-    $query->sort('tid');
+    $query->sort('name');
     foreach ($storage->loadMultiple($query->execute()) as $term) {
       $this->wg_decisions[$term->id()] = $term->name->value;
     }
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'board_decisions');
-    $query->sort('weight');
-    $query->sort('tid');
+    $query->sort('name');
     foreach ($storage->loadMultiple($query->execute()) as $term) {
       $this->decisions[$term->id()] = $term->name->value;
     }
