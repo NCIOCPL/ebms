@@ -46,6 +46,7 @@ class MeetingDisplay extends ControllerBase {
     foreach ($meeting->groups as $group) {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('groups', $group->target_id);
+      $query->condition('status', 1);
       $query->sort('name');
       $members = [];
       $users = $storage->loadMultiple($query->execute());
