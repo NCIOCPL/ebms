@@ -423,6 +423,7 @@ class SearchForm extends FormBase {
         ],
         '#default_value' => $publication_month,
         '#empty_value' => '',
+        '#description' => 'Publication year is required when a publication month is specified.',
       ],
     ];
 
