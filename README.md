@@ -57,7 +57,7 @@ docker compose up --build
 ## Testing
 
 To run the complete set of regression tests, navigate to the base
-directory of the project and run:
+directory of the project in the web container and run:
 
 ```bash
 vendor/bin/phpunit web/modules/custom
@@ -75,8 +75,6 @@ Or even a specific test:
 vendor/bin/phpunit web/modules/custom/ebms_article/tests/src/Kernel/SearchTest.php
 ```
 
-Until we move to Drupal 10 the tests will trigger annoying bogus deprecation
-warnings complaining about an older version of Guzzle which can be ignored.
-There is a [ticket](https://www.drupal.org/project/drupal/issues/3281667) filed
-with the Drupal issue tracker following the progress of the efforts to deal
-with the problem.
+For an optimal testing experience, allocate plenty of resources for the Docker
+containers. On the current government-furnished MacBook Pro development
+machines 4-6GM of memory is reasonable, with a virtual disk limit of 128GB.
