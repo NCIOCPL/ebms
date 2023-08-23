@@ -67,7 +67,7 @@ curl -sS https://getcomposer.org/installer | php -- --install-dir=/opt/homebrew/
 5. Select *Settings*
 6. From the menu on the left select *Resources*
 7. Make sure *Memory* is at least 6GB
-8. Set *Virtual disk limit* is at least 100GB
+8. Set *Virtual disk limit* to at least 100GB
 9. Click **Apply & Restart**
 
 ## EBMS Developer Setup
