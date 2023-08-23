@@ -97,7 +97,7 @@ chmod 555 web/sites/default
 ```
 
 Commit the updated `composer.*` files. When other developers pull down
-to those files, they should run
+those files, they should run
 
 ```bash
 composer install
