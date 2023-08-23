@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir -p unversioned
+cp templates/dburl.example unversioned/dburl
+cp templates/adminpw.example unversioned/adminpw
+cp templates/userpw.example unversioned/userpw
+cp template/sitehost.example unversioned/sitehost

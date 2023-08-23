@@ -1,31 +1,89 @@
 # EBMS 4.0
 
 This version of the PDQ® Editorial Board Management System has been
-rewritten to use Drupal 9.x. The project directory was initialized
+rewritten to use Drupal 9.x or later. The project directory was initialized
 with the command `composer create-project drupal/recommended-project
-ebms4`. This page focuses on setting up a `Docker` container for doing
+ebms4`. After the new version was deployed to production the old repository
+was retired and replaced with the new one (renamed from "ebms4" to "ebms").
+
+This page focuses on setting up a `Docker` container for doing
 development work on the EBMS, with non-sensitive dummy data which can
 be put under version control. Jenkins will be used for refreshing lower
-CBIIT tiers from the production server the `scripts` directory contains
+CBIIT tiers from the production server. The `scripts` directory contains
 scripts given to CBIIT for deployment of individual releases.
 
-## Developer Setup
+## Prerequisites
 
-To create a local development environment for this project, perform the following steps. You will need a recent PHP (8.1 is recommended), composer 2.x, and Docker.
+MacOS is the only supported environment for EBMS development, as using
+Docker on Windows is too painful.
+You will need `git`, `homebrew`, `php`, `composer`, and `docker`.
+For those tools which are not already installed, follow the instructions
+here.
 
-1. Clone the repository.
-2. Change current directory to the cloned repository.
-3. Create a new `unversioned` directory.
-4. Run `composer install`.
-5. Copy `templates/dburl.example` to `unversioned/dburl`.
-6. Create an admin password, copy `templates/adminpw.example` to `unversioned/adminpw`  and put the admin password in the copied file.
-7. Create a user password, copy `templates/userpw.example` to `unversioned/userpw`  and put the user password in the copied file.
-8. Copy `templates/sitehost.example` to `unversioned/sitehost` and replace the host name if appropriate.
-9. Run `docker compose up -d`.
-10. Run `docker exec -it ebms-web-1 bash`.
-11. Inside the container, run `./install.sh`.
-12. Point your favorite browser to http://ebms.localhost:8081.
-13. Log in as admin using the password you created in step 5.
+### git
+
+Enable the Mac developer tools which will include things like `git`.
+
+```bash
+sudo xcodebuild -license
+```
+
+### Homebrew
+
+Run the following command to install [Homebrew](https://brew.sh/), which is a
+package manager for tools not supplied by Apple.
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+### PHP
+A recent version of PHP is needed (version 8.1 or higher).
+
+1. Run `brew install php@8.1`. It's OK if you end up with a higher version.
+2. Follow any additional instructions on the screen. One of this set is adding PHP to your path. Make sure you do that.
+3. Edit `/opt/homebrew/etc/php/8.1/php.ini` or `/usr/local/etc/php/8.1/php.ini` and set `memory_limit = -1` (this removes any memory limits, which `composer install` usually hits. `/opt/homebrew` is the location for newer M1 Macs. If `php --version` shows that you're running a later version, you'll need to adjust the path of the file you're editing accordingly.
+
+### Composer
+
+If you have an older Intel-based Mac, run
+
+```bash
+curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2
+```
+
+For the newer Apple silicon (M1) Macs, the command is:
+
+```bash
+curl -sS https://getcomposer.org/installer | php -- --install-dir=/opt/homebrew/bin --filename=composer --2
+```
+
+### Docker
+
+1. Go to https://docs.docker.com/desktop/install/mac-install/
+2. Select the right binary for your Mac's architecture
+3. Follow the instructions to install.
+4. Click on the Docker icon at the top right of your Mac's display
+5. Select *Settings*
+6. From the menu on the left select *Resources*
+7. Make sure *Memory* is at least 6GB
+8. Set *Virtual disk limit* is at least 100GB
+9. Click **Apply & Restart**
+
+## EBMS Developer Setup
+
+To create a local development environment for this project, perform the following steps.
+
+1. Clone the repository
+2. Change current directory to the cloned repository
+3. Run `./scripts/create-unversioned-files`
+4. Edit the files in the `unversioned` directory, choosing appropriate passwords and other values
+5. Run `composer install`
+6. Run `docker compose up -d`
+7. Run `docker exec -it ebms-web-1 bash`
+8. Inside the container, run `./install.sh`
+9. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
+10. Log in as admin using the password you created in step 4.
 
 ## Updated packages.
 
@@ -74,7 +132,3 @@ Or even a specific test:
 ```bash
 vendor/bin/phpunit web/modules/custom/ebms_article/tests/src/Kernel/SearchTest.php
 ```
-
-For an optimal testing experience, allocate plenty of resources for the Docker
-containers. On the current government-furnished MacBook Pro development
-machines 4-6GM of memory is reasonable, with a virtual disk limit of 128GB.
