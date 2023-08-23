@@ -85,7 +85,7 @@ To create a local development environment for this project, perform the followin
 9. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
 10. Log in as admin using the password created in steps 3-4.
 
-## Updated packages.
+## Updated packages
 
 To update Drupal core (for example, when a new version of Drupal is
 released to address serious bugs or security vulnerabilities), run
