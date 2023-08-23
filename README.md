@@ -83,7 +83,7 @@ To create a local development environment for this project, perform the followin
 7. Run `docker exec -it ebms-web-1 bash`
 8. Inside the container, run `./install.sh`
 9. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
-10. Log in as admin using the password you created in step 4.
+10. Log in as admin using the password created in steps 3-4.
 
 ## Updated packages.
 
