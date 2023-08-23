@@ -77,7 +77,7 @@ To create a local development environment for this project, perform the followin
 1. Clone the repository
 2. Change current directory to the cloned repository
 3. Run `./scripts/create-unversioned-files`
-4. Edit the files in the `unversioned` directory, choosing appropriate passwords and other values
+4. Optionally edit the files in the `unversioned` directory
 5. Run `composer install`
 6. Run `docker compose up -d`
 7. Run `docker exec -it ebms-web-1 bash`
