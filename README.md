@@ -6,7 +6,7 @@ with the command `composer create-project drupal/recommended-project
 ebms4`. After the new version was deployed to production the old repository
 was retired and replaced with the new one (renamed from "ebms4" to "ebms").
 
-This page focuses on setting up a `Docker` container for doing
+This page focuses on setting up `Docker` containers for doing
 development work on the EBMS, with non-sensitive dummy data which can
 be put under version control. Jenkins will be used for refreshing lower
 CBIIT tiers from the production server. The `scripts` directory contains
