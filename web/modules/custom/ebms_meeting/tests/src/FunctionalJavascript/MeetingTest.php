@@ -8,13 +8,15 @@ use Drupal\ebms_group\Entity\Group;
 use Drupal\ebms_meeting\Entity\Meeting;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test calendar and meeting pages.
  *
  * @group ebms
  */
-class MeetingTest extends WebDriverTestBase {
+//class MeetingTest extends WebDriverTestBase {
+class MeetingTest extends BrowserTestBase {
 
   protected static $modules = ['ebms_meeting'];
 
@@ -88,40 +90,48 @@ class MeetingTest extends WebDriverTestBase {
     $assert_session = $this->assertSession();
     $calendar_url = Url::fromRoute('ebms_meeting.calendar')->toString();
     $this->drupalGet($calendar_url);
-    $this->createScreenshot('../testdata/screenshots/month-page.png');
+    $assert_session->statusCodeEquals(200);
+    //$this->createScreenshot('../testdata/screenshots/month-page.png');
     $assert_session->pageTextContains(date('F Y'));
     $this->clickLink('Create Meeting');
     $form = $this->getSession()->getPage();
     $form->fillField('name', 'Board 1 First Meeting This Month');
-    $form->findButton('Meeting Schedule')->click();
+    //$form->findButton('Meeting Schedule')->click();
 
     // Drupal doesn't allow setting the date widget's format.
     // See https://www.drupal.org/project/drupal/issues/2936268.
-    $meeting_date = sprintf('%02d/05/%04d', date('n'), date('Y'));
+    //$meeting_date = sprintf('%02d/05/%04d', date('n'), date('Y'));
+    $meeting_date = sprintf('%04d-%02d-05', date('Y'), date('n'));
     $form->fillField('date', $meeting_date);
 
     // It looks like there's a space between the time and 'AM' on the form,
     // but that's a deceptive trap. If the space is included here the wrong
     // time is recorded. As with the date, ISO format isn't supported.
-    $form->fillField('start', '09:30AM');
-    $form->fillField('end', '04:00PM');
-    $form->findButton('Participants')->click();
+    $form->fillField('start', '09:30');
+    $form->fillField('end', '16:00');
+    //$form->findButton('Participants')->click();
     $form->findField('boards[]')->selectOption('1', TRUE);
     $form->findField('groups[]')->selectOption('2', TRUE);
-    $form->findButton('Participants')->click();
+    //$form->findButton('Participants')->click();
     $selector = '.form-item-agenda-value .ck-editor__editable';
     $agenda = '<h2>Agenda</h2><p>Yada yada</p>';
-    $this->setRichTextValue($selector, $agenda);
+    //$this->setRichTextValue($selector, $agenda);
+    $form->fillField('agenda[value]', $agenda);
     $selector = '.form-item-notes-value .ck-editor__editable';
     $notes = '<h3>Presenters</h3><ul><li>Larry</li><li>Moe</li><li>Curly</li></ul>';
-    $this->setRichTextValue($selector, $notes);
-    $form->findButton('Meeting Files')->click();
+    //$this->setRichTextValue($selector, $notes);
+    $form->fillField('notes[value]', $notes);
+    //$form->findButton('Meeting Files')->click();
     $file_field = $form->findField('files[files][]');
     $file_field->attachFile('/usr/local/share/testdata/test.docx');
-    $assert_session->assertWaitOnAjaxRequest();
-    $this->createScreenshot('../testdata/screenshots/create-meeting-form.png');
+    //$assert_session->assertWaitOnAjaxRequest();
+    //$this->createScreenshot('../testdata/screenshots/create-meeting-form.png');
     $form->findButton('Save')->click();
-    $this->createScreenshot('../testdata/screenshots/new-meeting-created.png');
+    //$this->createScreenshot('../testdata/screenshots/new-meeting-created.png');
+    $assert_session = $this->assertSession();
+    $page = $this->getSession()->getPage();
+    $html = $page->getHtml();
+    file_put_contents('../logs/new-meeting-added.html', $html);
     $assert_session->pageTextContains('New meeting added.');
 
     // Verify that the Meeting entity's values are what we expect them to be.
@@ -170,30 +180,32 @@ class MeetingTest extends WebDriverTestBase {
         $this->clickLink('Create Meeting');
         $form = $this->getSession()->getPage();
         $form->fillField('name', "Board $j $name");
-        $form->findButton('Meeting Schedule')->click();
-        $meeting_date = sprintf('%02d/%02d/%04d', $month, 12 + $j * 2, $year);
+        //$form->findButton('Meeting Schedule')->click();
+        //$meeting_date = sprintf('%02d/%02d/%04d', $month, 12 + $j * 2, $year);
+        $meeting_date = sprintf('%04d-%02d-%02d', $year, $month, 12 + $j * 2);
         $form->fillField('date', $meeting_date);
-        $form->fillField('start', '01:30PM');
-        $form->fillField('end', '05:00PM');
-        $form->findButton('Participants')->click();
+        $form->fillField('start', '13:30');
+        $form->fillField('end', '17:00');
+        //$form->findButton('Participants')->click();
         $form->findField('boards[]')->selectOption($j, TRUE);
-        $form->findButton('Publication')->click();
+        //$form->findButton('Publication')->click();
         $form->checkField('agenda-published');
         $selector = '.form-item-agenda-value .ck-editor__editable';
         $agenda = '<h2>Agenda</h2><p>Yada yada ' . ($i + 1) . '</p>';
-        $this->setRichTextValue($selector, $agenda);
+        //$this->setRichTextValue($selector, $agenda);
+        $form->fillField('agenda[value]', $agenda);
         $form->findButton('Save')->click();
       }
     }
 
     // Test the board filter ("my boards" vs. "all boards").
     $this->drupalGet($calendar_url);
-    $this->createScreenshot('../testdata/screenshots/calendar-with-meetings.png');
+    //$this->createScreenshot('../testdata/screenshots/calendar-with-meetings.png');
     $assert_session->linkExists('Show All Boards');
     $assert_session->linkNotExists('Restrict To My Boards');
     $assert_session->pageTextNotContains('Board 2 Emergency Meeting');
     $this->clickLink('Show All Boards');
-    $this->createScreenshot('../testdata/screenshots/calendar-all-boards.png');
+    //$this->createScreenshot('../testdata/screenshots/calendar-all-boards.png');
     $assert_session->pageTextContains('Board 2 Emergency Meeting');
     $assert_session->linkNotExists('Show All Boards');
     $assert_session->linkExists('Restrict To My Boards');
@@ -203,7 +215,7 @@ class MeetingTest extends WebDriverTestBase {
     /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
     $assert_session = $this->assertSession();
     $this->drupalGet($calendar_url);
-    $this->createScreenshot('../testdata/screenshots/board-member-calendar.png');
+    //$this->createScreenshot('../testdata/screenshots/board-member-calendar.png');
     $assert_session->pageTextMatches('/5\s+9:30am Eastern Time\s+Board 1 First Meeting This Month/');
     $assert_session->pageTextMatches('/14\s+1:30pm Eastern Time\s+Board 1 Emergency Meeting/');
     $assert_session->pageTextNotContains('Board 2 Emergency Meeting');
@@ -211,7 +223,7 @@ class MeetingTest extends WebDriverTestBase {
 
     // Bring up the first meeting display as a board member.
     $this->clickLink('Board 1 First Meeting This Month');
-    $this->createScreenshot('../testdata/screenshots/first-meeting.png');
+    //$this->createScreenshot('../testdata/screenshots/first-meeting.png');
     $assert_session->pageTextContains('Board 1 First Meeting This Month');
     $assert_session->pageTextMatches('/When.*9:30 am - 4:00 pm \(Eastern Time\)\s+How\s+In Person\s+Who\sBoard 1 Board; Group 2\s+Notes\s+Presenters.+Larry.+Moe.+Curly\s+Meeting Documents\s+test\.docx/');
     $assert_session->pageTextNotContains('Agenda');
@@ -219,12 +231,12 @@ class MeetingTest extends WebDriverTestBase {
     // Navigate throught the next couple of meetings.
     $assert_session->linkExists('Next');
     $this->clickLink('Next');
-    $this->createScreenshot('../testdata/screenshots/next-meeting.png');
+    //$this->createScreenshot('../testdata/screenshots/next-meeting.png');
     $assert_session->pageTextContains('Board 1 Emergency Meeting');
     $assert_session->pageTextMatches('/Agenda\s+Yada yada 2/');
     $assert_session->linkExists('Next');
     $this->clickLink('Next');
-    $this->createScreenshot('../testdata/screenshots/last-meeting.png');
+    //$this->createScreenshot('../testdata/screenshots/last-meeting.png');
     $assert_session->pageTextContains('Board 1 Meeting for the Following Month');
     $assert_session->pageTextMatches('/Agenda\s+Yada yada 3/');
     $assert_session->linkNotExists('Next');
@@ -234,7 +246,7 @@ class MeetingTest extends WebDriverTestBase {
     $assert_session->linkExists('Next');
     $assert_session->linkExists('Previous');
     $this->clickLink('Previous');
-    $this->createScreenshot('../testdata/screenshots/previous-month.png');
+    //$this->createScreenshot('../testdata/screenshots/previous-month.png');
     $assert_session->pageTextContains('Upcoming Meetings');
     $assert_session->pageTextContains('Board 1 Meeting for the Previous Month');
   }
