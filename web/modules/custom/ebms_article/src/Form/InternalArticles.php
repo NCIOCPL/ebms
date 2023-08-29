@@ -5,6 +5,7 @@ namespace Drupal\ebms_article\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\file\Entity\File;
 use Drupal\taxonomy\Entity\Term;
@@ -180,7 +181,7 @@ class InternalArticles extends FormBase {
         $start += $page * $per_page;
       }
       $ids = $query->execute();
-      $articles = $storage->loadMultiple($ids);
+      $articles = Article::loadMultiple($ids);
 
       // Assemble the render arrays.
       $items = [];

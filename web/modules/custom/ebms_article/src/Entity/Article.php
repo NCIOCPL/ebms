@@ -58,6 +58,37 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
   const CONVERSION_DATE = '2013-03-18';
 
   /**
+   * The article types the users want to be able to use for filtering.
+   */
+  const SEARCHABLE_TYPES = [
+    'Case Reports',
+    'Clinical Trial',
+    'Clinical Trial, Phase I',
+    'Clinical Trial, Phase II',
+    'Clinical Trial, Phase III',
+    'Clinical Trial, Phase IV',
+    'Clinical Trial Protocol',
+    'Comment',
+    'Controlled Clinical Trial',
+    'Editorial',
+    'Equivalence Trial',
+    'Evaluation Study',
+    'Guideline',
+    'Letter',
+    'Meta-Analysis',
+    'Multicenter Study',
+    'Observational Study',
+    'Practice Guideline',
+    'Preprint',
+    'Pragmatic Clinical Trial',
+    'Published Erratum',
+    'Randomized Controlled Trial',
+    'Review',
+    'Systematic Review',
+    'Validation Study',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type): array {
@@ -269,7 +300,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     // Get the board to which the topic belongs.
     $topics = \Drupal::entityTypeManager()->getStorage('ebms_topic');
     $topic = $topics->load($topic_id);
-    $board_id = $topic->get('board')->target_id;
+    $board_id = $topic->board->target_id;
 
     // Use the current time if date/time not provided.
     if (empty($entered)) {
@@ -367,7 +398,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     }
     $state = State::create($values);
     $state->save();
-    $article_topic->states[] = $state->id();
+    $article_topic->states->appendItem($state->id());
     $article_topic->save();
     if ($new_topic) {
       $this->topics[] = $article_topic->id();
@@ -439,7 +470,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       }
       if (empty($parent)) {
         $topics = \Drupal::entityTypeManager()->getStorage('ebms_topic');
-        $topic_name = $topics->load($topic)->getName();
+        $topic_name = $topics->load($topic)->name->value;
         $id = $this->id();
         throw new \Exception("Topic '$topic_name' not assigned to article $id.");
       }
@@ -776,7 +807,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $ids = $query->execute();
       if (count($ids) === 1) {
         $journal = $storage->load(reset($ids));
-        $journals[$journal_id] = $journal->get('core')->value;
+        $journals[$journal_id] = $journal->core->value;
       }
     }
     return $journals[$journal_id];
@@ -1120,7 +1151,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     // Create the query.
     $query = \Drupal::database()->select('ebms_article', 'article');
     $query->addField('article', 'id');
-    $query->addExpression('CONVERT(article.source_id, UNSIGNED INTEGER)', 'pmid');
+    $query->addField('article', 'source_id', 'pmid');
     $query->join('ebms_state', 'state', 'state.article = article.id');
     $query->condition('state.current', 1);
     $query->condition('state.value', $rejection_state_ids, 'NOT IN');
@@ -1130,11 +1161,11 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       ->condition('state_decisions.decisions_decision', $unwanted_decision_ids, 'NOT IN')
       ->isNull('state_decisions.decisions_decision');
     $query->condition($group);
-    $query->orderBy('pmid');
     $active = [];
     foreach ($query->execute() as $row) {
       $active[$row->id] = $row->pmid;
     }
+    asort($active, SORT_NUMERIC);
     return $active;
   }
 }

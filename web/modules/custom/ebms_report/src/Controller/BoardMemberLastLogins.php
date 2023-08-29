@@ -17,93 +17,71 @@ class BoardMemberLastLogins extends ControllerBase {
 
   /**
    * Create an Excel workbook for the report (no form needed).
+   *
+   * Rewritten to use the database API instead of the entity query API,
+   * in order to speed up the report, which was taking over 3 minutes
+   * on my own server and between 7 and 9 (or more) minutes on the
+   * CBIIT servers. Now it finishes in under 2 seconds.
    */
   public function report() {
 
-    // Examine the active packets, counting article waiting for review.
-    $full_text_approval = \Drupal::service('ebms_core.term_lookup')->getState('passed_full_review');
-    $sequence_threshold = $full_text_approval->field_sequence->value;
-    $unreviewed_counts = [];
-    $storage = $this->entityTypeManager()->getStorage('ebms_packet');
-    $query = $storage->getQuery()->accessCheck(FALSE);
-    $query->condition('active', 1);
-    foreach ($storage->loadMultiple($query->execute()) as $packet) {
+    // Time the report.
+    $start = microtime(TRUE);
 
-      // Who's assigned to the packet?
-      $reviewers = [];
-      foreach ($packet->reviewers as $reviewer) {
-        $reviewers[] = $reviewer->target_id;
-      }
-      foreach ($packet->articles as $packet_article) {
+    // See if the externalauth module is enabled.
+    $have_external_auth = \Drupal::moduleHandler()->moduleExists('externalauth');
 
-        // If the article has been dropped, it's not waiting for reviews.
-        if (!empty($packet_article->entity->dropped->value)) {
-          continue;
-        }
-
-        // We don't expect reviews for FYI articles.
-        $current_state = $packet_article->entity->article->entity->getCurrentState($packet->topic->target_id);
-        if ($current_state->value->entity->field_text_id->value  === 'fyi') {
-          continue;
-        }
-
-        // If the article has already moved on for this topic, skip past it.
-        if ($current_state->value->entity->field_sequence->value > $sequence_threshold) {
-          continue;
-        }
-
-        // Who has already reviewed the article?
-        $reviewed_by = [];
-        foreach ($packet_article->entity->reviews as $review) {
-          foreach ($review->entity->reviewer as $reviewer) {
-            $reviewed_by[] = $reviewer->target_id;
-          }
-        }
-
-        // See who was assigned but hasn't yet reviewed the article.
-        foreach (array_diff($reviewers, $reviewed_by) as $reviewer_id) {
-          if (!array_key_exists($reviewer_id, $unreviewed_counts)) {
-            $unreviewed_counts[$reviewer_id] = 1;
-          }
-          else {
-            $unreviewed_counts[$reviewer_id]++;
-          }
-        }
-      }
+    // Get the board names.
+    $query = \Drupal::database()->select('ebms_board', 'b');
+    $query->condition('b.active', 1);
+    $query->fields('b', ['id', 'name']);
+    $query->orderBy('b.name');
+    $rows = $query->execute();
+    $board_names = [];
+    foreach ($rows as $row) {
+      $board_names[$row->id] = $row->name;
     }
 
-    // Find all the active board member users.
-    $storage = $this->entityTypeManager()->getStorage('user');
-    $query = $storage->getQuery()->accessCheck(FALSE);
-    $query->condition('status', 1);
-    $query->condition('roles', 'board_member');
-    $query->sort('name');
+    // Find all the active board members.
+    $query = \Drupal::database()->select('users_field_data', 'u');
+    $query->fields('u', ['uid', 'name', 'login']);
+    $query->addExpression("FROM_UNIXTIME(u.login, '%Y-%m-%d')", 'last');
+    $query->condition('u.status', 1);
+    $query->join('user__roles', 'r', 'r.entity_id = u.uid');
+    $query->condition('r.roles_target_id', 'board_member');
+    if ($have_external_auth) {
+      $query->leftJoin('authmap', 'a', 'a.uid = u.uid');
+      $query->addField('a', 'authname', 'authname');
+    }
+    $query->orderBy('u.name');
+    $rows = $query->execute();
     $board_members = [];
+    foreach ($rows as $row) {
+      $board_members[$row->uid] = $row;
+    }
+
+    // Get board memberships.
+    $query = \Drupal::database()->select('user__boards', 'b');
+    $query->join('users_field_data', 'u', 'u.uid = b.entity_id');
+    $query->condition('u.status', 1);
+    $query->fields('b', ['entity_id', 'boards_target_id']);
+    $rows = $query->execute();
+    $memberships = [];
+    foreach ($rows as $row) {
+      $memberships[$row->entity_id][] = $row->boards_target_id;
+    }
+
+    // Collect counts of outstanding reviews per board per member.
     $boards = [];
-    $no_board = [];
-
-    // Collect the information needed for each board member.
-    foreach ($storage->loadMultiple($query->execute()) as $user) {
-      $uid = $user->id();
-      $board_members[$uid] = [
-        'name' => $user->name->value,
-        'login' => empty($user->login->value) ? '' : date('Y-m-d', $user->login->value),
-        'unreviewed' => $unreviewed_counts[$uid] ?? 0,
-      ];
-
-      // Add the user ID to each board's array of members.
-      foreach ($user->boards as $board) {
-        if (!array_key_exists($board->target_id, $boards)) {
-          $boards[$board->target_id] = [$uid];
-        }
-        else {
-          $boards[$board->target_id][] = $uid;
-        }
+    $homeless = [];
+    foreach (array_keys($board_members) as $uid) {
+      if (empty($memberships[$uid])) {
+        $homeless[$uid] = 0;
       }
-
-      // We'll create a separate worksheet for board members with no board.
-      if (empty($user->boards->count())) {
-        $no_board[] = $uid;
+      else {
+        foreach ($memberships[$uid] as $board_id) {
+          $boards[$board_id][$uid] = $this->count_unreviewed_articles($uid, $board_id);
+        }
       }
     }
 
@@ -112,18 +90,19 @@ class BoardMemberLastLogins extends ControllerBase {
     while ($book->getSheetCount() > 0) {
       $book->removeSheetByIndex(0);
     }
+    $properties = $book->getProperties();
+    $properties->setCustomProperty('EBMS Server', php_uname('n'));
 
     // Create a worksheet for each board.
-    $board_names = Board::boards();
     foreach ($board_names as $board_id => $board_name) {
       if ($board_name === 'Integrative, Alternative, and Complementary Therapies') {
         $board_name = 'IACT';
       }
-      $this->addSheet($book, $board_name, $boards[$board_id], $board_members);
+      $this->addSheet($book, $have_external_auth, $board_name, $boards[$board_id], $board_members);
     }
 
     // Add a final worksheet for those not yet assigned a board.
-    $this->addSheet($book, 'No Boards', $no_board, $board_members);
+    $this->addSheet($book, $have_external_auth, 'No Boards', $homeless, $board_members);
 
     // Wrap things up and send the workbook to the client.
     $book->setActiveSheetIndex(0);
@@ -131,6 +110,8 @@ class BoardMemberLastLogins extends ControllerBase {
     ob_start();
     $writer->save('php://output');
     $stamp = date('YmdHis');
+    $elapsed = microtime(TRUE) - $start;
+    ebms_debug_log("Board Member Last Logins: elapsed time: $elapsed", 1);
     return new Response(
       ob_get_clean(),
       200,
@@ -142,18 +123,81 @@ class BoardMemberLastLogins extends ControllerBase {
   }
 
   /**
+   * Find out how many unreviewed articles a user has for a given board.
+   *
+   * @param $uid int
+   *   ID of board member's Drupal user account
+   * @param $board_id int
+   *   ID of board
+   *
+   * @return int
+   *   Number of reviews we're still waiting for
+   */
+  private function count_unreviewed_articles(int $uid, int $board_id = 0) {
+
+    // Cache these so we only look them up once.
+    static $fyi = NULL;
+    static $max_sequence = NULL;
+    if (empty($fyi)) {
+      $term_lookup = \Drupal::service('ebms_core.term_lookup');
+      $fyi = $term_lookup->getState('fyi')->id();
+      $passed_full_review = $term_lookup->getState('passed_full_review');
+      $max_sequence = $passed_full_review->field_sequence->value;
+    }
+
+    // Find the board member's reviews.
+    $subquery = \Drupal::database()->select('ebms_packet_article__reviews', 'reviews');
+    $subquery->join('ebms_review', 'review', 'review.id = reviews.reviews_target_id');
+    $subquery->condition('review.reviewer', $uid);
+    $subquery->addField('reviews', 'reviews_target_id');
+    $subquery->distinct();
+
+    // Create the query.
+    $query = \Drupal::database()->select('ebms_packet_article', 'a');
+    $query->addField('a', 'article', 'id');
+    $query->condition('a.dropped', 0);
+    $query->isNull('a.archived');
+    $query->join('ebms_packet__articles', 'pa', 'pa.articles_target_id = a.id');
+    $query->join('ebms_packet', 'p', 'p.id = pa.entity_id');
+    $query->condition('p.active', 1);
+    $query->join('ebms_packet__reviewers', 'u', 'u.entity_id = p.id');
+    $query->condition('u.reviewers_target_id', $uid);
+    $query->join('ebms_state', 's', 's.article = a.article AND s.topic = p.topic');
+    $query->condition('s.current', 1);
+    $query->condition('s.value', $fyi, '<>');
+    $query->join('taxonomy_term__field_sequence', 'q', 'q.entity_id = s.value');
+    $query->condition('q.field_sequence_value', $max_sequence, '<=');
+    if (!empty($board_id)) {
+      $query->condition('s.board', $board_id);
+    }
+    $query->condition('a.id', $subquery, 'NOT IN');
+    $query->distinct();
+    $query = $query->countQuery();
+    return $query->execute()->fetchField();
+  }
+
+  /**
    * Add a sheet to the workbook and populate it.
    */
-  private function addSheet($book, $board_name, &$user_ids, &$board_members) {
+  private function addSheet($book, $have_external_auth, $board_name, &$unreviewed, &$board_members) {
 
     // Create the sheet and configure its settings.
     $sheet = $book->createSheet();
     $sheet->setTitle($board_name);
     $sheet->setCellValue('A1', 'Name');
-    $sheet->setCellValue('B1', 'AuthName');
-    $sheet->setCellValue('C1', 'Last Login');
-    $sheet->setCellValue('D1', 'Outstanding Reviews');
-    $sheet->getStyle('A1:D1')->applyFromArray([
+    if ($have_external_auth) {
+      $sheet->setCellValue('B1', 'AuthName');
+      $sheet->setCellValue('C1', 'Last Login');
+      $sheet->setCellValue('D1', 'Outstanding Reviews');
+      $range = 'A1:D1';
+      $sheet->getColumnDimension('D')->setAutoSize(TRUE);
+    }
+    else {
+      $sheet->setCellValue('B1', 'Last Login');
+      $sheet->setCellValue('C1', 'Outstanding Reviews');
+      $range = 'A1:C1';
+    }
+    $sheet->getStyle($range)->applyFromArray([
       'fill' => [
         'fillType' => 'solid',
         'color' => ['argb' => 'FF0101DF'],
@@ -169,15 +213,20 @@ class BoardMemberLastLogins extends ControllerBase {
     $sheet->getColumnDimension('A')->setAutoSize(TRUE);
     $sheet->getColumnDimension('B')->setAutoSize(TRUE);
     $sheet->getColumnDimension('C')->setAutoSize(TRUE);
-    $sheet->getColumnDimension('D')->setAutoSize(TRUE);
 
     // Add the user rows.
     $row = 2;
-    foreach ($user_ids as $uid) {
-      $sheet->setCellValue("A$row", $board_members[$uid]['name']);
-      $sheet->setCellValue("B$row", 'SSO login not implemented yet');
-      $sheet->setCellValue("C$row", $board_members[$uid]['login']);
-      $sheet->setCellValue("D$row", $board_members[$uid]['unreviewed']);
+    foreach ($unreviewed as $uid => $count) {
+      $sheet->setCellValue("A$row", $board_members[$uid]->name);
+      if ($have_external_auth) {
+        $sheet->setCellValue("B$row", $board_members[$uid]->authname ?? '');
+        $sheet->setCellValue("C$row", $board_members[$uid]->login ? $board_members[$uid]->last : '');
+        $sheet->setCellValue("D$row", $count);
+      }
+      else {
+        $sheet->setCellValue("B$row", $board_members[$uid]->login ? $board_members[$uid]->last : '');
+        $sheet->setCellValue("C$row", $count);
+      }
       ++$row;
     }
 

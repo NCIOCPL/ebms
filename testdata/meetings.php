@@ -21,7 +21,7 @@ $meeting_types = [
 ];
 $meeting_maps = [];
 $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meeting_categories');
 $ids = $query->execute();
 $terms = $storage->loadMultiple($ids);
@@ -29,7 +29,7 @@ foreach ($terms as $term) {
   $key = $meeting_categories[$term->name->value];
   $meeting_maps['meeting_categories'][$key] = $term->id();
 }
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meeting_statuses');
 $ids = $query->execute();
 $terms = $storage->loadMultiple($ids);
@@ -37,7 +37,7 @@ foreach ($terms as $term) {
   $key = $meeting_statuses[$term->name->value];
   $meeting_maps['meeting_statuses'][$key] = $term->id();
 }
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meeting_types');
 $ids = $query->execute();
 $terms = $storage->loadMultiple($ids);
@@ -85,17 +85,17 @@ log_success("Successfully loaded: $n meetings");
 
 // Get some specific terminology IDs we need.
 $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meeting_categories');
 $query->condition('name', 'Board');
 $ids = $query->execute();
 $board_category = reset($ids);
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meeting_statuses');
 $query->condition('name', 'Scheduled');
 $ids = $query->execute();
 $on_calendar = reset($ids);
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'meeting_types');
 $query->condition('name', 'In Person');
 $ids = $query->execute();

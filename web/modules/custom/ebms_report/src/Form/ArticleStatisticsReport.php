@@ -62,6 +62,11 @@ class ArticleStatisticsReport extends FormBase {
   private array $decisions = [];
 
   /**
+   * Final board decisions.
+   */
+  private array $wg_decisions = [];
+
+  /**
    * Beginning of date range for the report.
    */
   private string $start = '';
@@ -195,9 +200,14 @@ class ArticleStatisticsReport extends FormBase {
     }
     $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
+    $query->condition('vid', 'working_group_decisions');
+    $query->sort('name');
+    foreach ($storage->loadMultiple($query->execute()) as $term) {
+      $this->wg_decisions[$term->id()] = $term->name->value;
+    }
+    $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'board_decisions');
-    $query->sort('weight');
-    $query->sort('tid');
+    $query->sort('name');
     foreach ($storage->loadMultiple($query->execute()) as $term) {
       $this->decisions[$term->id()] = $term->name->value;
     }
@@ -227,12 +237,13 @@ class ArticleStatisticsReport extends FormBase {
     $this->cols[] = 'Positive Responses';
     $this->cols[] = 'No Changes Warranted';
     $this->cols[] = 'No Reviews Received';
+    foreach($this->wg_decisions as $label) {
+      $this->cols[] = $label;
+    }
     foreach($this->decisions as $label) {
       $this->cols[] = $label;
     }
-    $this->last_col = 'A';
-    for ($i = count($this->cols) - 1; $i > 0; $i--)
-        $this->last_col++;
+    $this->last_col = $this->column(count($this->cols));
 
     // Create the overview sheet.
     $this->addSheet($book, 'Boards');
@@ -285,18 +296,23 @@ class ArticleStatisticsReport extends FormBase {
       $sheet->freezePane('B6');
       $row = 4;
     }
+    $last_wg_decisions_col = $this->column(16 + count($this->wg_decisions));
+    $first_board_decisions_col = $this->column(17 + count($this->wg_decisions));
     $sheet->mergeCells("A1:{$this->last_col}1");
     $sheet->mergeCells("A2:{$this->last_col}2");
     $sheet->mergeCells("A$row:M$row");
     $sheet->mergeCells("N$row:P$row");
-    $sheet->mergeCells("Q$row:{$this->last_col}$row");
+    $sheet->mergeCells("Q$row:$last_wg_decisions_col$row");
+    $sheet->mergeCells("$first_board_decisions_col$row:{$this->last_col}$row");
     $sheet->setCellValue("N$row", 'Board Member Responses');
-    $sheet->setCellValue("Q$row", 'Editorial Board Decisions');
+    $sheet->setCellValue("Q$row", 'Working Group Decisions');
+    $sheet->setCellValue("$first_board_decisions_col$row", 'Editorial Board Decisions');
     $row++;
     $sheet->getStyle("A1:{$this->last_col}$row")->applyFromArray(self::STYLE);
     $sheet->setCellValue('A1', $this->sheet_title);
     $sheet->fromArray($this->cols, NULL, "A$row");
-    foreach (range('A', $this->last_col) as $col) {
+    for ($i = 1; $i <= count($this->cols); ++$i) {
+      $col = $this->column($i);
       $sheet->getColumnDimension($col)->setAutoSize(TRUE);
     }
 
@@ -369,7 +385,10 @@ class ArticleStatisticsReport extends FormBase {
     $counts[] = $this->reviewCount('=', $board, $topic);
     $counts[] = $this->reviewCount('', $board, $topic);
 
-    // Finally, get the counts for the final board decisions.
+    // Finally, get the counts for the working group and final board decisions.
+    foreach (array_keys($this->wg_decisions) as $decision) {
+      $counts[] = $this->wgDecisionCount($decision, $board, $topic);
+    }
     foreach (array_keys($this->decisions) as $decision) {
       $counts[] = $this->decisionCount($decision, $board, $topic);
     }
@@ -598,6 +617,29 @@ class ArticleStatisticsReport extends FormBase {
   }
 
   /**
+   * Get a count for articles given a specific working group decision.
+   *
+   * @param int $decision
+   *   ID for the decision we're counting articles for.
+   * @param int $board
+   *   Optional ID for narrowing the count to a specific board.
+   * @param int $topic
+   *   Optional ID for narrowing the count to a specific topic.
+   *
+   * @return int
+   *   Value to be placed in a cell in the spreadsheet.
+   */
+  private function wgDecisionCount(int $decision, int $board, int $topic) {
+    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query->join('ebms_state__wg_decisions', 'decisions', 'decisions.entity_id = state.id');
+    $query->condition('decisions.wg_decisions_target_id', $decision);
+    $query->addField('state', 'article');
+    $query->distinct();
+    $this->addConditions($query, $board, $topic);
+    return $query->countQuery()->execute()->fetchField();
+  }
+
+  /**
    * Get a count for articles given a specific final board decision.
    *
    * @param int $decision
@@ -662,6 +704,25 @@ class ArticleStatisticsReport extends FormBase {
       return implode('', $matches[0]);
     }
     return $name;
+  }
+
+  /**
+   * Calculate the letter combinations for a given column.
+   *
+   * @param int $position
+   *   Position of column, starting with column 1.
+   *
+   * @return string
+   *   'A' for column 1, 'B' for column 2, ..., 'AA' for column 27, etc.
+   */
+  private function column($position) {
+    $label = '';
+    while ($position > 0) {
+        $remainder = ($position - 1) % 26;
+        $label = chr(65 + $remainder) . $label;
+        $position = ($position - $remainder - 1) / 26;
+    }
+    return $label;
   }
 
 }

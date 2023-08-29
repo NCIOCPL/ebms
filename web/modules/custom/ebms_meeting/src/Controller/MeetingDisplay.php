@@ -38,12 +38,25 @@ class MeetingDisplay extends ControllerBase {
     $when .= $end->format(' - g:i a');
 
     // Show which boards and groups are invited.
+    $storage = \Drupal::entityTypeManager()->getStorage('user');
     $participants = [];
     foreach ($meeting->boards as $board) {
-      $participants[] = $board->entity->name->value . ' Board';
+      $participants[] = ['name' => $board->entity->name->value . ' Board'];
     }
     foreach ($meeting->groups as $group) {
-      $participants[] = $group->entity->name->value;
+      $query = $storage->getQuery()->accessCheck(FALSE);
+      $query->condition('groups', $group->target_id);
+      $query->condition('status', 1);
+      $query->sort('name');
+      $members = [];
+      $users = $storage->loadMultiple($query->execute());
+      foreach ($users as $user) {
+        $members[] = $user->name->value;
+      }
+      $participants[] = [
+        'name' => $group->entity->name->value,
+        'members' => $members,
+      ];
     }
 
     // Create some buttons for navigation and meeting creation.
@@ -150,7 +163,7 @@ class MeetingDisplay extends ControllerBase {
         '#meeting' => [
           'scheduled' => $when,
           'type' => $meeting->type->entity->name->value,
-          'participants' => implode('; ', $participants),
+          'participants' => $participants,
           'agenda' => $agenda,
           'notes' => $meeting->notes->value,
           'user' => $meeting->user->entity->name->value,

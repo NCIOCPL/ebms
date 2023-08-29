@@ -5,6 +5,8 @@ package: EBMS
 core_version_requirement: ^9 || ^10
 dependencies:
   - drupal:file
+  - drupal:options
+  - drupal:system
   - drupal:taxonomy
   - drupal:user
   - ebms_core:ebms_core

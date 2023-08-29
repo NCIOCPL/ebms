@@ -438,6 +438,10 @@ class ArticleController extends ControllerBase {
       }
       $notes[] = "Decision: $name";
     }
+    foreach ($state->wg_decisions as $decision) {
+      $name = $decision->entity->name->value;
+      $notes[] = "Decision: $name";
+    }
     $deciders = [];
     foreach ($state->deciders as $decider) {
       $deciders[] = $decider->entity->getDisplayName();
@@ -478,6 +482,21 @@ class ArticleController extends ControllerBase {
     }
     elseif ($text_id === 'fyi') {
       $legend = 'info';
+    }
+    foreach ($state->wg_decisions as $decision) {
+      $name = $decision->entity->name->value;
+      if ($name === 'Not cited') {
+        $legend = 'no';
+      }
+      elseif ($name === 'Hold') {
+        $legend = 'hold';
+      }
+      elseif (str_contains($name, 'Text needs to be')) {
+        $legend = 'write';
+      }
+      else {
+        $legend = 'yes';
+      }
     }
     foreach ($state->decisions as $decision) {
       $name = $this->termStorage->load($decision->decision)->name->value;

@@ -6,12 +6,14 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_article\Search;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_core\TermLookup;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_topic\Entity\Topic;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -115,6 +117,7 @@ class SearchForm extends FormBase {
       $meeting_start = $params['meeting-start'] ?? '';
       $meeting_end = $params['meeting-end'] ?? '';
       $decision = $params['decision'] ?? 0;
+      $wg_decision = $params['wg-decision'] ?? 0;
       $cycle = $params['cycle'] ?? '';
       $cycle_start = $params['cycle-start'] ?? '';
       $cycle_end = $params['cycle-end'] ?? '';
@@ -131,6 +134,7 @@ class SearchForm extends FormBase {
       $import_end = $params['import-end'] ?? '';
       $modified_start = $params['modified-start'] ?? '';
       $modified_end = $params['modified-end'] ?? '';
+      $article_type = $params['article-type'] ?? [];
       if (!empty($params['filters'])) {
         $filters = [];
         foreach ($params['filters'] as $key => $value) {
@@ -184,7 +188,7 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'dispositions');
       $query->sort('weight');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $dispositions[$entity->id()] = $entity->getName();
       }
@@ -194,7 +198,7 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'meeting_categories');
       $query->sort('name');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $meeting_categories[$entity->id()] = $entity->getName();
       }
@@ -204,9 +208,19 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'board_decisions');
       $query->sort('name');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $board_decisions[$entity->id()] = $entity->getName();
+      }
+
+      // Working group decisions which can be assigned for an article.
+      $wg_decisions = [];
+      $query = $storage->getQuery()->accessCheck(FALSE);
+      $query->condition('vid', 'working_group_decisions');
+      $query->sort('name');
+      $entities = Term::loadMultiple($query->execute());
+      foreach ($entities as $entity) {
+        $wg_decisions[$entity->id()] = $entity->getName();
       }
 
       // Tags which can be assigned to articles.
@@ -214,7 +228,7 @@ class SearchForm extends FormBase {
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'article_tags');
       $query->sort('name');
-      $entities = $storage->loadMultiple($query->execute());
+      $entities = Term::loadMultiple($query->execute());
       foreach ($entities as $entity) {
         $article_tags[$entity->id()] = $entity->getName();
       }
@@ -254,6 +268,9 @@ class SearchForm extends FormBase {
         'journal' => 'Journal',
         'core' => 'Core Journals',
       ];
+
+      // Create a picklist for searchable article types.
+      $article_types = array_combine(Article::SEARCHABLE_TYPES, Article::SEARCHABLE_TYPES);
     }
 
     $form = [
@@ -406,11 +423,19 @@ class SearchForm extends FormBase {
         ],
         '#default_value' => $publication_month,
         '#empty_value' => '',
+        '#description' => 'Publication year is required when a publication month is specified.',
       ],
     ];
 
     // Advanced and administrator search are only for full searches.
     if (!$restricted) {
+      $form['basic']['article-type'] = [
+        '#type' => 'select',
+        '#title' => 'Publication Type',
+        '#options' => $article_types,
+        '#default_value' => $article_type,
+        '#multiple' => TRUE,
+      ];
       $form['advanced'] = [
         '#type' => 'details',
         '#open' => TRUE,
@@ -504,6 +529,13 @@ class SearchForm extends FormBase {
               ],
             ],
           ],
+        ],
+        'wg-decision' => [
+          '#type' => 'select',
+          '#title' => 'Working Group Decision',
+          '#options' => $wg_decisions,
+          '#default_value' => $wg_decision,
+          '#empty_value' => '',
         ],
         'decision' => [
           '#type' => 'select',
@@ -759,7 +791,7 @@ class SearchForm extends FormBase {
     $parameters = $form_state->getValues();
     if (!empty($parameters['persist'])) {
       $storage = $this->entityTypeManager->getStorage('user');
-      $user = $storage->load($this->currentUser()->id());
+      $user = User::load($this->currentUser()->id());
       $user->set('search_per_page', $parameters['per-page'] ?? 10);
       $user->set('search_sort', $parameters['sort'] ?? 'ebms-id');
       $user->save();
@@ -784,6 +816,9 @@ class SearchForm extends FormBase {
     else if ($trigger === 'Submit') {
       parent::validateForm($form, $form_state);
       $parameters = $form_state->getValues();
+      if (!empty($parameters['publication-month']) && empty($parameters['publication-year'])) {
+        $form_state->setErrorByName('publication-year', 'Publication year is required when a publication month is specified.');
+      }
       $boards = [];
       if (!empty($parameters['board'])) {
         foreach ($parameters['board'] as $key => $value) {

@@ -39,6 +39,7 @@ class ArticlesByStatusReports extends FormBase {
   const BOARD_MEMBER_RESPONSES = 'Board Member Responses';
   const BOARD_MANAGER_ACTION = 'Board Manager Action';
   const ON_AGENDA = 'On Agenda';
+  const WORKING_GROUP_DECISION = 'Working Group Decision';
   const EDITORIAL_BOARD_DECISION = 'Editorial Board Decision';
   const REPORTS = [
     ArticlesByStatusReports::ABSTRACT_DECISION,
@@ -48,6 +49,7 @@ class ArticlesByStatusReports extends FormBase {
     ArticlesByStatusReports::BOARD_MEMBER_RESPONSES,
     ArticlesByStatusReports::BOARD_MANAGER_ACTION,
     ArticlesByStatusReports::ON_AGENDA,
+    ArticlesByStatusReports::WORKING_GROUP_DECISION,
     ArticlesByStatusReports::EDITORIAL_BOARD_DECISION,
   ];
 
@@ -75,7 +77,7 @@ class ArticlesByStatusReports extends FormBase {
     $dispositions_multiple = FALSE;
     $default_disposition = '';
     $disposition_description = 'Narrow the report to a single outcome.';
-    if (in_array($report, [self::BOARD_MANAGER_ACTION, self::EDITORIAL_BOARD_DECISION])) {
+    if (in_array($report, [self::BOARD_MANAGER_ACTION, self::WORKING_GROUP_DECISION, self::EDITORIAL_BOARD_DECISION])) {
       $dispositions_multiple = TRUE;
       $default_disposition = [];
       $disposition_description = 'Narrow the report to one or more specific outcomes.';
@@ -271,10 +273,13 @@ class ArticlesByStatusReports extends FormBase {
         case self::ON_AGENDA:
           $form['report'] = $this->onAgendaReport($params);
           break;
+        case self::WORKING_GROUP_DECISION:
+          $form['report'] = $this->wgDecisionReport($params);
+          break;
         case self::EDITORIAL_BOARD_DECISION:
           $form['report'] = $this->boardDecisionReport($params);
           break;
-      }
+        }
     }
     return $form;
   }
@@ -349,7 +354,9 @@ class ArticlesByStatusReports extends FormBase {
         return self::getTerms('dispositions');
       case self::BOARD_MANAGER_ACTION:
         return self::getBoardManagerActions();
-      case self::EDITORIAL_BOARD_DECISION:
+        case self::WORKING_GROUP_DECISION:
+          return self::getTerms('working_group_decisions');
+        case self::EDITORIAL_BOARD_DECISION:
         return self::getTerms('board_decisions');
       default:
         return [];
@@ -392,7 +399,7 @@ class ArticlesByStatusReports extends FormBase {
     $query->sort('weight');
     $terms = [];
     foreach ($storage->loadMultiple($query->execute()) as $term) {
-      $terms[$term->id()] = $term->getName();
+      $terms[$term->id()] = $term->name->value;
     }
     return $terms;
   }
@@ -1157,7 +1164,7 @@ class ArticlesByStatusReports extends FormBase {
       if (!array_key_exists($article_id, $articles)) {
         $article_count++;
         $articles[$article_id] = self::getArticleValues($article);
-        $articles[$article_id]['agenda_topics'] = [];
+        $articles[$article_id]['board_decision_topics'] = [];
       }
       $decisions = [];
       foreach ($state->decisions as $state_decision) {
@@ -1187,6 +1194,86 @@ class ArticlesByStatusReports extends FormBase {
     return [
       '#theme' => 'articles_by_status',
       '#title' => "Editorial Board Decisions ($article_count Article$article_s, $topic_count Topic$topic_s, $decision_count Decision$decision_s)",
+      '#articles' => $articles,
+    ];
+  }
+
+  /**
+   * Show articles which are in the "working group decision" state.
+   *
+   * This state represents a temporary state prior to reaching a final board
+   * decision.
+   *
+   * @param array $values
+   *   Values entered by the user on the request form.
+   *
+   * @return array
+   *   Render array for the report.
+   */
+  private function wgDecisionReport(array $values): array {
+
+    // Construct a query to find the states which the report needs.
+    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $query = $storage->getQuery()->accessCheck(FALSE);
+    $query->condition('current', TRUE);
+    $query->condition('value.entity.field_text_id', 'working_group_decision');
+    if (!empty($values['topic'])) {
+      $query->condition('topic', $values['topic']);
+    }
+    else {
+      $query->condition('board', $values['board']);
+    }
+    if (!empty($values['cycles'])) {
+      $query->addTag('states_for_cycle');
+      if (count($values['cycles']) === 1) {
+        $query->addMetaData('cycle', reset($values['cycles']));
+        $query->addMetaData('operator', '=');
+      }
+      else {
+        $query->addMetaData('cycle', $values['cycles']);
+        $query->addMetaData('operator', 'IN');
+      }
+    }
+    if (!empty($values['disposition'])) {
+      $query->condition('wg_decisions', $values['disposition'], 'IN');
+    }
+    $query->sort('article.entity.authors.0.display_name');
+    $query->sort('article.entity.title');
+    $query->sort('entered');
+
+    // Walk through the dispositions building the render arrays for each article.
+    $article_count = $topic_count = $decision_count = 0;
+    $articles = [];
+    foreach ($storage->loadMultiple($query->execute()) as $state) {
+      $topic_count++;
+      $article_id = $state->article->target_id;
+      $article = $state->article->entity;
+      if (!array_key_exists($article_id, $articles)) {
+        $article_count++;
+        $articles[$article_id] = self::getArticleValues($article);
+        $articles[$article_id]['wg_decision_topics'] = [];
+      }
+      $decisions = [];
+      foreach ($state->wg_decisions as $state_decision) {
+        $decision_count++;
+        $decisions[] = $state_decision->entity->name->value;
+      }
+      $articles[$article_id]['wg_decision_topics'][] = [
+        'name' => $state->topic->entity->name->value,
+        'cycle' => $this->getCycleForState($article, $state->topic->target_id),
+        'when' => $state->entered->value,
+        'decisions' => $decisions,
+        'comments' => $this->getComments($state),
+      ];
+    }
+
+    // Put together the render array for the complete report.
+    $article_s = $article_count === 1 ? '' : 's';
+    $topic_s = $topic_count === 1 ? '' : 's';
+    $decision_s = $decision_count === 1 ? '' : 's';
+    return [
+      '#theme' => 'articles_by_status',
+      '#title' => "Working Group Decisions ($article_count Article$article_s, $topic_count Topic$topic_s, $decision_count Decision$decision_s)",
       '#articles' => $articles,
     ];
   }

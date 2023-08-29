@@ -6,7 +6,11 @@
     <dd>{{ meeting.type }}</dd>
     {% if meeting.participants %}
     <dt>Who</dt>
-    <dd>{{ meeting.participants }}</dd>
+    <dd>
+    {% for participant in meeting.participants %}
+    <span {% if participant.members %} title="{{ participant.members|join(', ') }}" {% endif %}>{{ participant.name }}</span>{% if not loop.last %}; {% endif %}
+    {% endfor %}
+    </dd>
     {% endif %}
     {% if meeting.agenda %}
     <dt>What</dt>

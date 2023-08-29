@@ -133,6 +133,7 @@ $vocabularies = [
   ['dispositions.json', 'dispositions', 'review dispositions'],
   ['states.json', 'states', 'states'],
   ['topic_groups.json', 'topic_groups', 'topic groups'],
+  ['working_group_decisions.json', '', 'working group decisions'],
 ];
 foreach ($vocabularies as list($filename, $mapname, $label)) {
   $json = file_get_contents("$repo_base/testdata/$filename");
@@ -161,5 +162,3 @@ foreach ($vocabularies as list($filename, $mapname, $label)) {
 // Make the ID maps available to other loaders.
 $fp = fopen("$repo_base/testdata/maps.json", 'w');
 fwrite($fp, json_encode($maps, JSON_PRETTY_PRINT));
-//$n = count($maps);
-//echo "$n ID maps saved\n";

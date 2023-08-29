@@ -51,7 +51,7 @@
     {% endfor %}
     {% for agenda_topic in article.agenda_topics %}
     <div class="agenda-topic">
-      <div "agenda-topic-details">On agenda for <span class="topic-name">{{ agenda_topic.name }}</span> in review cycle {{ agenda_topic.cycle }}</div>
+      <div class="agenda-topic-details">On agenda for <span class="topic-name">{{ agenda_topic.name }}</span> in review cycle {{ agenda_topic.cycle }}</div>
       {% for meeting in agenda_topic.meetings %}
       <div class="agenda-topic-meeting">{{ meeting.category }} meeting <span class="meeting-name">{{ meeting.name }}</span> scheduled for {{ meeting.date|slice(0, 10) }}</div>
       {% endfor %}
@@ -74,6 +74,22 @@
       {% if decision_topic.deciders %}
       <div class="deciders">Discussed by: {{ decision_topic.deciders|join(', ') }}</div>
       {% endif %}
+      {% for comment in decision_topic.comments %}
+      <div class="comment">{{ comment }}</div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+    {% for decision_topic in article.wg_decision_topics %}
+    <div class="wg-decision-topic">
+      <div class="wg-decision-topic-details">Working group decisions for <span class="topic-name">{{ decision_topic.name }}</span> taken {{ decision_topic.when|slice(0, 10) }} in review cycle {{ decision_topic.cycle }}</div>
+      <ul>
+        {% for decision in decision_topic.decisions %}
+        <li class="wg-decision">{{ decision }}</li>
+        {% endfor %}
+        {% if not decision_topic.decisions %}
+        <li class="wg-decision no-wg-decisions">[No decisions made]</li>
+        {% endif %}
+      </ul>
       {% for comment in decision_topic.comments %}
       <div class="comment">{{ comment }}</div>
       {% endfor %}

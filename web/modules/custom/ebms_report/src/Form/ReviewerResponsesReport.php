@@ -288,7 +288,9 @@ class ReviewerResponsesReport extends FormBase {
       $query->orderBy('packet.created');
     }
     else {
-      $query = $query->extend(TableSortExtender::class)->orderByHeader($header);
+      /** @var $query TableSortExtender */
+      $query = $query->extend(TableSortExtender::class);
+      $query->orderByHeader($header);
     }
     $rows = [];
     $total_assigned = $total_reviewed = 0;

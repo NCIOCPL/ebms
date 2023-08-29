@@ -132,7 +132,7 @@ class Group extends ContentEntityBase implements ContentEntityInterface {
     $entities = $storage->loadMultiple($query->execute());
     $groups = [];
     foreach ($entities as $entity) {
-      $groups[$entity->id()] = $entity->getName();
+      $groups[$entity->id()] = $entity->name->value;
     }
     return $groups;
   }

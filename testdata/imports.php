@@ -1,15 +1,17 @@
 <?php
 
+use function PHPUnit\Framework\assertFalse;
+
 require(__DIR__ . '/console-log.php');
 
 // Find out where the data is.
 $repo_base = getenv('REPO_BASE') ?: '/var/www/ebms';
 
 $storage = \Drupal::entityTypeManager()->getStorage('ebms_article');
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $article_ids = $query->execute();
 $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'import_types');
 $ids = $query->execute();
 $terms = $storage->loadMultiple($ids);
@@ -18,7 +20,7 @@ foreach ($terms as $term) {
   $key = $term->field_text_id->value;
   $types[$key] = $term->id();
 }
-$query = $storage->getQuery();
+$query = $storage->getQuery()->accessCheck(FALSE);
 $query->condition('vid', 'import_dispositions');
 $terms = $storage->loadMultiple($query->execute());
 $dispositions = [];

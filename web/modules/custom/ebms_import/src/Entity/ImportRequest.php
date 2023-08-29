@@ -7,6 +7,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Url;
+use Drupal\ebms_article\Entity\Article;
 
 /**
  * Import request parameters and results.
@@ -128,7 +129,6 @@ class ImportRequest extends ContentEntityBase implements ContentEntityInterface 
     }
 
     // Collect the report data.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_article');
     $articles = [];
     $labels = [];
     $values = json_decode($this->report->value, TRUE);
@@ -145,7 +145,7 @@ class ImportRequest extends ContentEntityBase implements ContentEntityInterface 
           $articles['unique'][$pmid] = ['id' => $ebms_id];
         }
         if (!empty($ebms_id) && !array_key_exists($ebms_id, $labels)) {
-          $entity = $storage->load($ebms_id);
+          $entity = Article::load($ebms_id);
           if (!empty($entity)) {
             $labels[$ebms_id] = $entity->getLabel();
           }

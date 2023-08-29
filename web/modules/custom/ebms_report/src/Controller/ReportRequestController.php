@@ -58,6 +58,12 @@ class ReportRequestController extends ControllerBase {
         'description' => 'Used to summarize recent Board-related activity in the EBMS. It may be useful if you are concerned you missed something or if a Board member has had a period of inactivity and wants to catch up (the Board manager would need to copy and paste the report results to send to the Board member).',
         'permissions' => ['view all reports'],
       ],
+      [
+        'name' => 'Topic Reviewers',
+        'route' => 'ebms_report.topic_reviewers',
+        'description' => 'Shows which Board members are assigned to which topics. A print-friendly version of this report is available.',
+        'permissions' => ['view all reports', 'manage topics'],
+      ],
     ],
     'article' => [
       [
@@ -101,12 +107,6 @@ class ReportRequestController extends ControllerBase {
         'route' => 'ebms_report.articles_without_responses',
         'description' => 'Used to identify which articles were assigned for review but haven\'t received any further attention. The results of this report are often used to help plan meeting agendas and prevent important papers from "falling through the cracks." A Board member version of this report is also available as the results are often shared with Board members. This report may be worth sharing with the Editors in Chief periodically.',
         'permissions' => ['view all reports'],
-      ],
-      [
-        'name' => 'Topic Reviewers',
-        'route' => 'ebms_report.topic_reviewers',
-        'description' => 'Shows which Board members are assigned to which topics. A print-friendly version of this report is available.',
-        'permissions' => ['view all reports', 'manage topics'],
       ],
       [
         'name' => 'Invalid PubMed IDs',

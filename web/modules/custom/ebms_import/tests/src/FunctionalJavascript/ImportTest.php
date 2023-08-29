@@ -93,6 +93,10 @@ class ImportTest extends WebDriverTestBase {
       $term = Term::create($values);
       $term->save();
     }
+    $internal_tags = ['Best Practices', 'Health Information Communication', 'PDQ', 'SEO'];
+    foreach ($internal_tags as $name) {
+      Term::create(['vid' => 'internal_tags', 'name' => $name])->save();
+    }
 
     // Create a board, a couple of topics, and a meeting.
     $board = Board::create([
@@ -115,7 +119,7 @@ class ImportTest extends WebDriverTestBase {
   public function testImportForm() {
 
     // Log in as a user with the necessary permissions.
-    $this->drupalLogin($this->createUser(['import articles']));
+    $this->drupalLogin($this->createUser(['import articles', 'manage articles']));
     $assert_session = $this->assertSession();
 
     // Bring up the form.
@@ -159,7 +163,9 @@ class ImportTest extends WebDriverTestBase {
     $test_filename = 'pubmed-search-results-for-import-testing.txt';
     $file_field->attachFile("$test_directory/$test_filename");
     $submit_button = $form->findButton('Submit');
+    $this->createScreenshot('../testdata/screenshots/article-import-form.png');
     $submit_button->click();
+    $this->createScreenshot('../testdata/screenshots/article-import-form-submitted.png');
 
     // Fetch the PubmedSearchResults entity and test it.
     $pubmed_search_results = PubmedSearchResults::load(1);
@@ -176,6 +182,44 @@ class ImportTest extends WebDriverTestBase {
     $this->assertNotEmpty($report['success'][0]['value']);
     $this->assertNotEmpty($report['actions']);
     $this->assertEquals($article_count, $report['article_count'][0]['value']);
+
+    // Test importing some internal articles.
+    $this->drupalGet('/articles/import/internal');
+    $form = $this->getSession()->getPage();
+    $form->fillField('pmids', '32003825 31045507');
+    $form->fillField('comment', 'On the QT');
+    $form->find('css', 'label:contains("Best Practices")')->click();
+    $this->createScreenshot('../testdata/screenshots/import-internal-article-form.png');
+    $form->findButton('Import')->click();
+    $this->createScreenshot('../testdata/screenshots/import-internal-article-form-submitted.png');
+    $form = $this->getSession()->getPage();
+    $form->fillField('pmids', '31438218');
+    $form->fillField('comment', 'Discussion of collaboration with a content dissemination partner.');
+    $form->find('css', 'label:contains("Best Practices")')->click();
+    $form->find('css', 'label:contains("PDQ")')->click();
+    $this->createScreenshot('../testdata/screenshots/import-internal-article-form-second-request.png');
+    $form->findButton('Import')->click();
+    $this->createScreenshot('../testdata/screenshots/import-internal-article-form-second-request-submitted.png');
+
+    // Bring up the internal articles display page.
+    $this->drupalGet('/articles/internal');
+    $this->createScreenshot('../testdata/screenshots/internal-articles.png');
+    /** @var \Drupal\FunctionalJavascriptTests\JSWebAssert $assert_session */
+    $assert_session = $this->assertSession();
+    $assert_session->pageTextContains('Internal Articles');
+    $assert_session->pageTextContains('Articles (3)');
+    $assert_session->pageTextContains('PMID: 31438218');
+    $assert_session->pageTextContains('PMID: 32003825');
+    $assert_session->pageTextContains('PMID: 31045507');
+    $form = $this->getSession()->getPage();
+    $form->findButton('Filters')->click();
+    $form->find('css', 'label:contains("Best Practices")')->click();
+    $form->findButton('Filter')->click();
+    $this->createScreenshot('../testdata/screenshots/internal-articles-filtered.png');
+    $assert_session->pageTextContains('Articles (2)');
+    $assert_session->pageTextNotContains('PMID: 31438218');
+    $assert_session->pageTextContains('PMID: 32003825');
+    $assert_session->pageTextContains('PMID: 31045507');
   }
 
 }

@@ -197,8 +197,10 @@ class ReviewQueue extends FormBase {
     $per_page = $params['per-page'];
     $title = $params['title'];
     $journal = $params['journal'];
+    $article_type = $params['article-type'];
 
     // Create options for the form.
+    $article_types = array_combine(Article::SEARCHABLE_TYPES, Article::SEARCHABLE_TYPES);
     $boards = Board::boards();
     $cycles = Batch::cycles();
     $queue_types = $this->getQueueTypes();
@@ -264,7 +266,7 @@ class ReviewQueue extends FormBase {
     $query->sort('name');
     $entities = $storage->loadMultiple($query->execute());
     foreach ($entities as $entity) {
-      $tags[$entity->id()] = $entity->getName();
+      $tags[$entity->id()] = $entity->name->value;
     }
     $sorts = [
       'state.article' => 'EBMS ID #',
@@ -349,6 +351,10 @@ class ReviewQueue extends FormBase {
           $query->condition($group);
         }
       }
+      if (!empty($article_type)) {
+        $query->join('ebms_article__types', 'types', 'types.entity_id = state.article');
+        $query->condition('types.types_value', $article_type, 'IN');
+      }
       $count_query = $query->countQuery();
       $count = $count_query->execute()->fetchField();
       if ($sort === 'author') {
@@ -382,6 +388,7 @@ class ReviewQueue extends FormBase {
         }
         $query->orderBy($sort);
       }
+      /** @var $query PagerSelectExtender */
       $query = $query->extend(PagerSelectExtender::class);
       $query->limit($per_page);
       $ids = $query->execute()->fetchCol();
@@ -485,6 +492,13 @@ class ReviewQueue extends FormBase {
               ],
             ],
           ],
+        ],
+        'article-type' => [
+          '#type' => 'select',
+          '#title' => 'Publication Type',
+          '#options' => $article_types,
+          '#default_value' => $article_type,
+          '#multiple' => TRUE,
         ],
         'title' => [
           '#type' => 'textfield',
@@ -626,7 +640,7 @@ class ReviewQueue extends FormBase {
         $decisions_json = $form_state->getUserInput()['decisions'] ?? '{}';
         $decisions = json_decode($decisions_json, TRUE);
         foreach ($decisions as $key => $decision) {
-          preg_match('/topic-action-(\d+)\|(\d+)/', $key, $matches);
+          preg_match('/topic-action-(\d+)-(\d+)/', $key, $matches);
           $article_id = $matches[1];
           $topic_id = $matches[2];
           $state = self::DECISION_STATES[$queue_type][$decision];
@@ -767,6 +781,7 @@ class ReviewQueue extends FormBase {
       'form_id' => 'ebms_review_queue',
       'filtered' => $filtered,
       'journal-filters' => $parameters['journal-filters'] ?? [],
+      'article-type' => $parameters['article-type'] ?? [],
     ];
     return SavedRequest::saveParameters('review queue', $spec);
   }
@@ -852,7 +867,7 @@ class ReviewQueue extends FormBase {
       else {
         $show_buttons = $mine;
       }
-      $field_name = "topic-action-$article_id|$topic_id";
+      $field_name = "topic-action-$article_id-$topic_id";
       $checked = (int) ($decisions[$field_name] ?? '0');
       $tags = [];
       foreach ($article_topic->tags as $topic_tag) {
@@ -1063,7 +1078,7 @@ class ReviewQueue extends FormBase {
         $my_topics[] = $tid;
       }
       $count = $counts[$tid] ?? 0;
-      $name = $topic->getName();
+      $name = $topic->name->value;
       $options[$tid] = "$name ($count)";
     }
     ebms_debug_log('assembled the topics picklist');
@@ -1109,7 +1124,7 @@ class ReviewQueue extends FormBase {
     if ($decisions_json !== '{}') {
       $decisions = json_decode($decisions_json, TRUE);
       foreach ($decisions as $key => $value) {
-        preg_match('/topic-action-(\d+)\|(\d+)/', $key, $matches);
+        preg_match('/topic-action-(\d+)-(\d+)/', $key, $matches);
         $article_id = $matches[1];
         $topic_id = $matches[2];
         $topic = Topic::load($topic_id);

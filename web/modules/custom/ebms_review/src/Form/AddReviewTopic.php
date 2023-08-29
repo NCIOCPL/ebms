@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_core\Entity\SavedRequest;
+use Drupal\ebms_topic\Entity\Topic;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -102,7 +103,7 @@ class AddReviewTopic extends FormBase {
     $boards = [];
     foreach ($entities as $entity) {
       $id = $entity->id();
-      $boards[$id] = $entity->getName();
+      $boards[$id] = $entity->name->value;
     }
     $topics = ['' => 'Select a board'];
     $board = $form_state->getValue('board');
@@ -205,6 +206,7 @@ class AddReviewTopic extends FormBase {
     $storage = $this->entityTypeManager->getStorage('ebms_topic');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('board', $board_id);
+    $query->condition('active', TRUE);
     $query->sort('name');
     $ids = $query->execute();
     $topics = $storage->loadMultiple($ids);
@@ -214,7 +216,7 @@ class AddReviewTopic extends FormBase {
         $options = [0 => '- Select a topic -'];
       }
       if (!in_array($topic->id(), $existing_topics)) {
-        $options[$topic->id()] = $topic->getName();
+        $options[$topic->id()] = $topic->name->value;
       }
     }
     if (count($options) === 1) {
@@ -258,14 +260,12 @@ class AddReviewTopic extends FormBase {
     $article_id = $form_state->getValue('article');
 
     // Load the article entity.
-    $storage = $this->entityTypeManager->getStorage('ebms_article');
-    $article = $storage->load($article_id);
+    $article = Article::load($article_id);
     $article->addState($state_id, $topic_id, $uid, $entered, $cycle);
     $article->save();
 
     // Tell the user what we did.
-    $storage = $this->entityTypeManager->getStorage('ebms_topic');
-    $topic = $storage->load($topic_id);
+    $topic = Topic::load($topic_id);
     $name = $topic->getName();
     $publication = $article->getLabel();
     $message = "Topic '$name' has been added to article $article_id ($publication).";

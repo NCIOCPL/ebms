@@ -16,7 +16,6 @@ use Drupal\taxonomy\Entity\Term;
  */
 class MeetingTest extends WebDriverTestBase {
 
-
   protected static $modules = ['ebms_meeting'];
 
   protected $defaultTheme = 'stark';
@@ -148,10 +147,6 @@ class MeetingTest extends WebDriverTestBase {
     $this->assertEquals(0, $entity->agenda_published->value);
     $this->assertCount(1, $entity->documents);
     $this->assertEquals('test.docx', $entity->documents[0]->entity->filename->value);
-    echo "\n";
-    echo 'When: ' . $entity->dates->value . ' - ' . $entity->dates->end_value . "\n";
-    echo 'Agenda: ' . $entity->agenda->value . "\n";
-    echo 'Format: ' . $entity->agenda->format . "\n";
 
     // Add a few more meetings.
     $names = [

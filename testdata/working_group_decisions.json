@@ -1,0 +1,32 @@
+[
+  {
+    "vid": "working_group_decisions",
+    "name": "Cited (citation only)",
+    "status": true
+  },
+  {
+    "vid": "working_group_decisions",
+    "name": "Hold",
+    "status": true
+  },
+  {
+    "vid": "working_group_decisions",
+    "name": "Not cited",
+    "status": true
+  },
+  {
+    "vid": "working_group_decisions",
+    "name": "Text approved",
+    "status": true
+  },
+  {
+    "vid": "working_group_decisions",
+    "name": "Text needs to be revised",
+    "status": true
+  },
+  {
+    "vid": "working_group_decisions",
+    "name": "Text needs to be written",
+    "status": true
+  }
+]

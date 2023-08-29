@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir -p unversioned
+printf password123 > unversioned/adminpw
+printf password123 > unversioned/userpw
+printf 'mysql://ebms:ebms@db/ebms' > unversioned/dburl
+printf 'ebms.localhost' > unversioned/sitehost

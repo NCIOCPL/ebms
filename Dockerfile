@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:lunar
 
 RUN DEBIAN_FRONTEND=noninteractive apt update
 
