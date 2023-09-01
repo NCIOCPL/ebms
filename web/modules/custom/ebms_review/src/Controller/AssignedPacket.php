@@ -97,7 +97,7 @@ class AssignedPacket extends ControllerBase {
       if (empty($authors)) {
         $authors = ['[No authors named]'];
       }
-      $agendas = $fyi = $review_posted = $board_reviewed = $full_text_url = $other_reviews_url = $review_url = $quick_rejection_url = '';
+      $agendas = $fyi = $review_posted = $wg_reviewed = $board_reviewed = $full_text_url = $other_reviews_url = $review_url = $quick_rejection_url = '';
       if (!empty($article->full_text->file)) {
         $file = File::load($article->full_text->file);
         $full_text_url = $file->createFileUrl();
@@ -132,6 +132,9 @@ class AssignedPacket extends ControllerBase {
         if (empty($review_posted)) {
           if ($current_state->value->entity->field_text_id->value === 'final_board_decision') {
             $board_reviewed = TRUE;
+          }
+          elseif ($current_state->value->entity->field_text_id->value === 'working_group_decision') {
+            $wg_reviewed = TRUE;
           }
           else {
             $review_url = Url::fromRoute('ebms_review.add_review', $parms, $options);
@@ -170,6 +173,7 @@ class AssignedPacket extends ControllerBase {
           'fyi' => $fyi,
           'review_posted' => $review_posted,
           'board_reviewed' => $board_reviewed,
+          'wg_reviewed' => $wg_reviewed,
           'full_text_url' => $full_text_url,
           'other_reviews' => $other_reviews_url,
           'review_url' => $review_url,
