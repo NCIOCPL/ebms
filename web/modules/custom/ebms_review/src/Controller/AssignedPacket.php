@@ -8,11 +8,29 @@ use Drupal\Core\Url;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Show the articles in the review packet.
  */
 class AssignedPacket extends ControllerBase {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): AssignedPacket {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * Create the render array for the assigned packet page.
@@ -35,7 +53,7 @@ class AssignedPacket extends ControllerBase {
 
     // Set up some defaults.
     $title = $packet->title->value;
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $uid = $this->currentUser()->id();
 
     // Override defaults if working on behalf of a board member.
@@ -59,7 +77,7 @@ class AssignedPacket extends ControllerBase {
     foreach ($packet->articles as $article) {
       $packet_articles[] = $article->entity;
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_journal');
+    $storage = $this->entityTypeManager()->getStorage('ebms_journal');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('core', 1)

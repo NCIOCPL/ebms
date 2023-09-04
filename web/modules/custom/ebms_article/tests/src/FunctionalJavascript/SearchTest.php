@@ -109,7 +109,9 @@ class SearchTest extends WebDriverTestBase {
     $form = $this->getSession()->getPage();
     $form->findButton('Display Options')->click();
     $this->createScreenshot('../testdata/screenshots/board-member-search-sort-options.png');
-    file_put_contents('../dross/search-display-options.html', $form->getHtml());
+    if (is_dir('../dross')) {
+      file_put_contents('../dross/search-display-options.html', $form->getHtml());
+    }
     $form->findById('edit-sort-author')->click();
     $this->createScreenshot('../testdata/screenshots/board-member-search-sort-by-author.png');
     $form->findButton('Submit')->click();

@@ -13,6 +13,8 @@ use Drupal\taxonomy\Entity\Term;
  * @FieldType(
  *   id = "ebms_transportation_expense",
  * )
+ * @property string $date
+ * See https://github.com/mglaman/phpstan-drupal/issues/602.
  */
 class TransportationExpense extends FieldItemBase {
 
@@ -31,7 +33,7 @@ class TransportationExpense extends FieldItemBase {
       'amount' => DataDefinition::create('decimal')
         ->setDescription('How much the expense was for.'),
       'mileage' => DataDefinition::create('decimal')
-        ->setDescription('How much the expense was for.'),
+        ->setDescription('Distance traveled in a private vehicle.'),
     ];
   }
 

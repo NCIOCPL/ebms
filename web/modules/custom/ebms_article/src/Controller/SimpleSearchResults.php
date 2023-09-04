@@ -3,6 +3,7 @@
 namespace Drupal\ebms_article\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\ebms_article\Search;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
@@ -25,12 +26,20 @@ class SimpleSearchResults extends ControllerBase {
   protected Search $searchService;
 
   /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): SimpleSearchResults {
     // Instantiates this form class.
     $instance = parent::create($container);
     $instance->searchService = $container->get('ebms_article.search');
+    $instance->renderer = $container->get('renderer');
     return $instance;
   }
 
@@ -50,6 +59,7 @@ class SimpleSearchResults extends ControllerBase {
       }
       $filters[] = 'Board(s): ' . implode('; ', $boards);
     }
+    $topics = [];
     if (!empty($parameters['topic'])) {
       $boards = [];
       foreach ($parameters['topic'] as $topic_id) {
@@ -132,7 +142,7 @@ class SimpleSearchResults extends ControllerBase {
     }
 
     // Render and return the page.
-    $page = \Drupal::service('renderer')->render($render_array);
+    $page = $this->renderer->render($render_array);
     $response = new Response($page);
     return $response;
   }

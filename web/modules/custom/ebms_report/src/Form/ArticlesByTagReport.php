@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,9 +11,9 @@ use Drupal\ebms_article\Entity\ArticleTag;
 use Drupal\ebms_article\Entity\ArticleTopic;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
-use Drupal\ebms_state\Entity\State;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\taxonomy\Entity\Term;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Show articles with topic-specific tags.
@@ -35,6 +36,37 @@ class ArticlesByTagReport extends FormBase {
     'delete this journal',
     'state inactivated by setting ',
   ];
+
+  /**
+   * Service for looking up an EBMS taxonomy term.
+   */
+  protected $termLookup;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticlesByTagReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->database = $container->get('database');
+    $instance->termLookup = $container->get('ebms_core.term_lookup');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -63,7 +95,7 @@ class ArticlesByTagReport extends FormBase {
     }
 
     // Create the tags picklist.
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'article_tags');
     $query->condition('field_topic_allowed', 1);
@@ -204,7 +236,7 @@ class ArticlesByTagReport extends FormBase {
   private function report(array $params): array {
 
     // Get some taxonomy terms we'll need later on.
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'article_tags');
     $query->condition('field_text_id', 'librarian_cmt');
@@ -226,8 +258,7 @@ class ArticlesByTagReport extends FormBase {
     $full_text_approval = $storage->load(reset($ids));
 
     // The Drupal entity query API is not suitable for this report's logic.
-    $term_lookup = \Drupal::service('ebms_core.term_lookup');
-    $query = \Drupal::database()->select('ebms_article_tag', 'article_tag');
+    $query = $this->database->select('ebms_article_tag', 'article_tag');
     $query->join('ebms_article_topic__tags', 'tags', 'tags.tags_target_id = article_tag.id');
     $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = tags.entity_id');
     $query->join('ebms_article__topics', 'topics', 'topics.topics_target_id = article_topic.id');
@@ -264,7 +295,7 @@ class ArticlesByTagReport extends FormBase {
       }
     }
     if (!empty($params['options']['no-decision'])) {
-      $fbd = $term_lookup->getState('final_board_decision')->tid->value;
+      $fbd = $this->termLookup->getState('final_board_decision')->tid->value;
       ebms_debug_log("final_board_decision state ID=$fbd", 3);
       $query->leftJoin('ebms_state',  'fbd', "fbd.article = article.id AND fbd.topic = topic.id AND fbd.value = $fbd");
       $query->isNull('fbd.article');
@@ -313,7 +344,7 @@ class ArticlesByTagReport extends FormBase {
         if (empty($state_description)) {
           $state_description = $state->value->entity->name->value;
           if ($state->field_text_id === 'passed_full_review') {
-            $query = \Drupal::database()->select('ebms_packet', 'packet');
+            $query = $this->database->select('ebms_packet', 'packet');
             $query->addField('packet', 'title');
             $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
             $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = articles.articles_target_id');

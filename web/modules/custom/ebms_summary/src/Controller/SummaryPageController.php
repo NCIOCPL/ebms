@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Show a page of summary links.
  */
-class SummaryPageController extends ControllerBase {
+final class SummaryPageController extends ControllerBase {
 
   /**
    * Request stack.

@@ -6,6 +6,7 @@ use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Session\AccountProxy;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\ebms_review\Entity\PacketArticle;
@@ -168,7 +169,7 @@ class Builder implements BreadcrumbBuilderInterface {
 
     // Calendar.
     'ebms_meeting.calendar' => [['Calendar', '<none>']],
-    'ebms_meeting.calendar_month' => [['Calendar', '<none>']],
+    // 'ebms_meeting.calendar_month' => [['Calendar', '<none>']],
     'ebms_meeting.add_meeting' => [
       ['Calendar', 'ebms_meeting.calendar'],
       ['Add Meeting', '<none>'],
@@ -517,9 +518,10 @@ class Builder implements BreadcrumbBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function __construct(RequestStack $request_stack) {
+  public function __construct(RequestStack $request_stack, AccountProxy $current_user) {
     $this->stack = $request_stack;
     $this->request = $this->stack->getCurrentRequest();
+  	$this->user = User::load($current_user->id());
   }
 
   /**
@@ -542,7 +544,6 @@ class Builder implements BreadcrumbBuilderInterface {
 	  // Establish some instance properties needed further down the call stack.
     $this->breadcrumb = new Breadcrumb();
     $this->route = $route_match->getRouteName();
-  	$this->user = User::load(\Drupal::currentUser()->id());
 
 	  // All the pages we've as covered by our class have at least a home-page breadcrumb.
     $this->breadcrumb->addLink(Link::createFromRoute('Home', '<front>'));

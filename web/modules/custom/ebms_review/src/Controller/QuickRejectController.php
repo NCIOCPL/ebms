@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Opens the modal form for an expedited article rejection.
  */
-class QuickRejectController extends ControllerBase {
+final class QuickRejectController extends ControllerBase {
 
   /**
    * The form builder.

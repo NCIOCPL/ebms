@@ -7,6 +7,7 @@ use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Find the article for a given PubMed ID.
@@ -16,11 +17,28 @@ class SearchPubMed extends ControllerBase {
   const NOT_FOUND = '<p>A PDF of this article is not available in the EBMS. E-mail your Board manager to request a copy of this article.';
 
   /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): SearchPubMed {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
+
+  /**
    * Show the article if we find it or fall back on the import form.
    */
   public function search() {
     $user = User::load($this->currentUser()->id());
-    $pmid =  \Drupal::request()->query->get('pmid');
+    $pmid =  $this->currentRequest->query->get('pmid');
     $storage = $this->entityTypeManager()->getStorage('ebms_article');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('source_id', trim($pmid));

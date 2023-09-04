@@ -2,13 +2,29 @@
 
 namespace Drupal\ebms_journal;
 
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Database\Connection;
 
 /**
  * Service for identifying blacklisted journals.
  */
 class NotList {
+
+  /**
+   * Connection to the SQL database.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $db;
+
+  /**
+   * Constructs a new \Drupal\ebms_journal\NotList service object.
+   *
+   * @param \Drupal\Core\Database\Connection
+   *   Connection to the SQL database.
+   */
+  public function __construct(Connection $connection) {
+    $this->db = $connection;
+  }
 
   /**
    * Find the journals this board doesn't want.
@@ -22,13 +38,12 @@ class NotList {
    */
   public function getNotList(int $board_id): array {
     $now = date('Y-m-d H:i:s');
-    $query = \Drupal::database()->select('ebms_journal', 'journal');
+    $query = $this->db->select('ebms_journal', 'journal');
     $query->addField('journal', 'source_id', 'journal_id');
     $query->join('ebms_journal__not_lists', 'not_list', 'not_list.entity_id = journal.id');
     $query->condition('not_list.not_lists_board', $board_id);
     $query->condition('not_list.not_lists_start', $now, '<=');
     $not_list = $query->execute()->fetchCol();
-    $count = count($not_list);
     return array_unique($not_list);
   }
 

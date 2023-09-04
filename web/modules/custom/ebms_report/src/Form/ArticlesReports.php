@@ -2,14 +2,17 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_import\Entity\ImportRequest;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Collection of basic article reports on a single form page.
@@ -49,6 +52,44 @@ class ArticlesReports extends FormBase {
     ArticlesReports::APPROVED_FROM_ABSTRACT,
   ];
 
+  /**
+   * Service for looking up an EBMS taxonomy term.
+   */
+  protected $termLookup;
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticlesReports {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->renderer = $container->get('renderer');
+    $instance->database = $container->get('database');
+    $instance->termLookup = $container->get('ebms_core.term_lookup');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -345,7 +386,7 @@ class ArticlesReports extends FormBase {
     }
 
     // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('value.entity.field_text_id', 'published');
     if (!empty($values['board'])) {
@@ -464,7 +505,7 @@ class ArticlesReports extends FormBase {
     }
 
     // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('value.entity.field_text_id', ['passed_init_review', 'reject_init_review'], 'IN');
     if (!empty($values['board'])) {
@@ -581,11 +622,10 @@ class ArticlesReports extends FormBase {
     }
 
     // Another report for which the entity query API failed.
-    $term_lookup = \Drupal::service('ebms_core.term_lookup');
-    $ready_init_review = $term_lookup->getState('ready_init_review')->id();
-    $reject_journal_title = $term_lookup->getState('reject_journal_title')->id();
+    $ready_init_review = $this->termLookup->getState('ready_init_review')->id();
+    $reject_journal_title = $this->termLookup->getState('reject_journal_title')->id();
     $states = [$ready_init_review, $reject_journal_title];
-    $query = \Drupal::database()->select('ebms_state', 's');
+    $query = $this->database->select('ebms_state', 's');
     $query->join('ebms_board', 'b', 'b.id = s.board');
     $query->join('ebms_article__topics', 'topics', 'topics.entity_id = s.article');
     $query->join('ebms_article_topic', 'article_topic',
@@ -727,7 +767,7 @@ class ArticlesReports extends FormBase {
     ];
 
     // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('value.entity.field_text_id', 'reject_bm_review');
     if (!empty($values['board'])) {
@@ -843,7 +883,7 @@ class ArticlesReports extends FormBase {
     ];
 
     // Create an entity query for the articles we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_article');
+    $storage = $this->entityTypeManager->getStorage('ebms_article');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('topics.entity.states.entity.value.entity.field_text_id', 'passed_bm_review');
     $query->condition('topics.entity.states.entity.entered', $dates, 'BETWEEN');
@@ -855,7 +895,7 @@ class ArticlesReports extends FormBase {
     $options = ['attributes' => ['target' => '_blank']];
     $rows = [];
     $articles = $storage->loadMultiple($query->execute());
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     foreach ($articles as $article) {
       $article_id = $article->id();
       $pmid = $article->source_id->value;
@@ -872,7 +912,7 @@ class ArticlesReports extends FormBase {
         '#items' => $librarian_topics,
         '#attributes' => ['class' => ['usa-list--unstyled']],
       ];
-      $librarian_topics = \Drupal::service('renderer')->render($librarian_topics);
+      $librarian_topics = $this->renderer->render($librarian_topics);
       $reviewer_topics = [];
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('article', $article_id);
@@ -886,7 +926,7 @@ class ArticlesReports extends FormBase {
         '#items' => $reviewer_topics,
         '#attributes' => ['class' => ['usa-list--unstyled']],
       ];
-      $reviewer_topics = \Drupal::service('renderer')->render($reviewer_topics);
+      $reviewer_topics = $this->renderer->render($reviewer_topics);
       $rows[] = [
         Link::createFromRoute($article_id, 'ebms_article.article', ['article' => $article_id], $options),
         Link::fromTextAndUrl($pmid, Url::fromUri("$pubmed_url/$pmid", $options)),
@@ -972,7 +1012,7 @@ class ArticlesReports extends FormBase {
     }
 
     // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('value.entity.field_text_id', 'reject_journal_title');
     if (!empty($values['board'])) {
@@ -1106,7 +1146,7 @@ class ArticlesReports extends FormBase {
     }
 
     // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('value.entity.field_text_id', ['passed_init_review', 'reject_init_review'], 'IN');
     if (!empty($values['board'])) {
@@ -1240,7 +1280,7 @@ class ArticlesReports extends FormBase {
     }
 
     // Create an entity query for the states we're looking for.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('value.entity.field_text_id', 'passed_bm_review');
     if (!empty($values['board'])) {

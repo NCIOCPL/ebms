@@ -226,7 +226,7 @@ class PrintPacket extends ControllerBase {
    *   description, as well as an optional string with extra information.
    */
   private function loadDispositions(): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE)
                      ->sort('weight')
                      ->condition('status', 1)
@@ -253,7 +253,7 @@ class PrintPacket extends ControllerBase {
    *   description, as well as an optional string with extra information.
    */
   private function loadReasons(): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE)
                      ->sort('weight')
                      ->condition('status', 1)

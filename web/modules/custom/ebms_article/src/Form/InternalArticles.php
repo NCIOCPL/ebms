@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_article\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,6 +11,7 @@ use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\file\Entity\File;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Find and display articles tagged for internal use, not for review.
@@ -17,6 +19,23 @@ use Drupal\user\Entity\User;
  * @ingroup ebms
  */
 class InternalArticles extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): InternalArticles {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -32,7 +51,7 @@ class InternalArticles extends FormBase {
     $values = empty($request_id) ? [] : SavedRequest::loadParameters($request_id);
     $per_page = $values['per-page'] ?? 10;
     $tags = [];
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('vid', 'internal_tags')
@@ -133,7 +152,7 @@ class InternalArticles extends FormBase {
     $method = $this->getRequest()->getMethod();
     ebms_debug_log("InternalArticles::buildForm(): request method is $method");
     if ($method !== 'POST') {
-      $storage = \Drupal::entityTypeManager()->getStorage('ebms_article');
+      $storage = $this->entityTypeManager->getStorage('ebms_article');
       $query = $storage->getQuery()->accessCheck(FALSE)->sort('internal_tags.0.added', 'DESC');
       $selected_tags = [];
       if (!empty($values['tags'])) {

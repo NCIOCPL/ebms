@@ -2,9 +2,9 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Database\Query\SelectInterface;
-use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -14,6 +14,7 @@ use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_topic\Entity\Topic;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -31,6 +32,23 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  * @ingroup ebms
  */
 class PublicationForm extends FormBase {
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected Connection $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): PublicationForm {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -86,6 +104,7 @@ class PublicationForm extends FormBase {
       $start = 1;
     }
     else {
+      /** @var \Drupal\Core\Database\Query\PagerSelectExtender */
       $query = $query->extend(PagerSelectExtender::class);
       $query->limit($per_page);
       $page = $this->getRequest()->get('page') ?? 0;
@@ -412,12 +431,12 @@ class PublicationForm extends FormBase {
    *   The base query for finding articles for the queue.
    */
   private function makeQuery(array $values): SelectInterface {
-    $query = \Drupal::database()->select('taxonomy_term__field_text_id', 'text_id');
+    $query = $this->database->select('taxonomy_term__field_text_id', 'text_id');
     $query->condition('bundle', 'states');
     $query->condition('field_text_id_value', 'passed_init_review');
     $query->addField('text_id', 'entity_id');
     $state_id = $query->execute()->fetchField();
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->database->select('ebms_state', 'state');
     $query->join('ebms_article', 'article', 'article.id = state.article');
     $query->condition('state.current', 1);
     $query->condition('state.value', $state_id);

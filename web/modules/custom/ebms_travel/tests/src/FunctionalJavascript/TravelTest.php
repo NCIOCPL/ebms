@@ -316,7 +316,7 @@ class TravelTest extends WebDriverTestBase {
     $this->assertEquals(6, $request->meeting->target_id);
     $this->assertEquals($arrival, $request->arrival->value);
     $this->assertEquals($departure, $request->departure->value);
-    $this->count(2, $request->transportation);
+    $this->assertEquals(2, $request->transportation->count());
     $this->assertEquals($arrival, $request->transportation[0]->date);
     $this->assertEquals($this->term_ids['transportation_expense_types']['taxi'], $request->transportation[0]->type);
     $this->assertEquals(25.99, $request->transportation[0]->amount);
@@ -325,7 +325,7 @@ class TravelTest extends WebDriverTestBase {
     $this->assertEquals($this->term_ids['transportation_expense_types']['private'], $request->transportation[1]->type);
     $this->assertEquals(500, $request->transportation[1]->mileage);
     $this->assertEmpty($request->transportation[1]->amount);
-    $this->count(1, $request->parking_and_tolls);
+    $this->assertEquals(1, $request->parking_and_tolls->count());
     $this->assertEquals($arrival, $request->parking_and_tolls[0]->date);
     $this->assertEquals($this->term_ids['parking_or_toll_expense_types']['toll'], $request->parking_and_tolls[0]->type);
     $this->assertEquals(.50, $request->parking_and_tolls[0]->amount);

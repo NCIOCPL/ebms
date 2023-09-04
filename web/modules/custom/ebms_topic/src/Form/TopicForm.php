@@ -66,6 +66,7 @@ class TopicForm extends ContentEntityForm {
         ]));
     }
     $form_state->setRedirect('entity.ebms_topic.canonical', ['ebms_topic' => $entity->id()]);
+    return $status;
   }
 
 }

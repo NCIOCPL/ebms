@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,6 +11,7 @@ use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_doc\Entity\Doc;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Report on documents uploaded to the system.
@@ -17,6 +19,23 @@ use Drupal\user\Entity\User;
  * @ingroup ebms
  */
 class DocumentsReport extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): DocumentsReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -60,7 +79,7 @@ class DocumentsReport extends FormBase {
         break;
       }
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $ids = $storage->getQuery()->accessCheck(FALSE)
       ->condition('vid', 'doc_tags')
       ->condition('status', 1)
@@ -207,7 +226,7 @@ class DocumentsReport extends FormBase {
     ];
 
     // Identify the documents for the report.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_doc');
+    $storage = $this->entityTypeManager->getStorage('ebms_doc');
     $query = $storage->getQuery()->accessCheck(FALSE);
     if (!empty($board)) {
       $query->condition('boards', $board);

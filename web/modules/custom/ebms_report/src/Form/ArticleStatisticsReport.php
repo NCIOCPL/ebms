@@ -5,6 +5,7 @@ namespace Drupal\ebms_report\Form;
 require '../vendor/autoload.php';
 
 use Drupal\Core\Database\Query\SelectInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_board\Entity\Board;
@@ -13,6 +14,7 @@ use Drupal\ebms_review\Entity\Review;
 use Drupal\ebms_topic\Entity\Topic;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -100,6 +102,31 @@ class ArticleStatisticsReport extends FormBase {
    * Board-level counts.
    */
   private array $board_counts;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticleStatisticsReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -198,7 +225,7 @@ class ArticleStatisticsReport extends FormBase {
     elseif (!empty($start)) {
       $this->sheet_title = "EBMS Statistics (since $start)";
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'working_group_decisions');
     $query->sort('name');
@@ -420,7 +447,7 @@ class ArticleStatisticsReport extends FormBase {
 
     // Handle the unusual, but very easy case.
     if (empty($this->start) && empty($this->end)) {
-      $query = \Drupal::database()->select('ebms_state', 'state');
+      $query = $this->database->select('ebms_state', 'state');
       if (!empty($topic)) {
         $query->condition('state.topic', $topic);
       }
@@ -432,7 +459,7 @@ class ArticleStatisticsReport extends FormBase {
     }
 
     // Create a subquery to get the first state for each article.
-    $subquery = \Drupal::database()->select('ebms_state', 'first');
+    $subquery = $this->database->select('ebms_state', 'first');
     $subquery->addField('first', 'article');
     $subquery->addExpression('MIN(first.id)', 'id');
     $subquery->groupBy('first.article');
@@ -444,7 +471,7 @@ class ArticleStatisticsReport extends FormBase {
     }
 
     // Now the query to find out how many of those state are in the range.
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->database->select('ebms_state', 'state');
     $query->join($subquery, 'first_state', 'first_state.id = state.id');
     $query->addField('state', 'article');
     $query->distinct();
@@ -471,7 +498,7 @@ class ArticleStatisticsReport extends FormBase {
    *   Value to be placed in a cell in the spreadsheet.
    */
   private function stateCount(string $text_id, int $board, int $topic): int {
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->database->select('ebms_state', 'state');
     $query->addField('state', 'article');
     $query->distinct();
     $query->condition('state.value', $this->state_ids[$text_id]);
@@ -491,7 +518,7 @@ class ArticleStatisticsReport extends FormBase {
    *   Value to be placed in a cell in the spreadsheet.
    */
   private function fullTextCount(int $board, int $topic) {
-    $query = \Drupal::database()->select('ebms_article', 'article');
+    $query = $this->database->select('ebms_article', 'article');
     $query->addField('article', 'id');
     $query->distinct();
     $query->join('file_managed', 'file', 'file.fid = article.full_text__file');
@@ -500,7 +527,7 @@ class ArticleStatisticsReport extends FormBase {
       if (!empty($topic)) {
         $query->condition('state.topic', $topic);
       }
-      elseif (!empty($board)) {
+      else {
         $query->condition('state.board', $board);
       }
     }
@@ -532,7 +559,7 @@ class ArticleStatisticsReport extends FormBase {
    *   Value to be placed in a cell in the spreadsheet.
    */
   private function assignedCount(int $board, int $topic) {
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
     $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = articles.articles_target_id');
     $query->addField('packet_article', 'article');
@@ -571,7 +598,7 @@ class ArticleStatisticsReport extends FormBase {
   private function reviewCount(string $operator, int $board, int $topic) {
 
     // Get started with the part of the query common to all three counts.
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
     $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = articles.articles_target_id');
     $query->addField('packet_article', 'article');
@@ -630,7 +657,7 @@ class ArticleStatisticsReport extends FormBase {
    *   Value to be placed in a cell in the spreadsheet.
    */
   private function wgDecisionCount(int $decision, int $board, int $topic) {
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->database->select('ebms_state', 'state');
     $query->join('ebms_state__wg_decisions', 'decisions', 'decisions.entity_id = state.id');
     $query->condition('decisions.wg_decisions_target_id', $decision);
     $query->addField('state', 'article');
@@ -653,7 +680,7 @@ class ArticleStatisticsReport extends FormBase {
    *   Value to be placed in a cell in the spreadsheet.
    */
   private function decisionCount(int $decision, int $board, int $topic) {
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->database->select('ebms_state', 'state');
     $query->join('ebms_state__decisions', 'decisions', 'decisions.entity_id = state.id');
     $query->condition('decisions.decisions_decision', $decision);
     $query->addField('state', 'article');

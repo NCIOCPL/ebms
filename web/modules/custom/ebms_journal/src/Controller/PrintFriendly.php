@@ -3,9 +3,11 @@
 namespace Drupal\ebms_journal\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_journal\Entity\Journal;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,6 +23,23 @@ class PrintFriendly extends ControllerBase {
     'full-title' => 'full title',
     'journal-id' => 'journal ID',
   ];
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): PrintFriendly {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->renderer = $container->get('renderer');
+    return $instance;
+  }
 
   /**
    * Show the journals.
@@ -74,7 +93,7 @@ class PrintFriendly extends ControllerBase {
       '#all' => $which === 'All',
       '#journals' => $journals,
     ];
-    $page = \Drupal::service('renderer')->render($render_array);
+    $page = $this->renderer->render($render_array);
     $response = new Response($page);
     return $response;
   }

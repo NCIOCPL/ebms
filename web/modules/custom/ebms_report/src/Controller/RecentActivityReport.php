@@ -3,11 +3,13 @@
 namespace Drupal\ebms_report\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_meeting\Entity\Meeting;
 use Drupal\ebms_message\Entity\Message;
 use Drupal\file\Entity\File;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -24,6 +26,23 @@ class RecentActivityReport extends ControllerBase {
     Message::MEETING_PUBLISHED,
     Message::MEETING_TYPE_CHANGED,
   ];
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): RecentActivityReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->renderer = $container->get('renderer');
+    return $instance;
+  }
 
   public function display($report_id) {
 
@@ -213,7 +232,7 @@ class RecentActivityReport extends ControllerBase {
       '#title' => $title,
       '#boards' => $boards,
     ];
-    $page = \Drupal::service('renderer')->render($render_array);
+    $page = $this->renderer->render($render_array);
     $response = new Response($page);
     return $response;
   }

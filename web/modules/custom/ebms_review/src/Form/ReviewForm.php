@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,11 +11,29 @@ use Drupal\ebms_review\Entity\PacketArticle;
 use Drupal\ebms_review\Entity\Review;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form used by the board memebers to assess articles in review packets.
  */
 class ReviewForm extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReviewForm {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -93,7 +112,7 @@ class ReviewForm extends FormBase {
     }
 
     // Get the values for the dispositions field.
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE)
       ->sort('weight')
       ->condition('status', 1)
@@ -237,7 +256,7 @@ class ReviewForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
 
     // Find out which disposition means "no changes" (it's the first one).
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $ids = $storage->getQuery()->accessCheck(FALSE)
       ->sort('weight')
       ->condition('vid', 'dispositions')

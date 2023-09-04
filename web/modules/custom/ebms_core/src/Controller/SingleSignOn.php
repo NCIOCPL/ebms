@@ -3,6 +3,7 @@
 namespace Drupal\ebms_core\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -21,6 +22,27 @@ class SingleSignOn extends ControllerBase {
   const LOGIN = '/login';
 
   /**
+   * Service for adding an entry to the authorization map.
+   */
+  protected $authmap;
+
+  /**
+   * Service for authenticating users outside of Drupal.
+   */
+  protected $externalauth;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): SingleSignOn {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->authmap = $container->get('externalauth.authmap');
+    $instance->externalauth = $container->get('externalauth.externalauth');
+    return $instance;
+  }
+
+  /**
    * Log in the user with SSO.
    */
   public function login(): RedirectResponse {
@@ -28,7 +50,6 @@ class SingleSignOn extends ControllerBase {
     // Collect the Apache headers.
     $headers = [];
     $raw_values = [];
-    $externalauth = \Drupal::service('externalauth.externalauth');
     foreach (apache_request_headers() as $name => $value) {
       $key = strtolower($name);
       if (str_starts_with($key, 'sm_') || $key === 'user_email') {
@@ -41,14 +62,14 @@ class SingleSignOn extends ControllerBase {
     // Make sure the /ssologin URL is protected by SiteMinder.
     if (!array_key_exists('sm_authtype', $headers) || $headers['sm_authtype'] !== 'Form') {
       $this->messenger()->addWarning('NIH SSO login integration is not configured correctly.');
-      \Drupal::logger(self::PROVIDER)->error('Login failed: page not protected by SSO.');
+      $this->getLogger(self::PROVIDER)->error('Login failed: page not protected by SSO.');
       return new RedirectResponse(self::LOGIN);
     }
 
     // Find out if the SiteMinder user name matches an EBMS account.
     if (array_key_exists('sm_user', $headers)) {
       $sm_user = $headers['sm_user'];
-      $account = $externalauth->load($sm_user, self::PROVIDER);
+      $account = $this->externalauth->load($sm_user, self::PROVIDER);
 
       // If not, see if the email address for the account SiteMinder approved
       // matches the email placeholder for a federated Google account.
@@ -56,12 +77,11 @@ class SingleSignOn extends ControllerBase {
         if (array_key_exists('user_email', $headers)) {
           $user_email = $headers['user_email'];
           $mail_key = "mail:$user_email";
-          $account = $externalauth->load($mail_key, self::PROVIDER);
+          $account = $this->externalauth->load($mail_key, self::PROVIDER);
 
           // If so, replace the placeholder with the SiteMinder user name.
           if (!empty($account)) {
-            $authmap = \Drupal::service('externalauth.authmap');
-            $authmap->save($account, self::PROVIDER, $sm_user);
+            $this->authmap->save($account, self::PROVIDER, $sm_user);
           }
         }
       }
@@ -70,7 +90,7 @@ class SingleSignOn extends ControllerBase {
       if (empty($account)) {
         ebms_debug_log("$sm_user is not a valid user account.", 1);
         $this->messenger()->addWarning('Not a valid user account.');
-        \Drupal::logger(self::PROVIDER)->error("$sm_user is not a valid user account.");
+        $this->getLogger(self::PROVIDER)->error("$sm_user is not a valid user account.");
         setcookie('NIHSMSESSION', '', 1, '/', '.nih.gov');
         setcookie('NIHSMPROFILE', '', 1, '/', '.nih.gov');
         return new RedirectResponse(self::LOGIN);
@@ -80,7 +100,7 @@ class SingleSignOn extends ControllerBase {
       elseif (empty($account->status)) {
         ebms_debug_log("$sm_user is a disabled user account.", 1);
         $this->messenger()->addWarning('Not a valid user account.');
-        \Drupal::logger(self::PROVIDER)->error("$sm_user is not an active user account.");
+        $this->getLogger(self::PROVIDER)->error("$sm_user is not an active user account.");
         setcookie('NIHSMSESSION', '', 1, '/', '.nih.gov');
         setcookie('NIHSMPROFILE', '', 1, '/', '.nih.gov');
         return new RedirectResponse(self::LOGIN);
@@ -88,7 +108,7 @@ class SingleSignOn extends ControllerBase {
 
       // If we make it to here, we have a usable account, so log it in.
       else {
-        $user = $externalauth->login($sm_user, self::PROVIDER);
+        $user = $this->externalauth->login($sm_user, self::PROVIDER);
         $name = $user->name->value;
         ebms_debug_log("SM user $sm_user logged in as $name");
         return $this->redirect('<front>');
@@ -99,7 +119,7 @@ class SingleSignOn extends ControllerBase {
     else {
       ebms_debug_log('SM_USER variable not found', 1);
       $this->messenger()->addWarning('NIH SSO login integration is not configured correctly.');
-      \Drupal::logger(self::PROVIDER)->error('SM_USER variable not found.');
+      $this->getLogger(self::PROVIDER)->error('SM_USER variable not found.');
       return new RedirectResponse(self::LOGIN);
     }
   }

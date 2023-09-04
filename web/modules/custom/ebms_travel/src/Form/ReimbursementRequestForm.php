@@ -12,7 +12,32 @@ use Drupal\user\Entity\User;
  *
  * @ingroup ebms
  */
-class ReimbursementRequestForm extends FormBase {
+final class ReimbursementRequestForm extends FormBase {
+
+  /**
+   * Type manage (for storage/queries).
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $typeManager;
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\Renderer
+   */
+  protected $renderer;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create($container) {
+    $form = new static();
+    $form->typeManager = $container->get('entity_type.manager');
+    //$form->renderer = \Drupal::service('renderer');
+    $form->renderer = $container->get('renderer');
+    return $form;
+  }
 
   /**
    * {@inheritdoc}
@@ -280,7 +305,7 @@ class ReimbursementRequestForm extends FormBase {
     }
 
     // Find the ID for the "I paid for my hotel" option.
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->typeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'hotel_payment_methods');
     $query->condition('field_text_id', 'i_paid');
@@ -579,7 +604,7 @@ class ReimbursementRequestForm extends FormBase {
    * Populate the picklist of board members.
    */
   private function getBoardMembers(): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->typeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('roles', 'board_member');
     $query->sort('name');
@@ -609,7 +634,7 @@ class ReimbursementRequestForm extends FormBase {
     foreach ($user->groups as $group) {
       $groups[] = $group->target_id;
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_meeting');
+    $storage = $this->typeManager->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE);
     if (!empty($boards) || !empty($groups)) {
       $membership = $query->orConditionGroup();
@@ -647,10 +672,10 @@ class ReimbursementRequestForm extends FormBase {
 
     // Collect the common SMTP values.
     $subject = 'EBMS Reimbursement Request';
-    $site_mail = \Drupal::config('system.site')->get('mail');
-    $site_name = \Drupal::config('system.site')->get('name');
+    $site_config = $this->config('system.site');
+    $site_mail = $site_config->get('mail');
+    $site_name = $site_config->get('name');
     $from = "$site_name <$site_mail>";
-    $renderer = \Drupal::service('renderer');
 
     // See if we have managers to whom we can send the notification.
     $host = $this->getRequest()->getHost();
@@ -669,7 +694,7 @@ class ReimbursementRequestForm extends FormBase {
         '#theme' => 'reimbursement_request_notification',
         '#request' => $request,
       ];
-      $message = $renderer->render($notification);
+      $message = $this->renderer->render($notification);
       $headers = implode("\r\n", [
         'MIME-Version: 1.0',
         'Content-type: text/html; charset=utf-8',
@@ -689,7 +714,7 @@ class ReimbursementRequestForm extends FormBase {
       '#request' => $request,
       '#user_notification' => TRUE,
     ];
-    $message = $renderer->render($notification);
+    $message = $this->renderer->render($notification);
     $to = $request->confirmation_email->value;
     $headers = implode("\r\n", [
       'MIME-Version: 1.0',
@@ -712,7 +737,7 @@ class ReimbursementRequestForm extends FormBase {
    *   Display values indexed by term IDs.
    */
   private function getPicklistValues(string $vocabulary): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->typeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', $vocabulary);
     $query->sort('weight');
@@ -746,7 +771,7 @@ class ReimbursementRequestForm extends FormBase {
    *   Unique ID for the term entity.
    */
   private function transportationExpenseType(string $text_id): int {
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->typeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('vid', 'transportation_expense_types');
     $query->condition('field_text_id', $text_id);

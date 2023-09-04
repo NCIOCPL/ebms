@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Show a menu of summary pages.
  */
-class BoardSummariesController extends ControllerBase {
+final class BoardSummariesController extends ControllerBase {
 
   /**
    * Request stack.

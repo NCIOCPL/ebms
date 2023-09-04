@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
@@ -10,13 +11,40 @@ use Drupal\ebms_message\Entity\Message;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\ebms_review\Entity\ReviewerDoc;
 use Drupal\ebms_summary\Entity\SummaryPage;
+use Drupal\file\FileUsage\FileUsageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Document posted by a board member to a packet.
  *
  * @ingroup ebms
  */
-class ReviewerDocForm extends FormBase {
+final class ReviewerDocForm extends FormBase {
+
+  /**
+   * File usage service.
+   *
+   * @var \Drupal\file\FileUsage\FileUsageInterface
+   */
+  protected FileUsageInterface $fileUsage;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReviewerDocForm {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->fileUsage = $container->get('file.usage');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -75,8 +103,7 @@ class ReviewerDocForm extends FormBase {
     ];
     $doc = ReviewerDoc::create($values);
     $doc->save();
-    $file_usage = \Drupal::service('file.usage');
-    $file_usage->add($file, 'ebms_reviewer_doc', 'ebms_reviewer_doc', $doc->id());
+    $this->fileUsage->add($file, 'ebms_reviewer_doc', 'ebms_reviewer_doc', $doc->id());
     $packet = Packet::load($packet_id);
     $packet->reviewer_docs[] = $doc->id();
     $packet->save();
@@ -97,7 +124,7 @@ class ReviewerDocForm extends FormBase {
 
     // Attach the document to any summary pages with the same topic.
     $topic_id = $packet->topic->target_id;
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_summary_page');
+    $storage = $this->entityTypeManager->getStorage('ebms_summary_page');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('topics', $packet->topic->target_id);
     $query->condition('active', 1);

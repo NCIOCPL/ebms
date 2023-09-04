@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\ebms_meeting\Entity\Meeting;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Custom calendar display.
@@ -18,6 +19,23 @@ use Drupal\user\Entity\User;
  * bugs.
  */
 class Month extends ControllerBase {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): Month {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * Assemble the render array for a calendar month.
@@ -70,7 +88,7 @@ class Month extends ControllerBase {
     }
 
     // Assemble the rows for the month's weeks.
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $dow = $date->format('w');
     $title = $date->format('F Y');
     $n = $date->format('t');
@@ -123,7 +141,7 @@ class Month extends ControllerBase {
 
     // Create navigation rows for the previous and next months.
     $route = 'ebms_meeting.calendar_month';
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $buttons = [
       [
         'url' => Url::fromRoute($route, ['month' => substr($prev_month, 0, 7)], $options),
@@ -146,7 +164,7 @@ class Month extends ControllerBase {
     if ($user->hasPermission('view all meetings')) {
       if (!$user->boards->isEmpty()) {
         $label = 'Show All Boards';
-        $options = ['query' => \Drupal::request()->query->all()];
+        $options = ['query' => $this->currentRequest->query->all()];
         if ($options['query']['boards'] ?? '' === 'all') {
           unset($options['query']['boards']);
           $label = 'Restrict To My Boards';
@@ -162,7 +180,7 @@ class Month extends ControllerBase {
       $travel_manager = $user->id() > 1 && $user->hasPermission('manage travel');
       $default = $travel_manager ? 'board' : 'all';
       $label = 'Show All Meeting Categories';
-      $options = ['query' => \Drupal::request()->query->all()];
+      $options = ['query' => $this->currentRequest->query->all()];
       $meetings = $options['query']['meetings'] ?? $default;
       if ($meetings === 'all') {
         $label = 'Show Just Board Meetings';

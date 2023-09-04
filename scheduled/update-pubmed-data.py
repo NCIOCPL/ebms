@@ -122,7 +122,7 @@ class Control:
         """Find the base directory for the site."""
 
         if self.opts.root:
-            return self.opts.root
+            return Path(self.opts.root)
         for root in self.ROOTS:
             path = Path(root)
             if (path / self.EBMS_CORE).exists():

@@ -528,7 +528,7 @@ class ImportForm extends FormBase {
     catch (\Exception $e) {
       $error = $e->getMessage();
       $message = "Import failure: $error";
-      $logger = \Drupal::logger('ebms_import');
+      $logger = $this->getLogger('ebms_import');
       $logger->error($message);
       $this->messenger()->addError($message);
       $batch = NULL;

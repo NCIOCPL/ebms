@@ -7,20 +7,35 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
-use Drupal\user\Entity\User;
 
 /**
  * Pick a user for whom to make topic assignments.
  *
  * @ingroup ebms
  */
-class ManageReviewTopicAssignments extends FormBase {
+final class ManageReviewTopicAssignments extends FormBase {
+
+  /**
+   * Storage service for user entities.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $userStorage;
 
   /**
    * {@inheritdoc}
    */
   public function getFormId(): string {
     return 'manage_review_topics_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create($container) {
+    $form = new static();
+    $form->userStorage = $container->get('entity_type.manager')->getStorage('user');
+    return $form;
   }
 
   /**
@@ -42,8 +57,7 @@ class ManageReviewTopicAssignments extends FormBase {
     $role = array_diff($parameters['role'] ?? ['board_member'], [0]);
 
     // Find the users to display in the table below the form.
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
-    $query = $storage->getQuery()->accessCheck(FALSE);
+    $query = $this->userStorage->getQuery()->accessCheck(FALSE);
     $query->sort('name');
     if (!empty($board)) {
       $query->condition('boards', $board, 'IN');
@@ -56,13 +70,12 @@ class ManageReviewTopicAssignments extends FormBase {
     }
     $query->condition('status', 1);
     ebms_debug_log('manage topic assignments query: ' . (string) $query);
-    ebms_debug_log("user: $user");
     $users = [];
     $opts = [];
     if (!empty($request_id)) {
       $opts['query'] = ['request_id' => $request_id];
     }
-    foreach ($storage->loadMultiple($query->execute()) as $user) {
+    foreach ($this->userStorage->loadMultiple($query->execute()) as $user) {
       $topics = [];
       foreach ($user->topics as $topic) {
         $topics[] = $topic->entity->name->value;

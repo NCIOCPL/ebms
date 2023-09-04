@@ -2,16 +2,13 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
-use Drupal\ebms_doc\Entity\Doc;
-use Drupal\ebms_topic\Entity\Topic;
-use Drupal\taxonomy\Entity\Term;
-use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Report on requests for hotel reservations.
@@ -19,6 +16,23 @@ use Drupal\user\Entity\User;
  * @ingroup ebms
  */
 class ReimbursementRequestsReport extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReimbursementRequestsReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -37,7 +51,7 @@ class ReimbursementRequestsReport extends FormBase {
     $boards = Board::boards();
     $board = $form_state->getValue('board', $params['board'] ?? '');
     $per_page = $params['per-page'] ?? '10';
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_meeting');
+    $storage = $this->entityTypeManager->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->sort('dates', 'DESC');
     if (!empty($board)) {
@@ -135,7 +149,7 @@ class ReimbursementRequestsReport extends FormBase {
 
 
     // Identify the documents for the report.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_reimbursement_request');
+    $storage = $this->entityTypeManager->getStorage('ebms_reimbursement_request');
     $query = $storage->getQuery()->accessCheck(FALSE);
     if (!empty($meeting)) {
       $query->condition('meeting', $meeting);

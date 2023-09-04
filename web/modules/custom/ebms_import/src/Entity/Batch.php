@@ -859,11 +859,10 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
    *   If unable to create a connection object.
    */
   public static function getCurlHandle(string $parms, string $url = self::URL): \CurlHandle {
-    $ch = curl_init();
+    $ch = curl_init($url);
     if (empty($ch)) {
       throw new \Exception('Unable to create an HTTP connection object.');
     }
-    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $parms);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);

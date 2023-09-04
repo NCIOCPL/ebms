@@ -37,7 +37,6 @@ class ToBeImplemented extends FormBase {
           '#description' => 'Select the board for which the report is to be generated.',
           '#required' => TRUE,
           '#options' => Board::boards(),
-          '#default_value' => $board,
           '#empty_value' => '',
           '#ajax' => [
             'callback' => '::boardChangeCallback',
@@ -65,7 +64,6 @@ class ToBeImplemented extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $params = $form_state->getValues();
-    dpm($params);
     $request = SavedRequest::saveParameters('name of the report', $params);
     $form_state->setRedirect('ebms_report.route_id_goes_here', ['report_id' => $request->id()]);
   }

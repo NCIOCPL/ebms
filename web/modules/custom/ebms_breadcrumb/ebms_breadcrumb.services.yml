@@ -3,5 +3,6 @@ services:
     class: Drupal\ebms_breadcrumb\Breadcrumb\Builder
     arguments:
       - '@request_stack'
+      - '@current_user'
     tags:
       - { name: breadcrumb_builder, priority: 100 }

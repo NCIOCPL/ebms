@@ -6,11 +6,35 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\file\Entity\File;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller for a packet with no reviews.
  */
 class UnreviewedPacket extends ControllerBase {
+
+  /**
+   * Service for looking up an EBMS taxonomy term.
+   */
+  protected $termLookup;
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): UnreviewedPacket {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    $instance->termLookup = $container->get('ebms_core.term_lookup');
+    return $instance;
+  }
 
   /**
    * Show the articles for this packet.
@@ -24,9 +48,9 @@ class UnreviewedPacket extends ControllerBase {
   public function display(int $packet_id): array {
 
     // Collect some preliminary information.
-    $full_text_approval = \Drupal::service('ebms_core.term_lookup')->getState('passed_full_review');
-    $archive = \Drupal::request()->get('archive');
-    $filter_id = \Drupal::request()->get('filter-id');
+    $full_text_approval = $this->termLookup->getState('passed_full_review');
+    $archive = $this->currentRequest->get('archive');
+    $filter_id = $this->currentRequest->get('filter-id');
     $packet = Packet::load($packet_id);
     $reviewers = [];
     foreach ($packet->reviewers as $reviewer) {

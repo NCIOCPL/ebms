@@ -4,14 +4,41 @@ namespace Drupal\ebms_article;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Link;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a class to build a listing of EBMS articles.
  *
  * @ingroup ebms
  */
-class ArticleListBuilder extends EntityListBuilder {
+final class ArticleListBuilder extends EntityListBuilder {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * Object for creating a Drupal form.
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    $type_id = $container->get('entity_type.manager')->getStorage($entity_type->id());
+    $instance = new static($entity_type, $type_id);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    $instance->formBuilder = $container->get('form_builder');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -28,7 +55,7 @@ class ArticleListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render(): array {
-    $build['form'] = \Drupal::formBuilder()->getForm('Drupal\ebms_article\Form\ArticleListForm');
+    $build['form'] = $this->formBuilder->getForm('Drupal\ebms_article\Form\ArticleListForm');
     $build += parent::render();
     return $build;
   }
@@ -48,7 +75,7 @@ class ArticleListBuilder extends EntityListBuilder {
     $storage = $this->getStorage();
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->sort('import_date', 'DESC');
-    $parms = \Drupal::request()->query;
+    $parms = $this->currentRequest->query;
     $board = $parms->get('board');
     $state = $parms->get('state');
     if (!empty($board) || !empty($state)) {
@@ -70,17 +97,16 @@ class ArticleListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity): array {
-    $row['id'] = $entity->id();
-    $row['source-id'] = $entity->source_id->value;
+    /** @var \Drupal\ebms_article\Entity\Article */
+    $article = $entity;
+    $row['id'] = $article->id();
+    $row['source-id'] = $article->source_id->value;
     $row['citation'] = Link::createFromRoute(
-      $entity->getLabel(),
-      // 'entity.ebms_article.canonical',
+      $article->getLabel(),
       'ebms_article.article',
-      // ['ebms_article' => $entity->id()]
-      ['article' => $entity->id()]
+      ['article' => $article->id()]
     );
-    // $row['citation'] = $entity->getLabel();
-    $row['import-date'] = $entity->import_date->value;
+    $row['import-date'] = $article->import_date->value;
     return $row + parent::buildRow($entity);
   }
 

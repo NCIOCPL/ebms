@@ -2,11 +2,13 @@
 
 namespace Drupal\ebms_import\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_import\Entity\ImportRequest;
 use Drupal\taxonomy\Entity\Term;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Import articles tagged for internal use, not for the review process.
@@ -14,6 +16,23 @@ use Drupal\taxonomy\Entity\Term;
  * @ingroup ebms
  */
 class ImportInternalArticles extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ImportInternalArticles {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -33,7 +52,7 @@ class ImportInternalArticles extends FormBase {
 
     // Create the picklist for internal tags.
     $tags = [];
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('vid', 'internal_tags')
@@ -160,7 +179,7 @@ class ImportInternalArticles extends FormBase {
     catch (\Exception $e) {
       $error = $e->getMessage();
       $message = "Import failure: $error";
-      $logger = \Drupal::logger('ebms_import');
+      $logger = $this->getLogger('ebms_import');
       $logger->error($message);
       $this->messenger()->addError($message);
       $batch = NULL;

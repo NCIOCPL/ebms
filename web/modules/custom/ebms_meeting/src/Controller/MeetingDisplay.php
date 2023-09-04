@@ -7,11 +7,29 @@ use Drupal\Core\Url;
 use Drupal\ebms_meeting\Entity\Meeting;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Display the information for a PDQ meeting.
  */
 class MeetingDisplay extends ControllerBase {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): MeetingDisplay {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * Assemble the render array for a PDQ meeting.
@@ -38,7 +56,7 @@ class MeetingDisplay extends ControllerBase {
     $when .= $end->format(' - g:i a');
 
     // Show which boards and groups are invited.
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->entityTypeManager()->getStorage('user');
     $participants = [];
     foreach ($meeting->boards as $board) {
       $participants[] = ['name' => $board->entity->name->value . ' Board'];
@@ -61,7 +79,7 @@ class MeetingDisplay extends ControllerBase {
 
     // Create some buttons for navigation and meeting creation.
     $user = User::load($this->currentUser()->id());
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $buttons = [
       [
         'url' => Url::fromRoute('ebms_meeting.calendar', ['month' => $start->format('Y-m')], $options),

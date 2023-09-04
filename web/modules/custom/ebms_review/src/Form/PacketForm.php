@@ -2,10 +2,12 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -41,6 +43,13 @@ class PacketForm extends FormBase {
   protected AccountProxyInterface $account;
 
   /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected Connection $database;
+
+  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -50,7 +59,14 @@ class PacketForm extends FormBase {
   /**
    * Are board members other than topic specialists selected?
    */
-  private bool $nonSpecialists = FALSE;
+  protected bool $nonSpecialists = FALSE;
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
 
   /**
    * {@inheritdoc}
@@ -60,6 +76,8 @@ class PacketForm extends FormBase {
     $instance = parent::create($container);
     $instance->account = $container->get('current_user');
     $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->renderer = $container->get('renderer');
+    $instance->database = $container->get('database');
     return $instance;
   }
 
@@ -74,6 +92,11 @@ class PacketForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $packet_id = NULL): array {
+
+    // Make PHPStan happy.
+    $boards = [];
+    $topic_options = [];
+    $topic_description = '';
 
     // If we're editing an existing packet, board and topic are fixed.
     $method = $this->getRequest()->getMethod();
@@ -683,7 +706,7 @@ class PacketForm extends FormBase {
   private function makeTopicQuery(int $topic_id, string $state_text_id, string $sort): SelectInterface {
 
     // Use a subquery to avoid articles which are already in a packet for this topic.
-    $subquery = \Drupal::database()->select('ebms_packet_article', 'packet_article');
+    $subquery = $this->database->select('ebms_packet_article', 'packet_article');
     $subquery->join('ebms_packet__articles', 'packet_articles', 'packet_articles.articles_target_id = packet_article.id');
     $subquery->join('ebms_packet', 'packet', 'packet.id = packet_articles.entity_id');
     $subquery->addField('packet_article', 'article');
@@ -692,7 +715,7 @@ class PacketForm extends FormBase {
     $subquery->distinct();
 
     $state_id = State::getStateId($state_text_id);
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->database->select('ebms_state', 'state');
     $query->join('ebms_article', 'article', 'article.id = state.article');
     $query->addField('article', 'id');
     $query->condition('state.topic', $topic_id);
@@ -832,7 +855,7 @@ class PacketForm extends FormBase {
       '#high_priority' => $high_priority,
       '#comments' => $comments,
     ];
-    return \Drupal::service('renderer')->render($element);
+    return $this->renderer->render($element);
   }
 
   /**
@@ -1009,7 +1032,7 @@ class PacketForm extends FormBase {
     GROUP BY t.id
     EOT;
     ebms_debug_log('PacketForm::topicOptions() query = ' . (string) $query, 3);
-    $results = \Drupal::database()->query($query);
+    $results = $this->database->query($query);
     $counts = [];
     foreach ($results as $result) {
       $counts[$result->id] = $result->count;
@@ -1020,7 +1043,7 @@ class PacketForm extends FormBase {
       return [];
     }
 
-    $query = \Drupal::database()->select('ebms_topic', 'topic');
+    $query = $this->database->select('ebms_topic', 'topic');
     $query->leftJoin('taxonomy_term_field_data', 'grp', 'grp.tid = topic.topic_group');
     $query->condition('topic.id', array_keys($counts), 'IN');
     $query->fields('topic', ['id', 'name']);

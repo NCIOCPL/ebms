@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * @ingroup ebms
  */
-class ReviewQueue extends FormBase {
+final class ReviewQueue extends FormBase {
 
   /**
    * How many articles should appear on the page at most.
@@ -104,6 +104,13 @@ class ReviewQueue extends FormBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $connection;
+
+  /**
    * IDs of boards assigned to the current user.
    *
    * @var array
@@ -122,12 +129,12 @@ class ReviewQueue extends FormBase {
    *
    * @var bool
    */
-  private bool $canReviewAllTopics = FALSE;
+  protected bool $canReviewAllTopics = FALSE;
 
   /**
    * Array of publication types indexed by ancestors.
    */
-  private array $pubTypeHierarchy = [];
+  protected array $pubTypeHierarchy = [];
 
   /**
    * {@inheritdoc}
@@ -143,8 +150,8 @@ class ReviewQueue extends FormBase {
       $instance->userTopics[] = $topic->target_id;
     }
     $instance->canReviewAllTopics = $account->hasPermission('perform all topic reviews');
-    $connection = $container->get('database');
-    $select = $connection->select('on_demand_config', 'c');
+    $instance->connection = $container->get('database');
+    $select = $instance->connection->select('on_demand_config', 'c');
     $select->condition('c.name', 'article-type-ancestors');
     $select->fields('c', ['value']);
     $json = $select->execute()->fetchField();
@@ -240,6 +247,7 @@ class ReviewQueue extends FormBase {
     }
     ebms_debug_log('topics: ' . print_r($topics, TRUE), 3);
     if (!empty($topic)) {
+      $topic_ids = [];
       if (!empty($topics)) {
         $topic_ids = array_keys($topics);
         if (!is_numeric($topic_ids[0])) {
@@ -283,7 +291,7 @@ class ReviewQueue extends FormBase {
     // a second or less.
     $queue = [];
     if (empty($values)) {
-      $query = \Drupal::database()->select('ebms_state', 'state');
+      $query = $this->connection->select('ebms_state', 'state');
       $query->addField('state', 'article');
       $query->distinct();
       $query->condition('state.value', State::getStateId($state));
@@ -1048,7 +1056,7 @@ class ReviewQueue extends FormBase {
     // now this step takes around 5 seconds.
     $state_id = State::getStateId($state);
     ebms_debug_log("integer state ID is $state_id");
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->connection->select('ebms_state', 'state');
     $query->condition('state.value', $state_id);
     $query->condition('state.topic', $topic_ids, 'IN');
     $query->condition('state.current', 1);

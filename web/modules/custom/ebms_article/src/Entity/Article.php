@@ -26,10 +26,6 @@ use Drupal\ebms_article\Plugin\Field\FieldType\Author;
  *   handlers = {
  *     "view_builder" = "Drupal\ebms_article\Controller\ArticleController",
  *     "list_builder" = "Drupal\ebms_article\ArticleListBuilder",
- *     "form" = {
- *       "default" = "Drupal\ebms_article\Form\ArticleForm",
- *       "edit" = "Drupal\ebms_article\Form\ArticleForm",
- *     },
  *     "route_provider" = {
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
@@ -44,8 +40,6 @@ use Drupal\ebms_article\Plugin\Field\FieldType\Author;
  *     "published" = "active",
  *   },
  *   links = {
- *     "canonical" = "/ebms_article/{ebms_article}",
- *     "edit-form" = "/ebms_article/{ebms_article}/edit",
  *     "collection" = "/admin/content/ebms_article",
  *   }
  * )
@@ -483,7 +477,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     if (empty($date)) {
       $date = date('Y-m-d H:i:s');
     }
-    $comment = trim($comment ?? '');
+    $comment = trim($comment ?: '');
     if (!empty($comment)) {
       $comment = [
         'user' => $user,
@@ -895,7 +889,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $abstract = [];
     if (!empty($article->Abstract->AbstractText)) {
       foreach ($article->Abstract->AbstractText as $node) {
-        $text = trim($node ?? '');
+        $text = trim($node ?: '');
         if (!empty($text)) {
           $text_xml = $node->asXML();
           $text = preg_replace('#<\s*/?\s*AbstractText[^>]*>#', '', $text_xml);
@@ -953,7 +947,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $types = [];
     if (!empty($article->PublicationTypeList->PublicationType)) {
       foreach ($article->PublicationTypeList->PublicationType as $type) {
-        $type = trim($type ?? '');
+        $type = trim($type ?: '');
         if (!empty($type)) {
           $types[] = $type;
         }
@@ -963,7 +957,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $comments_corrections = [];
     if (!empty($citation->CommentsCorrectionsList->CommentsCorrections->PMID)) {
       foreach ($citation->CommentsCorrectionsList->CommentsCorrections->PMID as $pmid) {
-        $pmid = trim($pmid ?? '');
+        $pmid = trim($pmid ?: '');
         if (!empty($pmid)) {
           $comments_corrections[] = $pmid;
         }

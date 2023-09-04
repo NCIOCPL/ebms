@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_core\EventSubscriber;
 
+use Drupal\Core\Session\AccountProxy;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -24,6 +25,22 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
   ];
 
   /**
+   * The user requesting the page.
+   *
+   * @var AccountProxy
+   */
+  protected AccountProxy $currentUser;
+
+  /**
+   * Initialize the property for the current user.
+   *
+   * @param AccountProxy $current_user
+   */
+  public function __construct(AccountProxy $current_user) {
+    $this->currentUser = $current_user;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
@@ -34,9 +51,8 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
    * Send the user to the login page if appropriate.
    */
   public function checkLoginStatus(RequestEvent $event) {
-    $user = \Drupal::currentUser();
     $current_path = $event->getRequest()->getPathInfo();
-    if ($user->isAnonymous() && !in_array($current_path, self::SKIP)) {
+    if ($this->currentUser->isAnonymous() && !in_array($current_path, self::SKIP)) {
       ebms_debug_log('redirecting to /login');
       $response = new RedirectResponse('/login');
       $response->send();

@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -14,6 +15,7 @@ use Drupal\ebms_review\Entity\Packet;
 use Drupal\ebms_review\Entity\Review;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Report showing reviews of articles assigned to packets.
@@ -21,6 +23,31 @@ use Drupal\user\Entity\User;
  * @ingroup ebms
  */
 class LiteratureReviewsReport extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): LiteratureReviewsReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -73,7 +100,7 @@ class LiteratureReviewsReport extends FormBase {
     }
     $reviewers = empty($board_id) ? [] : $this->reviewers($board_id);
     $reviewer_id = $params['reviewer'] ?? '';
-    if (!empty($reviewer) && !array_key_exists($reviewer_id, $reviewers)) {
+    if (!empty($reviewer_id) && !array_key_exists($reviewer_id, $reviewers)) {
       $reviewer_id = '';
     }
     $packets = empty($board_id) ? [] : $this->packets($board_id, $topic_id);
@@ -234,7 +261,7 @@ class LiteratureReviewsReport extends FormBase {
   private function report(array $params): array {
 
     // Drupal's entity query API isn't up to the task of creating this report.
-    $query = \Drupal::database()->select('ebms_review', 'review');
+    $query = $this->database->select('ebms_review', 'review');
     $query->join('ebms_packet_article__reviews', 'reviews', 'reviews.reviews_target_id = review.id');
     $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = reviews.entity_id');
     $query->join('ebms_packet__articles', 'articles', 'articles.articles_target_id = packet_article.id');
@@ -401,7 +428,7 @@ class LiteratureReviewsReport extends FormBase {
    *   Sorted reviewer names indexed by user ID.
    */
   private function reviewers(int $board_id): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->entityTypeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('boards', $board_id);
     $query->condition('roles', 'board_member');
@@ -425,7 +452,7 @@ class LiteratureReviewsReport extends FormBase {
    *   Sorted packet titles indexed by entity ID.
    */
   private function packets(int $board_id, int|string $topic_id): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_packet');
+    $storage = $this->entityTypeManager->getStorage('ebms_packet');
     $query = $storage->getQuery()->accessCheck(FALSE);
     if (!empty($topic_id)) {
       $query->condition('topic', $topic_id);

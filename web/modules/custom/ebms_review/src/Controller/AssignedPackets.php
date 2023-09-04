@@ -7,11 +7,29 @@ use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Url;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provide a list of packets assigned for review to the current user.
  */
 class AssignedPackets extends ControllerBase {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): AssignedPackets {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * Create the render array for the packets list.
@@ -20,7 +38,7 @@ class AssignedPackets extends ControllerBase {
 
     // Start with some defaults.
     $title = 'Assigned Packets';
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $uid = $this->currentUser()->id();
 
     // Override defaults if working on behalf of a board member.

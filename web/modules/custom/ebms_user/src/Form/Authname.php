@@ -14,7 +14,7 @@ use Drupal\user\Entity\User;
  *
  * @ingroup ebms
  */
-class Authname extends FormBase {
+final class Authname extends FormBase {
 
   /**
    * Explain what to enter for the authname.
@@ -22,6 +22,38 @@ class Authname extends FormBase {
    * We use this elsewhere, so nice to maintain it in one place.
    */
   const DESCRIPTION = "The user's NIH SSO Username. You can find this information by going to https://ned.nih.gov and searching for the user and viewing the account's details. On the details page this is the <strong>NIH Login Username</strong> field. Try to make the Drupal username match this value if possible.<br><br>Alternatively, enter the user's OpenID identifier. This identifier must be provided by the user. Google identifiers are Google account email addresses (which may or may not be gmail addresses). If the identifier is an email address, prefix it with <strong>mail:</strong>, <em>e.g.</em>, <strong>mail:jjsmith@gmail.com</strong>.";
+
+  /**
+   * Service for external authorization map.
+   *
+   * @var \Drupal\externalauth\Authmap
+   */
+  protected $authmap;
+
+  /**
+   * Drupal module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create($container) {
+    $form = new static();
+    $form->authmap = $container->get('externalauth.authmap');
+    $form->moduleHandler = $container->get('module_handler');
+    $form->database = $container->get('database');
+    return $form;
+  }
 
   /**
    * {@inheritdoc}
@@ -78,8 +110,7 @@ class Authname extends FormBase {
     $user = User::load($uid);
     $user->set('pass', NULL);
     $user->save();
-    $authmap = \Drupal::service('externalauth.authmap');
-    $authmap->save($user, SingleSignOn::PROVIDER, $authname);
+    $this->authmap->save($user, SingleSignOn::PROVIDER, $authname);
     ebms_debug_log("Saved SSO authname $authname");
     $form_state->setRedirect('entity.user.edit_form', ['user' => $uid]);
   }
@@ -97,13 +128,13 @@ class Authname extends FormBase {
     if (!$account->hasPermission('administer users')) {
       $answer = AccessResult::forbidden();
     }
-    elseif (!\Drupal::moduleHandler()->moduleExists('externalauth')) {
+    elseif (!$this->moduleHandler->moduleExists('externalauth')) {
       $answer = AccessResult::forbidden();
     }
     else {
       $uid = $this->getRouteMatch()->getRawParameter('user');
       ebms_debug_log('checking to see if user ' . $uid . ' has an authname');
-      $authname = \Drupal::database()->select('authmap', 'a')
+      $authname = $this->database->select('authmap', 'a')
         ->condition('a.uid', $uid)
         ->condition('a.provider', 'ebms_core')
         ->fields('a', ['authname'])
