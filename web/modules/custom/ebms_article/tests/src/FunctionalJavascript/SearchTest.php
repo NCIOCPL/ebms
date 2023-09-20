@@ -159,8 +159,11 @@ class SearchTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Test Article 2');
     $assert_session->pageTextContains('Topics: Test Topic 3; Test Topic 4');
 
-    // Search by PubMed ID. Can't test the quick PMID search because of
-    // bug https://www.drupal.org/project/uswds_base/issues/3359804.
+    // Search by PubMed ID. Can't test the quick PMID search here because
+    // of bug https://www.drupal.org/project/uswds_base/issues/3359804.
+    // So instead we test the quick PMID search as part of the tests of
+    // the home page, where we can use the EBMS theme without triggering
+    // that bug.
     $this->drupalGet($url);
     $form = $this->getSession()->getPage();
     $form->fillField('PubMed ID', '10000002');

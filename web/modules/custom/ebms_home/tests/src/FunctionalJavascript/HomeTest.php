@@ -19,7 +19,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
 
-/**ß
+/**
  * Test the EBMS home pages.
  *
  * @group ebms
@@ -40,6 +40,12 @@ class HomeTest extends WebDriverTestBase {
     'ebms_menu',
     'ebms_user',
   ];
+
+  /**
+   * We need to use our own theme here instead of the stark theme, which we
+   * use for most of the tests, because the quick PMID search is only shown
+   * when using our theme.
+   */
   protected $defaultTheme = 'ebms';
 
   private $test_users = [];
