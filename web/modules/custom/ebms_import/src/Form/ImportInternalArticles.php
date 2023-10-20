@@ -76,6 +76,7 @@ class ImportInternalArticles extends FormBase {
         '#title' => 'PubMed IDs',
         '#description' => 'Separate multiple IDs with commas or spaces.',
         '#default_value' => $values['pmids'] ?? '',
+        '#maxlength' => NULL,
         '#required' => TRUE,
       ],
       'comment' => [
