@@ -77,7 +77,6 @@ class ImportInternalArticles extends FormBase {
         '#description' => 'Separate multiple IDs with commas or spaces.',
         '#default_value' => $values['pmids'] ?? '',
         '#maxlength' => NULL,
-        '#required' => TRUE,
       ],
       'comment' => [
         '#type' => 'textfield',
@@ -93,14 +92,34 @@ class ImportInternalArticles extends FormBase {
         '#description' => 'Choose one or more internal tags to mark this article as intended for internal use only.',
         '#required' => TRUE,
       ],
-      'full-text' => [
-        '#title' => 'Full Text',
-        '#type' => 'file',
-        '#attributes' => [
-          'class' => ['usa-file-input'],
-          'accept' => ['.pdf'],
+      'files-wrapper' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['grid-row', 'grid-gap']],
+        'file-wrapper' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
+          'file' => [
+            '#title' => 'PubMed Search Results',
+            '#type' => 'file',
+            '#attributes' => [
+              'class' => ['usa-file-input'],
+              'title' => 'Required if no PMIDs have been entered above.',
+            ],
+          ],
         ],
-        '#description' => 'Only allowed if a single article is being imported. Can also be added later from the "Full Article" page.',
+        'full-text-wrapper' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
+          'full-text' => [
+            '#title' => 'Full Text',
+            '#type' => 'file',
+            '#attributes' => [
+              'class' => ['usa-file-input'],
+              'accept' => ['.pdf'],
+              'title' => 'Only appropriate for single-article import requests.',
+            ],
+          ],
+        ],
       ],
       'import' => [
         '#type' => 'submit',
@@ -130,23 +149,48 @@ class ImportInternalArticles extends FormBase {
     // Make sure we have at least one valid PubMed ID.
     parent::validateForm($form, $form_state);
     $pmids = trim($form_state->getValue('pmids') ?? '');
-    $pmids = preg_split('/[\s,]+/', $pmids, -1, PREG_SPLIT_NO_EMPTY);
-    if (count($pmids) < 1) {
-      $form_state->setErrorByName('pmids', 'No valid PubMed IDs entered.');
+    $files = $this->getRequest()->files->get('files', []);
+    if (empty($pmids)) {
+      if (empty($files['file'])) {
+        $message = 'You must enter a list of PubMed IDs or post a PubMed search results file.';
+        $form_state->setErrorByName('pmids', $message);
+      }
+      else {
+        $validators = ['file_validate_extensions' => ''];
+        $file = file_save_upload('file', $validators, FALSE, 0);
+        if (empty($file)) {
+          $name = $files['file']->getClientOriginalName();
+          $form_state->setErrorByName('file', "Unable to save $name.");
+        }
+        $search_results = file_get_contents($file->getFileUri());
+        $pmids = ImportForm::findPubmedIds($search_results);
+        if (empty($pmids)) {
+          $form_state->setErrorByName('file', 'No PubMed IDs found.');
+        }
+      }
+    }
+    elseif (!empty($files['file'])) {
+      $message = 'List of IDs and PubMed search results both submitted.';
+      $form_state->setErrorByName('file', $message);
     }
     else {
-      foreach ($pmids as $pmid) {
-        if (!preg_match('/^\d{1,8}$/', $pmid)) {
-          $form_state->setErrorByName('pmids', 'Invalid Pubmed ID format.');
-          break;
+      $pmids = preg_split('/[\s,]+/', $pmids, -1, PREG_SPLIT_NO_EMPTY);
+      if (count($pmids) < 1) {
+        $form_state->setErrorByName('pmids', 'No valid PubMed IDs entered.');
+      }
+      else {
+        foreach ($pmids as $pmid) {
+          if (!preg_match('/^\d{1,8}$/', $pmid)) {
+            $form_state->setErrorByName('pmids', 'Invalid Pubmed ID format.');
+            break;
+          }
         }
       }
     }
 
     // Make sure only one article is being imported if we have a PDF file.
     $full_text_id = NULL;
-    $files = $this->getRequest()->files->get('files', []);
-    if (!empty($files['fll-text'])) {
+    if (!empty($files['full-text'])) {
       if (count($pmids) > 1) {
         $form_state->setErrorByName('full-text', 'Full-text PDF can only be supplied when importing a single article');
       }

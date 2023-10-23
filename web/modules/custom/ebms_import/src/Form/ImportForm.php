@@ -462,7 +462,7 @@ class ImportForm extends FormBase {
    * @throws \Exception
    *   If bad filename, parms, out of memory, etc.
    */
-  public function findPubmedIds(string $results): array {
+  public static function findPubmedIds(string $results): array {
 
     // Save what we got (OCEEBMS-313).
     $values = [
@@ -646,7 +646,7 @@ class ImportForm extends FormBase {
             $form_state->setErrorByName('file', "Unable to save $name.");
           }
           $search_results = file_get_contents($file->getFileUri());
-          $pmids = $this->findPubmedIds($search_results);
+          $pmids = self::findPubmedIds($search_results);
           if (empty($pmids)) {
             $form_state->setErrorByName('file', 'No PubMed IDs found.');
           }
