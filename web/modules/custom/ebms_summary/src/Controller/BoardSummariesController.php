@@ -18,9 +18,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 final class BoardSummariesController extends ControllerBase {
 
   /**
-   * Request stack.
+   * The current request.
    *
-   * @var RequestStack
+   * @var Request
    */
   public $request;
 
