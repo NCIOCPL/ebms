@@ -124,8 +124,10 @@ class ReviewForm extends FormBase {
         $no_changes = $term->id();
       }
       $display = htmlspecialchars($term->name->value);
-      if (!empty($term->description->value)) {
-        $description = htmlspecialchars(rtrim($term->description->value, '.'));
+      $description = str_replace('<p>', '', $term->description->value);
+      $description = str_replace('</p>', '', $description);
+      if (!empty($description)) {
+        $description = htmlspecialchars($description);
         $display .= " (<em>$description</em>)";
       }
       $dispositions[$term->id()] = $display;
