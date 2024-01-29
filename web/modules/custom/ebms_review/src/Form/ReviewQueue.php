@@ -195,6 +195,8 @@ final class ReviewQueue extends FormBase {
     $decisions = json_decode($decisions_json, TRUE);
     $topic = $params['topic'];
     $cycle = $params['cycle'];
+    $cycle_start = $params['cycle-start'];
+    $cycle_end = $params['cycle-end'];
     $tag = $params['tag'];
     $sort = $params['sort'];
     $journal_filters = $params['journal-filters'] ?? '';
@@ -338,14 +340,24 @@ final class ReviewQueue extends FormBase {
           $query->condition('article.brief_journal_title', "%$journal%", 'LIKE');
         }
       }
-      if (!empty($cycle)) {
+      if (!empty($cycle) || !empty($cycle_start) || !empty($cycle_end)) {
         $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
         $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
+      }
+      if (!empty($cycle)) {
         $query->condition('article_topic.cycle', $cycle);
+      }
+      else {
+        if (!empty($cycle_start)) {
+          $query->condition('article_topic.cycle', $cycle_start, '>=');
+        }
+        if (!empty($cycle_end)) {
+          $query->condition('article_topic.cycle', $cycle_end, '<=');
+        }
       }
       if ($queue_type !== 'Librarian Review') {
         if (!empty($tag)) {
-          if (empty($cycle)) {
+          if (empty($cycle) && empty($cycle_start) && empty($cycle_end)) {
             $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
             $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
           }
@@ -472,15 +484,46 @@ final class ReviewQueue extends FormBase {
             '#default_value' => $topic,
             '#multiple' => TRUE,
             '#validated' => TRUE,
+            '#size' => 8,  // Broken in USWDS.
+            '#attributes' => ['style' => 'height: 12.4rem;'],
           ],
         ],
-        'cycle' => [
-          '#type' => 'select',
-          '#title' => 'Review Cycle',
-          '#options' => $cycles,
-          '#description' => 'Include articles assigned to at least one reviewable topic for this review cycle.',
-          '#default_value' => $cycle,
-          '#empty_value' => '',
+        'cycle-and-date-wrapper' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['grid-row', 'grid-gap']],
+          'cycle-wrapper' => [
+            '#type' => 'container',
+            '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
+            'cycle' => [
+              '#type' => 'select',
+              '#title' => 'Review Cycle',
+              '#options' => $cycles,
+              '#description' => 'Filter queue by review cycle(s).',
+              '#default_value' => $cycle,
+              '#empty_value' => '',
+            ],
+            ],
+          'cycle-range-wrapper' => [
+            '#type' => 'container',
+            '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
+            'cycle-range' => [
+              '#type' => 'container',
+              '#attributes' => ['class' => ['inline-fields']],
+              '#title' => 'Review Cycle Range',
+              'cycle-start' => [
+                '#type' => 'select',
+                '#options' => $cycles,
+                '#default_value' => $cycle_start,
+                '#empty_value' => '',
+              ],
+              'cycle-end' => [
+                '#type' => 'select',
+                '#options' => $cycles,
+                '#default_value' => $cycle_end,
+                '#empty_value' => '',
+              ],
+            ],
+          ],
         ],
         'tag' => [
           '#type' => 'select',
@@ -540,7 +583,7 @@ final class ReviewQueue extends FormBase {
       ],
       'display-options' => [
         '#type' => 'details',
-        '#open' => $params['filtered'],
+        '#open' => FALSE,
         '#title' => 'Display Options',
         'sort' => [
           '#type' => 'select',
@@ -777,6 +820,8 @@ final class ReviewQueue extends FormBase {
       'board' => $parameters['board'] ?? Board::defaultBoard($user),
       'topic' => $parameters['topic'] ?? [],
       'cycle' => $parameters['cycle'] ?? '',
+      'cycle-start' => $parameters['cycle-start'] ?? '',
+      'cycle-end' => $parameters['cycle-end'] ?? '',
       'tag' => $parameters['tag'] ?? 0,
       'title' => $parameters['title'] ?? '',
       'journal' => $parameters['journal'] ?? '',
