@@ -416,18 +416,20 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
             if (!empty($request['fast-track']) && in_array($article_id, $batch->readyForReview)) {
               $article->addTag('i_fasttrack', $topic_id, $user, $now);
               $state = $article->addState($placement, $topic_id, $user, $now, $cycle, $fast_track_comment);
-              $article_changed = TRUE;
-              $state_changed = FALSE;
-              if ($placement === 'on_agenda' && !empty($meeting)) {
-                $state->meetings[] = $meeting;
-                $state_changed = TRUE;
-              }
-              elseif ($placement === 'final_board_decision' && !empty($decision)) {
-                $state->decisions[] = $decision;
-                $state_changed = TRUE;
-              }
-              if ($state_changed) {
-                $state->save();
+              if (!empty($state)) {
+                $article_changed = TRUE;
+                $state_changed = FALSE;
+                if ($placement === 'on_agenda' && !empty($meeting)) {
+                  $state->meetings[] = $meeting;
+                  $state_changed = TRUE;
+                }
+                elseif ($placement === 'final_board_decision' && !empty($decision)) {
+                  $state->decisions[] = $decision;
+                  $state_changed = TRUE;
+                }
+                if ($state_changed) {
+                  $state->save();
+                }
               }
             }
             if (!empty($topic_comment)) {

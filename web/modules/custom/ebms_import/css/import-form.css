@@ -5,3 +5,4 @@
 #ebms-import-form fieldset legend {
   padding: .5rem;
 }
+.is-submitting input { cursor: wait; }
