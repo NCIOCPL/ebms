@@ -369,7 +369,7 @@ class ArticlesByTagReport extends FormBase {
         if ($params['tag'] != $librarian_comment_id) {
           foreach ($article_topic->states as $topic_state) {
             foreach ($topic_state->entity->comments as $state_comment) {
-              ebms_debug_log('found another state comment for a non-librarian tag'. 3);
+              ebms_debug_log('found another state comment for a non-librarian tag', 3);
               $comment = $this->vet_comment($state_comment->body);
               if (!empty($comment)) {
                 $state_comments[] = $comment;
