@@ -97,6 +97,11 @@ chmod -w web/sites/default || { chmod sites-default failed; exit; }
 echo Running the database update script
 drush updatedb -y
 
+echo Installing per-board review dispositions
+drush php:script --script-path=$SCRIPTS add-board-dispositions || {
+  echo failure adding per-board review dispositions; exit;
+}
+
 echo Clearing Drupal caches
 drush cr
 

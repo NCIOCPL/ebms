@@ -112,6 +112,11 @@ class ReviewForm extends FormBase {
     }
 
     // Get the values for the dispositions field.
+    $board = $packet->topic->entity->board->entity;
+    $board_dispositions = [];
+    foreach ($board->review_dispositions as $disposition) {
+      $board_dispositions[] = $disposition->target_id;
+    }
     $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE)
       ->sort('weight')
@@ -120,17 +125,22 @@ class ReviewForm extends FormBase {
     $dispositions = [];
     $no_changes = NULL;
     foreach ($storage->loadMultiple($query->execute()) as $term) {
+      $id = $term->id();
+      $keep = in_array($id, $board_dispositions);
       if (is_null($no_changes)) {
         $no_changes = $term->id();
+        $keep = TRUE;
       }
-      $display = htmlspecialchars($term->name->value);
-      $description = str_replace('<p>', '', $term->description->value);
-      $description = str_replace('</p>', '', $description);
-      if (!empty($description)) {
-        $description = htmlspecialchars($description);
-        $display .= " (<em>$description</em>)";
+      if ($keep) {
+        $display = htmlspecialchars($term->name->value);
+        $description = str_replace('<p>', '', $term->description->value);
+        $description = str_replace('</p>', '', $description);
+        if (!empty($description)) {
+          $description = htmlspecialchars($description);
+          $display .= " (<em>$description</em>)";
+        }
+        $dispositions[$term->id()] = $display;
       }
-      $dispositions[$term->id()] = $display;
     }
 
     // Get the values for the rejection reasons field.
@@ -232,8 +242,8 @@ class ReviewForm extends FormBase {
         ],
       ],
     ];
-    if (!empty($packet->topic->entity->board->entity->loe_guidelines->entity)) {
-      $file = $packet->topic->entity->board->entity->loe_guidelines->entity;
+    if (!empty($board->loe_guidelines->entity)) {
+      $file = $board->loe_guidelines->entity;
       $form['loe-wrapper']['loe-guidelines'] = [
         '#type' => 'link',
         '#title' => 'Download LOE Guidelines',
