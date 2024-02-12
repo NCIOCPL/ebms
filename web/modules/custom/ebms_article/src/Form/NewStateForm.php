@@ -288,30 +288,33 @@ class NewStateForm extends FormBase {
 
     // Create the new state entity.
     $state = $article->addState($state_id, $topic_id, NULL, NULL, NULL, $comment);
-    $article->save();
 
-    // Add extra values needed, depending on the state.
-    if ($state_id === 'final_board_decision') {
-      $state->decisions[] = [
-        'decision' => $form_state->getValue('decision'),
-        'meeting_date' => $form_state->getValue('cycle'),
-        'discussed' => (bool) $form_state->getValue('discussed'),
-      ];
-      $state->deciders = $form_state->getValue('users');
-      $state->save();
-    }
-    elseif ($state_id === 'working_group_decision') {
-      $state->wg_decisions->appendItem($form_state->getValue('wg_decision'));
-      $state->save();
-    }
-    elseif ($state_id === 'on_agenda') {
-      $state->meetings[] = $form_state->getValue('meeting');
-      $state->save();
+    // Will be null if second click of double-click on submit button.
+    if (!empty($state)) {
+      $article->save();
+
+      // Add extra values needed, depending on the state.
+      if ($state_id === 'final_board_decision') {
+        $state->decisions[] = [
+          'decision' => $form_state->getValue('decision'),
+          'meeting_date' => $form_state->getValue('cycle'),
+          'discussed' => (bool) $form_state->getValue('discussed'),
+        ];
+        $state->deciders = $form_state->getValue('users');
+        $state->save();
+      }
+      elseif ($state_id === 'working_group_decision') {
+        $state->wg_decisions->appendItem($form_state->getValue('wg_decision'));
+        $state->save();
+      }
+      elseif ($state_id === 'on_agenda') {
+        $state->meetings[] = $form_state->getValue('meeting');
+        $state->save();
+      }
     }
 
     // Back to the article page or stay on this form, as requested.
     if (!empty($form_state->getValue('stay'))) {
-    $this->returnToArticle($article_id, $form_state);
       $route = 'ebms_article.add_new_state';
       $parameters = [
         'article_id' => $article_id,

@@ -1,4 +1,6 @@
 import-form:
+  js:
+    js/import-form.js: {}
   css:
     theme:
       css/import-form.css: {}
