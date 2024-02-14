@@ -160,7 +160,7 @@ final class ReviewerDocForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $validators = ['file_validate_extensions' => ''];
+    $validators = ['FileExtension' => []];
     $file = file_save_upload('doc', $validators, 'public://', 0);
     if (empty($file)) {
       $form_state->setErrorByName('doc', 'File is required.');

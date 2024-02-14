@@ -325,7 +325,7 @@ class FullTextQueue extends FormBase {
     // If we've been asked to store the files, do so.
     $trigger = $form_state->getTriggeringElement()['#value'];
     if ($trigger === self::UPLOAD) {
-      $validators = ['file_validate_extensions' => ['pdf']];
+      $validators = ['FileExtension' => ['extensions' => 'pdf']];
       $logger = $this->getLogger('ebms_article');
       $files = $this->getRequest()->files->get('files', []);
       foreach ($files as $key => $uploaded_file) {

@@ -170,7 +170,7 @@ class FullTextForm extends FormBase {
     $now = date('Y-m-d H:i:s');
     $message = 'Full-Text PDF file stored.';
     if (empty($form_state->getValue('unavailable'))) {
-      $validators = ['file_validate_extensions' => ['pdf']];
+      $validators = ['FileExtension' => ['extensions' => 'pdf']];
       $file = file_save_upload('full-text', $validators, 'public://', 0);
       $file->setPermanent();
       $file->save();

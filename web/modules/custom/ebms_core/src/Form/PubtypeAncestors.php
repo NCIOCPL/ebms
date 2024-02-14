@@ -55,7 +55,7 @@ class PubtypeAncestors extends FormBase
         '#type' => 'managed_file',
         '#required' => TRUE,
         '#validated' => TRUE,
-        '#upload_validators' => ['file_validate_extensions' => ['json']],
+        '#upload_validators' => ['FileExtension' => ['extensions' => 'json']],
         '#description' => 'Post a fresh set of JSON-encoded MeSH publication type terms.',
       ],
       'submit' => [

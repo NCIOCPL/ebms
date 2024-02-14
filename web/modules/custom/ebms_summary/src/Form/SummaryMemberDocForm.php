@@ -147,7 +147,7 @@ final class SummaryMemberDocForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $validators = ['file_validate_extensions' => ['doc docx']];
+    $validators = ['FileExtension' => ['extensions' => 'doc docx']];
     $file = file_save_upload('file', $validators, 'public://', 0);
     if (empty($file)) {
       $form_state->setErrorByName('file', 'File is required.');

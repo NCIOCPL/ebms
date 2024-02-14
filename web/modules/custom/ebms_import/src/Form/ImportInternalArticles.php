@@ -156,7 +156,7 @@ class ImportInternalArticles extends FormBase {
         $form_state->setErrorByName('pmids', $message);
       }
       else {
-        $validators = ['file_validate_extensions' => ''];
+        $validators = ['FileExtension' => []];
         $file = file_save_upload('file', $validators, FALSE, 0);
         if (empty($file)) {
           $name = $files['file']->getClientOriginalName();
@@ -195,7 +195,7 @@ class ImportInternalArticles extends FormBase {
         $form_state->setErrorByName('full-text', 'Full-text PDF can only be supplied when importing a single article');
       }
       else {
-        $validators = ['file_validate_extensions' => ['pdf']];
+        $validators = ['FileExtension' => ['extensions' => 'pdf']];
         $file = file_save_upload('full-text', $validators, 'public://', 0);
         $file->setPermanent();
         $file->save();
