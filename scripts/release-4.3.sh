@@ -94,9 +94,9 @@ echo Applying PHP upgrades
 # composer config --no-plugins allow-plugins.drupal/core-project-message true
 echo Ignore warnings about abandoned packages
 cd $BASEDIR
-chmod +w web/sites/default || { chmod sites-default failed; exit; }
-composer install || { echo composer install failed; exit; }
-chmod -w web/sites/default || { chmod sites-default failed; exit; }
+chmod +w web/sites/default || { echo chmod sites-default failed; exit; }
+composer install --no-dev || { echo composer install failed; exit; }
+chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 
 echo Running the database update script
 drush updatedb -y
