@@ -62,8 +62,9 @@ drush state:set system.maintenance_mode 1 || {
 
 echo Clearing files and directories which will be refreshed from GitHub
 cd $BASEDIR
-rm -rf README.md composer.* scheduled/* web/modules/custom/*
+rm -rf README.md composer.* scheduled/* web/modules/custom/* vendor
 rm -rf web/themes/custom/ebms/templates
+rm -rf web/themes/custom/ebms/css
 rm -rf web/themes/custom/ebms/package
 
 echo Refreshing those directories
@@ -74,6 +75,9 @@ cp -r web/modules/custom $BASEDIR/web/modules/ || {
 }
 cp -r web/themes/custom/ebms/templates $BASEDIR/web/themes/custom/ebms/ || {
   echo cp custom theme templates failed; exit;
+}
+cp -r web/themes/custom/ebms/css $BASEDIR/web/themes/custom/ebms/ || {
+  echo cp custom theme css failed; exit;
 }
 cp scheduled/* $BASEDIR/scheduled/ || { echo cp scheduled failed; exit; }
 cp README.md $BASEDIR/ || { echo cp README.md failed; exit; }
