@@ -19,7 +19,7 @@ class BoardTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['ebms_board', 'user', 'file', 'system'];
+  protected static $modules = ['ebms_board', 'user', 'file', 'system', 'taxonomy'];
 
   /**
    * Test saving a PDQ board.

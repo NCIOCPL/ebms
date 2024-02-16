@@ -133,7 +133,7 @@ class ReviewForm extends FormBase {
       }
       if ($keep) {
         $display = htmlspecialchars($term->name->value);
-        $description = str_replace('<p>', '', $term->description->value);
+        $description = str_replace('<p>', '', $term->description->value ?? '');
         $description = str_replace('</p>', '', $description);
         if (!empty($description)) {
           $description = htmlspecialchars($description);
