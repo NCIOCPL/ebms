@@ -103,6 +103,14 @@ those files, they should run
 composer install
 ```
 
+If there's any chance that files which should be managed by composer have
+been copied into their current locations by other means (for example, using
+`rsync`), then you should first remove the entire `vendor` directory, which
+will be repopulated by `composer`. This will ensure that `composer`'s picture
+of what is installed is accurate, even for files outside the `vendor`
+directory.
+
+
 ## Updated Docker configuration
 
 If settings are changed in `docker-compose.yml` or `Dockerfile` you
