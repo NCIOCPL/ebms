@@ -12,7 +12,7 @@ be put under version control. Jenkins will be used for refreshing lower
 CBIIT tiers from the production server. The `scripts` directory contains
 scripts given to CBIIT for deployment of individual releases.
 
-If at all possible, it is best to be disconnected from the NLM's VPN while
+If at all possible, it is best to be disconnected from the NIH's VPN while
 working on your local instance of the EBMS. This is particularly true when
 running `composer`, as that VPN is known to block access to required
 resources.
