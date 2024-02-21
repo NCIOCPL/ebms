@@ -12,6 +12,11 @@ be put under version control. Jenkins will be used for refreshing lower
 CBIIT tiers from the production server. The `scripts` directory contains
 scripts given to CBIIT for deployment of individual releases.
 
+If at all possible, it is best to be disconnected from the NLM's VPN while
+working on your local instance of the EBMS. This is particularly true when
+running `composer`, as that VPN is known to block access to required
+resources.
+
 ## Prerequisites
 
 MacOS is the only supported environment for EBMS development, as using
@@ -43,6 +48,9 @@ A recent version of PHP is needed (version 8.1 or higher).
 1. Run `brew install php@8.1`. It's OK if you end up with a higher version.
 2. Follow any additional instructions on the screen. One of this set is adding PHP to your path. Make sure you do that.
 3. Edit `/opt/homebrew/etc/php/8.1/php.ini` or `/usr/local/etc/php/8.1/php.ini` and set `memory_limit = -1` (this removes any memory limits, which `composer install` usually hits. `/opt/homebrew` is the location for newer M1 Macs. If `php --version` shows that you're running a later version, you'll need to adjust the path of the file you're editing accordingly.
+
+If you already have PHP installed, be sure the `php` executable is in your path, and that the `memory_limit` variable is set
+as described above.
 
 ### Composer
 
@@ -78,12 +86,14 @@ To create a local development environment for this project, perform the followin
 2. Change current directory to the cloned repository
 3. Run `./scripts/create-unversioned-files`
 4. Optionally edit the files in the `unversioned` directory
-5. Run `composer install`
-6. Run `docker compose up -d`
-7. Run `docker exec -it ebms-web-1 bash`
-8. Inside the container, run `./install.sh`
-9. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
-10. Log in as admin using the password created in steps 3-4.
+5. Run `chmod +w web/sites/default`
+6. Run `composer install`
+7. Run `chmod -w web/sites/default`
+8. Run `docker compose up -d`
+9. Run `docker exec -it ebms-web-1 bash`
+10. Inside the container, run `./install.sh`
+11. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
+12. Log in as admin using the password created in steps 3-4.
 
 ## Updated packages
 
