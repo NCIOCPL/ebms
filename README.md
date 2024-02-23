@@ -1,9 +1,29 @@
-# EBMS 4.0
+# EBMS
 
-This version of the PDQ® Editorial Board Management System has been
-rewritten to use Drupal 9.x or later. The project directory was initialized
-with the command `composer create-project drupal/recommended-project
-ebms4`. After the new version was deployed to production the old repository
+The PDQ® Editorial Board Management System (EBMS) supports the work of the
+U.S. National Cancer Institute to create and maintain comprehensive,
+evidence-based, up-to-date cancer content made available in the form of
+health professional cancer information summaries as a public service of
+the NCI. These published summaries are intended to
+
+- **improve the overall quality of cancer care** by informing and educating
+health professionals about the current published evidence related to individual
+cancer-related topics and
+- **support informed decision making between clinicians and patients**.
+
+The summaries are produced, maintained, and updated regularly by six editorial
+boards comprised of oncology specialists in fields including medical, surgical,
+and radiation oncology; epidemiology; psychology; genetics; and complementary
+and alternative medicine. Each board reviews published research findings on a
+monthly basis and meets several times a year to review and discuss updates to
+their summaries. The boards are not formal advisory or policy-making boards for
+the NCI. The EBMS is used to manage the identification of the newly-published
+relevant literature and to track to various stages of the review process.
+
+This version of the EBMS has been rewritten to use Drupal 9.x or later.
+The project directory was initialized with the command
+`composer create-project drupal/recommended-project ebms4`.
+After the new version was deployed to production the old repository
 was retired and replaced with the new one (renamed from "ebms4" to "ebms").
 
 This page focuses on setting up `Docker` containers for doing
