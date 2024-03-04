@@ -57,7 +57,7 @@ class Journal extends ContentEntityBase implements ContentEntityInterface {
     $fields['brief_title'] = BaseFieldDefinition::create('string')
       ->setRequired(TRUE)
       ->setDescription('Short display title for the journal.')
-      ->setSetting('max_length', 127);
+      ->setSetting('max_length', 255);
     $fields['core'] = BaseFieldDefinition::create('boolean')
       ->setDescription('Is this journal one of the preferred journals in the EBMS?');
     $fields['not_lists'] = BaseFieldDefinition::create('ebms_not_list_board')
@@ -210,6 +210,7 @@ class Journal extends ContentEntityBase implements ContentEntityInterface {
           'title' => $values['title'],
           'brief_title' => $values['brief_title'],
           'source_id' => $nlm_id,
+          'core' => FALSE,
         ])->save();
         ebms_debug_log("Added new journal $full ($nlm_id)", 1);
         $ids_we_have[] = $nlm_id;
