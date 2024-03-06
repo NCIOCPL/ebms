@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * Implements hook_update_N().
+ *
+ * Increase the size of the brief_title column.
+ */
+function ebms_journal_update_10201() {
+  $schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $base_field_definitions = $entity_field_manager->getBaseFieldDefinitions('ebms_journal');
+  $schema_repository->setLastInstalledFieldStorageDefinition($base_field_definitions['brief_title']);
+  $field_storage_definitions = $schema_repository->getLastInstalledFieldStorageDefinitions('ebms_journal');
+  $rc = new \ReflectionClass($field_storage_definitions['brief_title']);
+  $schema_property = $rc->getProperty('schema');
+  $schema_property->setAccessible(TRUE);
+  $schema = $field_storage_definitions['brief_title']->getSchema();
+  $schema['columns']['value']['length'] = 255;
+  $schema_property->setValue($field_storage_definitions['brief_title'], $schema);
+  $schema_repository->setLastInstalledFieldStorageDefinitions('ebms_journal', $field_storage_definitions);
+  $key_value = \Drupal::keyValue('entity.storage_schema.sql');
+  $key_name = 'ebms_journal.field_schema_data.brief_title';
+  $storage_schema = $key_value->get($key_name);
+  $storage_schema['ebms_journal']['fields']['brief_title']['length'] = 255;
+  $key_value->set($key_name, $storage_schema);
+  $db = \Drupal::database();
+  $table_schema = $storage_schema['ebms_journal']['fields']['brief_title'];
+  $db->schema()->changeField('ebms_journal', 'brief_title', 'brief_title', $table_schema);
+}
