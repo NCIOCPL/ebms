@@ -170,3 +170,11 @@ Or even a specific test:
 ```bash
 vendor/bin/phpunit web/modules/custom/ebms_article/tests/src/Kernel/SearchTest.php
 ```
+
+## Debugging
+
+The `php-xdebug` package is no longer included in the build of the web container,
+because recent versions of Drupal have broken asset aggregation when that package
+is installed and enabled. If you need to debug the site, use `apt install php-xdebug`
+to install the package and `service apache2 reload` to restart the web server. Be
+sure to disable `xdebug` when you have finished debugging.

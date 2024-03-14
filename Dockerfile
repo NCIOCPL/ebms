@@ -23,7 +23,6 @@ RUN DEBIAN_FRONTEND=noninteractive \
     php-readline \
     php-sqlite3 \
     php-soap \
-    php-xdebug \
     php-xml \
     php-zip \
     mariadb-client \
