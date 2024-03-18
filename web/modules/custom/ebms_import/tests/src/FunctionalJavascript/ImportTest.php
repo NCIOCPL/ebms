@@ -13,7 +13,7 @@ use Drupal\taxonomy\Entity\Term;
 /**
  * Test the parts of import which need a browser with JavaScript.
  *
- * @group ebms
+ * @group mysql
  */
 class ImportTest extends WebDriverTestBase {
 

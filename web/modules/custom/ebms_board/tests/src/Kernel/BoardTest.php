@@ -10,7 +10,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 /**
  * Test the board type.
  *
- * @group ebms
+ * @group mysql
  */
 class BoardTest extends KernelTestBase {
 

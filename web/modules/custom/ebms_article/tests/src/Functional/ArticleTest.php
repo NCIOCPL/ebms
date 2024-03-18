@@ -14,7 +14,7 @@ use Symfony\Component\Yaml\Yaml;
  * by https://www.drupal.org/project/drupal/issues/3281667, which will allow
  * sites based on the drupal/core-recommended template to upgrade to Guzzle 7.
  *
- * @group ebms
+ * @group mysql
  */
 class ArticleTest extends BrowserTestBase {
 

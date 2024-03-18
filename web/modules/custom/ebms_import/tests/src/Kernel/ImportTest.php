@@ -15,7 +15,7 @@ use Drupal\user\Entity\User;
 /**
  * Test the import scenarios.
  *
- * @group ebms
+ * @group mysql
  */
 class ImportTest extends KernelTestBase {
 

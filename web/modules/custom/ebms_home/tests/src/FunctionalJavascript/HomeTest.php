@@ -22,7 +22,7 @@ use Drupal\user\Entity\User;
 /**
  * Test the EBMS home pages.
  *
- * @group ebms
+ * @group mysql
  */
 class HomeTest extends WebDriverTestBase {
 
@@ -180,7 +180,7 @@ class HomeTest extends WebDriverTestBase {
       Message::create([
         'message_type' => Message::SUMMARY_POSTED,
         'user' => $this->test_users[($i % 2 == 1) ? 'board_member' : 'board_manager']->id(),
-        'posted' => $now,
+        'posted' => substr($now, 0, 17) . '0' . ($i - 1),
         'boards' => [1],
         'extra_values' => json_encode([
           'summary_url' => "/some/file-{$i}.docx",
@@ -267,8 +267,8 @@ class HomeTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Test Packet literature posted');
     $assert_session->linkExists('Test Packet');
     $assert_session->pageTextContains('Document Activity');
-    $assert_session->pageTextContains('posted Test Summary 5');
-    $assert_session->linkExists('Test Summary 5');
+    $assert_session->pageTextContains('posted Test Summary 6');
+    $assert_session->linkExists('Test Summary 6');
     $assert_session->linkExists('More');
     $assert_session->pageTextContains('Meeting Activity');
     $assert_session->pageTextContains('New meeting Test Meeting posted');

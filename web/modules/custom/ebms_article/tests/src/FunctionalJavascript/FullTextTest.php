@@ -13,7 +13,7 @@ use Drupal\taxonomy\Entity\Term;
 /**
  * Test the full-text retrieval queue.
  *
- * @group ebms
+ * @group mysql
  */
 class FullTextTest extends WebDriverTestBase {
 

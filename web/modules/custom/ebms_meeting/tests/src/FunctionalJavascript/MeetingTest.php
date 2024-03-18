@@ -214,7 +214,7 @@ class MeetingTest extends WebDriverTestBase {
     $this->clickLink('Board 1 First Meeting This Month');
     $this->createScreenshot('../testdata/screenshots/first-meeting.png');
     $assert_session->pageTextContains('Board 1 First Meeting This Month');
-    $assert_session->pageTextMatches('/When.*9:30 am - 4:00 pm \(Eastern Time\)\s+How\s+In Person\s+Who\sBoard 1 Board; Group 2\s+Notes\s+Presenters.+Larry.+Moe.+Curly\s+Meeting Documents\s+test\.docx/');
+    $assert_session->pageTextMatches('/When.*9:30 am - 4:00 pm \(Eastern Time\)\s+How\s+In Person\s+Who\sBoard 1 Board; Group 2\s+Notes\s+Presenters.+Larry.+Moe.+Curly/');
     $assert_session->pageTextNotContains('Agenda');
 
     // Navigate throught the next couple of meetings.

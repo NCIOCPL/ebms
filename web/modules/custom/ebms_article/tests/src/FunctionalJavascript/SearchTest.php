@@ -13,7 +13,7 @@ use Drupal\taxonomy\Entity\Term;
 /**
  * Test the board member search page.
  *
- * @group ebms
+ * @group mysql
  */
 class SearchTest extends WebDriverTestBase {
 

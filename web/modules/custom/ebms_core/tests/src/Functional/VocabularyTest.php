@@ -10,7 +10,7 @@ use Drupal\taxonomy\Entity\Term;
 /**
  * Test EBMS vocabularies.
  *
- * @group ebms
+ * @group mysql
  */
 class VocabularyTest extends BrowserTestBase {
 
