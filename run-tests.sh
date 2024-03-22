@@ -17,8 +17,11 @@ SQLITE_URL=sqlite://localhost/sites/simpletest/.ht.sqlite
 # ebms_import/tests/src/Kernel/ImportTest.php
 # ebms_journal/tests/src/FunctionalJavascript/JournalTest.php
 # ebms_user/tests/src/Functional/ProfileTest.php
+cd ${REPO_BASE}
+mkdir -p web/sites/simpletest
+chown www-data web/sites/simpletest
 /usr/bin/sed "s#@@SIMPLETEST_DB@@#${MYSQL_URL}#" < phpunit.xml.template > phpunit.xml
-${REPO_BASE}/vendor/bin/phpunit --group mysql web/modules/custom
+./vendor/bin/phpunit --group mysql web/modules/custom
 
 # SQLite
 # ebms_article/tests/src/Kernel/SearchTest.php
@@ -31,4 +34,4 @@ ${REPO_BASE}/vendor/bin/phpunit --group mysql web/modules/custom
 # ebms_topic/tests/src/Kernel/TopicTest.php
 # ebms_travel/tests/src/FunctionalJavascript/TravelTest.php
 /usr/bin/sed "s#@@SIMPLETEST_DB@@#${SQLITE_URL}#" < phpunit.xml.template > phpunit.xml
-${REPO_BASE}/vendor/bin/phpunit --exclude-group mysql web/modules/custom
+su www-data -s /bin/bash -c 'vendor/bin/phpunit --exclude-group mysql web/modules/custom'

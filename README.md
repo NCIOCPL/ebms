@@ -147,28 +147,16 @@ If settings are changed in `docker-compose.yml` or `Dockerfile` you
 will need to rebuild the images and containers with
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 ## Testing
 
 To run the complete set of regression tests, navigate to the base
-directory of the project in the web container and run:
+directory of the project in the web container and execute
 
 ```bash
-vendor/bin/phpunit web/modules/custom
-```
-
-You can run tests for just one module, for example:
-
-```bash
-vendor/bin/phpunit web/modules/custom/ebms_review
-```
-
-Or even a specific test:
-
-```bash
-vendor/bin/phpunit web/modules/custom/ebms_article/tests/src/Kernel/SearchTest.php
+./run-tests.sh
 ```
 
 ## Debugging

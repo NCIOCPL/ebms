@@ -117,6 +117,7 @@ class MeetingTest extends WebDriverTestBase {
     $this->setRichTextValue($selector, $notes);
     $form->findButton('Meeting Files')->click();
     $file_field = $form->findField('files[files][]');
+    $this->assertNotEmpty($file_field);
     $file_field->attachFile('/usr/local/share/testdata/test.docx');
     $assert_session->assertWaitOnAjaxRequest();
     $this->createScreenshot('../testdata/screenshots/create-meeting-form.png');
@@ -145,9 +146,8 @@ class MeetingTest extends WebDriverTestBase {
     $this->assertEquals('filtered_html', $entity->notes->format);
     $this->assertEquals(1, $entity->published->value);
     $this->assertEquals(0, $entity->agenda_published->value);
-    // Broken in chromium test driver.
-    // $this->assertCount(1, $entity->documents);
-    // $this->assertEquals('test.docx', $entity->documents[0]->entity->filename->value);
+    $this->assertCount(1, $entity->documents);
+    $this->assertEquals('test.docx', $entity->documents[0]->entity->filename->value);
 
     // Add a few more meetings.
     $names = [
