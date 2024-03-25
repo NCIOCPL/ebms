@@ -106,14 +106,12 @@ To create a local development environment for this project, perform the followin
 2. Change current directory to the cloned repository
 3. Run `./scripts/create-unversioned-files`
 4. Optionally edit the files in the `unversioned` directory
-5. Run `chmod +w web/sites/default`
-6. Run `composer install`
-7. Run `chmod -w web/sites/default`
-8. Run `docker compose up -d`
-9. Run `docker exec -it ebms-web-1 bash`
-10. Inside the container, run `./install.sh`
-11. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
-12. Log in as admin using the password created in steps 3-4.
+5. Run `composer install`
+6. Run `docker compose up -d`
+7. Run `docker exec -it ebms-web-1 bash`
+8. Inside the container, run `./install.sh`
+9. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
+10. Log in as admin using the password created in steps 3-4.
 
 ## Updated packages
 

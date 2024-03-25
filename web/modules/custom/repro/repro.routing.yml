@@ -1,0 +1,6 @@
+repro.page:
+  path: /repro
+  defaults:
+    _controller: Drupal\repro\Controller\ReproController::display
+  requirements:
+    _access: 'TRUE'
