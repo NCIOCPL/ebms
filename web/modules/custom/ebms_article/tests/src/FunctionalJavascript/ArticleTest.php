@@ -1,11 +1,12 @@
 <?php
 
-namespace Drupal\Tests\ebms_article\Functional;
+namespace Drupal\Tests\ebms_article\FunctionalJavascript;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\ebms_article\Entity\Article;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\Yaml\Yaml;
+
 
 /**
  * Test EBMS article functionality.
@@ -16,7 +17,7 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @group mysql
  */
-class ArticleTest extends BrowserTestBase {
+class ArticleTest extends WebDriverTestBase {
 
   protected static $modules = [
     'ebms_article',
@@ -83,12 +84,10 @@ class ArticleTest extends BrowserTestBase {
     $this->drupalLogin($account);
     $this->drupalGet('articles/500001');
     $assert_session = $this->assertSession();
-    $assert_session->statusCodeEquals(200);
     $assert_session->pageTextContains('Article A');
 
     // Bring up the form to link this article to others.
     $this->clickLink('Related');
-    $assert_session->statusCodeEquals(200);
 
     // Fill in the form and submit it.
     $form = $this->getSession()->getPage();
@@ -99,7 +98,6 @@ class ArticleTest extends BrowserTestBase {
     $form->pressButton('Submit');
 
     // Confirm that the relationships appear on the first article's page.
-    $assert_session->statusCodeEquals(200);
     $assert_session->pageTextContains('Article A');
     $assert_session->pageTextMatches('#Article/Editorial.+Yadissimo!.+Article/Editorial.+Yadissimo!#');
     $assert_session->linkExists('500002');

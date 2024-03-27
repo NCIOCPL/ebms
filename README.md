@@ -156,7 +156,23 @@ To run the complete set of regression tests, navigate to the base
 directory of the project in the web container and execute
 
 ```bash
-./run-tests.sh
+mkdir -p web/sites/simpletest
+chown www-data web/sites/simpletest
+su www-data -s /bin/bash -c 'vendor/bin/phpunit web/modules/custom'
+```
+
+You can then run tests for just one module, for example:
+
+```bash
+su www-data -s /bin/bash -c 'vendor/bin/phpunit web/modules/custom/ebms_review'
+```
+
+Or even a specific test:
+
+```bash
+EBMS_ARTICLE=web/modules/custom/ebms_article
+ARTICLE_TEST=$EBMS_ARTICLE/tests/src/FunctionalJavascript/ArticleTest.php
+su www-data -s /bin/bash -c "vendor/bin/phpunit $ARTICLE_TEST"
 ```
 
 ## Debugging

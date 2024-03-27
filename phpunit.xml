@@ -8,7 +8,7 @@
     <ini name="error_reporting" value="32767"/>
     <ini name="memory_limit" value="-1"/>
     <env name="SIMPLETEST_BASE_URL" value="http://web.ebms_net"/>
-    <env name="SIMPLETEST_DB" value="@@SIMPLETEST_DB@@"/>
+    <env name="SIMPLETEST_DB" value="sqlite://localhost/sites/simpletest/.ht.sqlite"/>
     <env name="MINK_DRIVER_ARGS_WEBDRIVER"
          value='["chrome", {"browserName":"chrome","chromeOptions":{"w3c": false, "args": ["--disable-gpu","--headless", "--no-sandbox", "--disable-dev-shm-usage"]}}, "http://chrome:4444"]'/>
   </php>

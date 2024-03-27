@@ -49,7 +49,6 @@ mysql.general_log*.sql
 *.bak
 *.dump
 .phpunit.result.cache
-phpunit.xml
 adminpw
 userpw
 dburl
