@@ -452,6 +452,10 @@ final class ReviewQueue extends FormBase {
           'callback' => '::decisionsCallback',
           'event' => 'change',
           'wrapper' => 'queued-decisions-list',
+          'progress' => [
+            'type' => 'throbber',
+            'message' => 'Processing—please wait ...',
+          ],
         ],
         '#attributes' => ['class' => ['hidden'], 'maxlength' => ''],
       ],

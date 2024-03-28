@@ -15,6 +15,18 @@
 #block-bartik-content #board-controlled select {
   max-width: 90%;
 }
+.form-item-decisions .ajax-progress.ajax-progress-throbber {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.form-item-decisions .ajax-progress.ajax-progress-throbber * {
+  font-weight: bold;
+  color: red;
+  font-size: 1.3rem;
+}
 @media only screen and (max-width: 650px) {
   #block-bartik-content div.topic-buttons div.topic-button {
     display: block;
