@@ -3,6 +3,7 @@
 namespace Drupal\ebms_meeting\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Stream;
@@ -12,6 +13,21 @@ use ZipArchive;
  * Pack up the meeting's files and send them to the user.
  */
 class Archive extends ControllerBase {
+
+  /**
+   * File system service.
+   */
+  protected $fileSystem;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): Archive {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->fileSystem = $container->get('file_system');
+    return $instance;
+  }
 
   /**
    * Zip and send the meeting files and the agenda files.
@@ -61,7 +77,7 @@ class Archive extends ControllerBase {
   }
 
   private function createArchive(array $filenames, string $dirname): string|false {
-    $base = \Drupal::service('file_system')->realpath('public://');
+    $base = $this->fileSystem->realpath('public://');
     $zip = new \ZipArchive();
     $path = tempnam(sys_get_temp_dir(), 'meeting-docs');
     $rc = $zip->open($path, ZipArchive::CREATE);
@@ -77,7 +93,7 @@ class Archive extends ControllerBase {
         ++$count;
       }
       else {
-        $error_file = $this->createErrorFile();
+        $error_file = $this->createErrorFile($filename);
         if (!empty($error_file)) {
           $zip->addFile($error_file, "$dirname/{$filename}_ERROR.txt");
           unlink($error_file);

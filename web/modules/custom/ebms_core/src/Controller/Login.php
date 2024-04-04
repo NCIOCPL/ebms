@@ -13,7 +13,7 @@ class Login extends ControllerBase {
    * Show the login instructions and a button to the real login page.
    */
   public function display(): array {
-    $url = \Drupal::moduleHandler()->moduleExists('externalauth') ? '/ssologin' : '/user/login';
+    $url = $this->moduleHandler()->moduleExists('externalauth') ? '/ssologin' : '/user/login';
     return [
       '#title' => '',
       '#attached' => ['library' => ['ebms_core/login']],

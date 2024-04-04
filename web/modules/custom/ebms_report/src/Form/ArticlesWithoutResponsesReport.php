@@ -2,14 +2,17 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -18,6 +21,39 @@ use Symfony\Component\HttpFoundation\Response;
  * @ingroup ebms
  */
 class ArticlesWithoutResponsesReport extends FormBase {
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticlesWithoutResponsesReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->renderer = $container->get('renderer');
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -36,7 +72,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
     $version = $this->getRequest()->query->get('version');
     if (!empty($params) && $version === 'member') {
       $report = $this->report($params, TRUE);
-      $page = \Drupal::service('renderer')->render($report);
+      $page = $this->renderer->render($report);
       $response = new Response($page);
       return $response;
     }
@@ -230,7 +266,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
     ebms_debug_log('top of ArticlesWithoutResponses::report()');
     $high_priority_id = $this->high_priority_id();
     $high_priority_only = FALSE;
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->join('ebms_topic', 'topic', 'topic.id = packet.topic');
     $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
     $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = articles.articles_target_id');
@@ -290,11 +326,11 @@ class ArticlesWithoutResponsesReport extends FormBase {
 
     // Apply the appropriate sort order for the rows.
     $topic_primary_sort = FALSE;
+    $topic_ids = [];
     switch ($params['sort']) {
       case 'topic':
         $query->orderBy('topic.name');
         $topic_primary_sort = TRUE;
-        $topic_ids = [];
         break;
       case 'journal':
         $query->leftJoin('ebms_journal', 'journal', 'journal.source_id = article.source_journal_id');
@@ -356,7 +392,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
     // Find out which reviewers were assigned to each packet.
     $reviewer_ids = [];
     if (!empty($packet_reviewers)) {
-      $query = \Drupal::database()->select('users_field_data', 'user');
+      $query = $this->database->select('users_field_data', 'user');
       $query->join('ebms_packet__reviewers', 'reviewer', 'reviewer.reviewers_target_id = user.uid');
       $query->condition('reviewer.entity_id', array_keys($packet_reviewers), 'IN');
       $query->addField('user', 'name', 'reviewer_name');
@@ -373,7 +409,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
     $articles = $this->loadArticles($article_ids, !$member_version);
     $high_priority = [];
     if (!$high_priority_only && !empty($articles)) {
-      $query = \Drupal::database()->select('ebms_article_topic', 'article_topic');
+      $query = $this->database->select('ebms_article_topic', 'article_topic');
       $query->join('ebms_article__topics', 'topics', 'topics.topics_target_id = article_topic.id');
       $query->join('ebms_article_topic__tags', 'tags' ,'tags.entity_id = article_topic.id');
       $query->join('ebms_article_tag', 'article_tag', 'article_tag.id = tags.tags_target_id');
@@ -460,7 +496,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
    *   Sorted reviewer names indexed by user ID.
    */
   private function reviewers(int $board_id): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->entityTypeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('boards', $board_id);
     $query->condition('roles', 'board_member');
@@ -479,7 +515,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
    *   Entity IDs for states we avoid when selecting unreviewed aritlces.
    */
   private function excluded_states(): array {
-    $query = \Drupal::database()->select('taxonomy_term_data', 'term');
+    $query = $this->database->select('taxonomy_term_data', 'term');
     $query->join('taxonomy_term__field_text_id', 'term_text_id', 'term_text_id.entity_id = term.tid');
     $query->join('taxonomy_term__field_sequence', 'sequence', 'sequence.entity_id = term.tid');
     $query->condition('term.vid', 'states');
@@ -487,7 +523,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
     $query->addField('term', 'tid', 'tid');
     $query->addField('sequence', 'field_sequence_value', 'sequence');
     $fyi = $query->execute()->fetchObject();
-    $query = \Drupal::database()->select('taxonomy_term_data', 'term');
+    $query = $this->database->select('taxonomy_term_data', 'term');
     $query->join('taxonomy_term__field_sequence', 'sequence', 'sequence.entity_id = term.tid');
     $query->condition('term.vid', 'states');
     $query->condition('sequence.field_sequence_value', $fyi->sequence, '>');
@@ -503,7 +539,7 @@ class ArticlesWithoutResponsesReport extends FormBase {
    * Find the article tag for high-priority article/topic combinations.
    */
   private function high_priority_id(): int {
-    $query = \Drupal::database()->select('taxonomy_term_data', 'term');
+    $query = $this->database->select('taxonomy_term_data', 'term');
     $query->join('taxonomy_term__field_text_id', 'term_text_id', 'term_text_id.entity_id = term.tid');
     $query->condition('term.vid', 'article_tags');
     $query->condition('term_text_id.field_text_id_value', 'high_priority');

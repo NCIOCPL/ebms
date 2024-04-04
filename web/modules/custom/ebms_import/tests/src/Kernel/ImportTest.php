@@ -15,7 +15,7 @@ use Drupal\user\Entity\User;
 /**
  * Test the import scenarios.
  *
- * @group ebms
+ * @group mysql
  */
 class ImportTest extends KernelTestBase {
 
@@ -202,7 +202,7 @@ class ImportTest extends KernelTestBase {
     $pmids = [];
     foreach ($root->IdList->Id as $id) {
       if (!empty($id)) {
-        $pmids[] = trim($id ?? '');
+        $pmids[] = trim($id ?: '');
       }
     }
     $this->assertNotEmpty($pmids);
@@ -291,6 +291,7 @@ class ImportTest extends KernelTestBase {
         //if ($comment !== self::IMPORT_REFRESH_TEST) {
           $this->assertEmpty($article->topics);
         //}
+        $article_topic = '';
       }
       else {
         $this->assertCount($request['topic'], $article->topics);
@@ -603,7 +604,7 @@ class ImportTest extends KernelTestBase {
     $this->assertEquals('eSearchResult', $root->getName());
     $pmids = [];
     foreach ($root->IdList->Id as $id) {
-      $id = trim($id ?? '');
+      $id = trim($id ?: '');
       if (!empty($id)) {
         $pmids[] = $id;
       }
@@ -646,7 +647,7 @@ class ImportTest extends KernelTestBase {
                   }
                 }
               }
-              if (!empty($pmid) && count($matches) === 1) {
+              if (count($matches) === 1) {
                 $pair = [$pmid, $matches[0]];
                 break;
               }

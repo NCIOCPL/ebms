@@ -2,18 +2,37 @@
 
 namespace Drupal\ebms_summary\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_doc\Entity\Doc;
 use Drupal\ebms_message\Entity\Message;
 use Drupal\ebms_summary\Entity\SummaryPage;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for adding a supporting document to a board summaries page.
  *
  * @ingroup ebms
  */
-class SummaryManagerDocForm extends FormBase {
+final class SummaryManagerDocForm extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): SummaryManagerDocForm {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -94,7 +113,7 @@ class SummaryManagerDocForm extends FormBase {
     $this->messenger()->addMessage('Added NCI document.');
 
     // Create a notification message for the home page.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_board_summaries');
+    $storage = $this->entityTypeManager->getStorage('ebms_board_summaries');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('pages', $page_id)

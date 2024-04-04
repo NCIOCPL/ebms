@@ -4,12 +4,31 @@ namespace Drupal\ebms_doc\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 //use Drupal\ebms_doc\Entity\Doc;
 
 /**
  * Show individual document information.
  */
 class ListDocs extends ControllerBase {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ListDocs {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * Display document information.
@@ -42,7 +61,7 @@ class ListDocs extends ControllerBase {
       ->condition('dropped', '1', '<>')
       ->tableSort($header);
     $rows = [];
-    $opts = ['query' => \Drupal::request()->query->all()];
+    $opts = ['query' => $this->currentRequest->query->all()];
     foreach ($storage->loadMultiple($query->execute()) as $doc) {
       $edit = [
         '#type' => 'link',

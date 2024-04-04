@@ -61,7 +61,7 @@ class Packets extends FormBase {
       $packet->set('active', 0);
       $packet->save();
       $this->getRequest()->query->remove('archive');
-      $this->messenger()->addMessage("Arcived packet #$archive.");
+      $this->messenger()->addMessage("Archived packet #$archive.");
     }
     $reactivate = $this->getRequest()->query->get('reactivate') ?: 0;
     if (!empty($reactivate)) {

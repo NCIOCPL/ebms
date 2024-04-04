@@ -105,6 +105,25 @@ class SearchForm extends FormBase {
       $per_page = 10;
     }
 
+    // Make PHPStan happy.
+    $article_tags = [];
+    $article_type = [];
+    $article_types = [];
+    $board_decisions = [];
+    $cycles = [];
+    $dispositions = [];
+    $filters = [];
+    $meeting_categories = [];
+    $reviewers = [];
+    $wg_decisions = [];
+    $article_tag = $reviewer = $disposition = $meeting_category = 0;
+    $wg_decision = $decision = 0;
+    $tag_start = $tag_end = $meeting_start = $meeting_end = $cycle = '';
+    $cycle_start = $cycle_end = $fyi = $abstract_decision = $full_text = '';
+    $full_text_decision = $core_journals = $comment = $comment_start = '';
+    $comment_end = $board_manager_comment = $import_start = $import_end = '';
+    $modified_start = $modified_end = '';
+
     // We only need these for the full version of the search page.
     if (!$restricted) {
       $ebms_id = $params['ebms_id'] ?? '';
@@ -136,7 +155,6 @@ class SearchForm extends FormBase {
       $modified_end = $params['modified-end'] ?? '';
       $article_type = $params['article-type'] ?? [];
       if (!empty($params['filters'])) {
-        $filters = [];
         foreach ($params['filters'] as $key => $value) {
           if (!empty($value)) {
             $filters[] = $key;
@@ -184,7 +202,6 @@ class SearchForm extends FormBase {
       $storage = $this->entityTypeManager->getStorage('taxonomy_term');
 
       // Values board members can assign in review of assigned packets.
-      $dispositions = [];
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'dispositions');
       $query->sort('weight');
@@ -194,7 +211,6 @@ class SearchForm extends FormBase {
       }
 
       // For searches based on meetings in which the articles are discussed.
-      $meeting_categories = [];
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'meeting_categories');
       $query->sort('name');
@@ -204,7 +220,6 @@ class SearchForm extends FormBase {
       }
 
       // Final decisions the board can assign for an article.
-      $board_decisions = [];
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'board_decisions');
       $query->sort('name');
@@ -214,7 +229,6 @@ class SearchForm extends FormBase {
       }
 
       // Working group decisions which can be assigned for an article.
-      $wg_decisions = [];
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'working_group_decisions');
       $query->sort('name');
@@ -224,7 +238,6 @@ class SearchForm extends FormBase {
       }
 
       // Tags which can be assigned to articles.
-      $article_tags = [];
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->condition('vid', 'article_tags');
       $query->sort('name');
@@ -249,7 +262,6 @@ class SearchForm extends FormBase {
       // to do. 😂
       // When Drupal makes its entity queries more capable and efficient,
       // perhaps this can be rewritten.
-      $reviewers = [];
       $query = $this->db->select('ebms_packet__reviewers', 'r')
                     ->distinct()
                     ->fields('u', ['uid', 'name']);

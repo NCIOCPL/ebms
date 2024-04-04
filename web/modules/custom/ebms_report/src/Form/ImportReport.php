@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
@@ -10,6 +11,7 @@ use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_import\Entity\ImportRequest;
 use Drupal\ebms_topic\Entity\Topic;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Placeholder for a report which has not yet been implemented.
@@ -17,6 +19,23 @@ use Drupal\ebms_topic\Entity\Topic;
  * @ingroup ebms
  */
 class ImportReport extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ImportReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -177,7 +196,7 @@ class ImportReport extends FormBase {
       ];
 
       // Find the matching import jobs which have a topic specified.
-      $storage = \Drupal::entityTypeManager()->getStorage('ebms_import_request');
+      $storage = $this->entityTypeManager->getStorage('ebms_import_request');
       $query = $storage->getQuery()->accessCheck(FALSE);
       $topic_or_board_filtered = FALSE;
       if (!empty($params['topic'])) {

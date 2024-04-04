@@ -2,15 +2,17 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
-use Drupal\ebms_article\Entity\Article;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -19,6 +21,31 @@ use Symfony\Component\HttpFoundation\Response;
  * @ingroup ebms
  */
 class TopicReviewersReport extends FormBase {
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): TopicReviewersReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->renderer = $container->get('renderer');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -40,7 +67,7 @@ class TopicReviewersReport extends FormBase {
         '#theme' => 'topic_reviewers_print_version',
         '#report' => $this->report($params, TRUE),
       ];
-      $page = \Drupal::service('renderer')->render($report);
+      $page = $this->renderer->render($report);
       $response = new Response($page);
       return $response;
     }
@@ -196,7 +223,7 @@ class TopicReviewersReport extends FormBase {
   private function report(array $params, bool $print_version = FALSE, int $report_id = 0): array {
 
     // Get the entities for the topic reviewers.
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->entityTypeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('status', 1);
     if (!empty($params['topics'])) {
@@ -214,7 +241,7 @@ class TopicReviewersReport extends FormBase {
 
     // Generate the render array for the table based on the grouping.
     $rows = [];
-    $renderer = \Drupal::service('renderer');
+    $renderer = $this->renderer;
     $tooltip = 'Edit this topic.';
     $options = [
       'attributes' => ['target' => '_blank', 'title' => $tooltip],
@@ -239,7 +266,7 @@ class TopicReviewersReport extends FormBase {
           }
         }
       }
-      $storage = \Drupal::entityTypeManager()->getStorage('ebms_topic');
+      $storage = $this->entityTypeManager->getStorage('ebms_topic');
       $query = $storage->getQuery()->accessCheck(FALSE);
       if (!empty($params['topics'])) {
         $query->condition('id', $params['topics'], 'IN');
@@ -317,7 +344,7 @@ class TopicReviewersReport extends FormBase {
    *   Sorted reviewer names indexed by user ID.
    */
   private function reviewers(int $board_id): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->entityTypeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('boards', $board_id);
     $query->condition('roles', 'board_member');

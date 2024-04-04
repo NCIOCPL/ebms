@@ -2,11 +2,14 @@
 
 namespace Drupal\ebms_doc\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_doc\Entity\Doc;
+use Drupal\file\FileUsage\FileUsageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for requesting an import job.
@@ -14,6 +17,31 @@ use Drupal\ebms_doc\Entity\Doc;
  * @ingroup ebms
  */
 class DocForm extends FormBase {
+
+  /**
+   * File usage service.
+   *
+   * @var \Drupal\file\FileUsage\FileUsageInterface
+   */
+  protected FileUsageInterface $fileUsage;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): DocForm {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->fileUsage = $container->get('file.usage');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -31,7 +59,7 @@ class DocForm extends FormBase {
     $boards = Board::boards();
     $summary_tag_id = 0;
     $tags = [];
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $ids = $storage->getQuery()->accessCheck(FALSE)
       ->condition('vid', 'doc_tags')
       ->condition('status', 1)
@@ -165,7 +193,7 @@ class DocForm extends FormBase {
     // If we have any boards and the 'summary' tag is applied, add topics.
     $summary_tag_checked = in_array($summary_tag_id, $selected_tags);
     if ($summary_tag_checked && !empty($selected_boards)) {
-      $storage = \Drupal::entityTypeManager()->getStorage('ebms_topic');
+      $storage = $this->entityTypeManager->getStorage('ebms_topic');
       $ids = $storage->getQuery()->accessCheck(FALSE)
         ->condition('board', $selected_boards, 'IN')
         ->condition('active', 1)
@@ -255,7 +283,7 @@ class DocForm extends FormBase {
     }
     $doc_id = $form_state->getValue('doc-id');
     if (empty($doc_id)) {
-      $validators = ['file_validate_extensions' => ['pdf rtf doc docx xlsx pptx']];
+      $validators = ['FileExtension' => ['extensions' => 'pdf rtf doc docx xlsx pptx']];
       $file = file_save_upload('file', $validators, 'public://', 0);
       $file->setPermanent();
       $file->save();
@@ -268,8 +296,7 @@ class DocForm extends FormBase {
         'topics' => $topic_ids,
       ]);
       $doc->save();
-      $file_usage = \Drupal::service('file.usage');
-      $file_usage->add($file, 'ebms_doc', 'ebms_doc', $this->currentUser()->id());
+      $this->fileUsage->add($file, 'ebms_doc', 'ebms_doc', $this->currentUser()->id());
     }
     else {
       $doc = Doc::load($doc_id);

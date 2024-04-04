@@ -26,10 +26,6 @@ use Drupal\ebms_article\Plugin\Field\FieldType\Author;
  *   handlers = {
  *     "view_builder" = "Drupal\ebms_article\Controller\ArticleController",
  *     "list_builder" = "Drupal\ebms_article\ArticleListBuilder",
- *     "form" = {
- *       "default" = "Drupal\ebms_article\Form\ArticleForm",
- *       "edit" = "Drupal\ebms_article\Form\ArticleForm",
- *     },
  *     "route_provider" = {
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
@@ -44,8 +40,6 @@ use Drupal\ebms_article\Plugin\Field\FieldType\Author;
  *     "published" = "active",
  *   },
  *   links = {
- *     "canonical" = "/ebms_article/{ebms_article}",
- *     "edit-form" = "/ebms_article/{ebms_article}/edit",
  *     "collection" = "/admin/content/ebms_article",
  *   }
  * )
@@ -278,6 +272,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
 
     // We have decided that no state more advanced than 'Published' is
     // allowed without also having a Published state.
+    ebms_debug_log("Setting state $text_id for topic $topic_id of article {$this->id()}.");
     $term_lookup = \Drupal::service('ebms_core.term_lookup');
     static $published_state = NULL;
     if (empty($published_state)) {
@@ -307,105 +302,151 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
       $entered = date('Y-m-d H:i:s');
     }
 
-    // Find the `ArticleTopic` entity.
-    $article_topic = NULL;
-    foreach ($this->topics as $candidate) {
-      if ($candidate->entity->topic->target_id == $topic_id) {
-        $article_topic = $candidate->entity;
-        break;
-      }
-    }
+    // Prevent double-clicking on a submit button from creating duplicate
+    // rows in the state table.
+    $lock = \Drupal::lock();
+    if ($lock->acquire('ebms_state_lock')) {
+      ebms_debug_log('acquired state-setting lock');
 
-    // Create a new one if it's missing.
-    $new_topic = FALSE;
-    if (empty($article_topic)) {
-      if (empty($cycle)) {
-        $cycle = new \DateTime($entered);
-        $cycle->modify('first day of next month');
-        $cycle = $cycle->format('Y-m-d');
-      }
-      $new_topic = TRUE;
-      $values = [
-        'topic' => $topic_id,
-        'cycle' => $cycle,
-      ];
-      $article_topic = ArticleTopic::create($values);
-    }
+      // Ensure that the lock gets released, no matter what happens here.
+      try {
 
-    // Otherwise, make any necessary tweaks to the topic's existing states.
-    else {
-      foreach ($article_topic->states as $state) {
-        $state = $state->entity;
-        $modified = FALSE;
-        if (!empty($state->current->value)) {
-          $state->set('current', FALSE);
-          $modified = TRUE;
-        }
-        if ($state->value->entity->field_sequence->value >= $sequence) {
-          if (!empty($state->active->value)) {
-            $state->set('active', FALSE);
-            $state->comments->appendItem([
-              'user' => $user_id,
-              'entered' => $entered,
-              'body' => "State inactivated by setting '$text_id' at $entered",
-            ]);
-            $modified = TRUE;
+        // Find the `ArticleTopic` entity.
+        $article_topic = NULL;
+        foreach ($this->topics as $candidate) {
+          if ($candidate->entity->topic->target_id == $topic_id) {
+            $article_topic = $candidate->entity;
+
+            // Make sure this isn't a duplicate request.
+            $latest_state = $article_topic->getCurrentState();
+            if ($latest_state->value->target_id == $state_value->id()) {
+              $delta = abs(strtotime($entered) - strtotime($latest_state->entered->value));
+              if ($delta < 5) {
+                $message = "Duplicate state $text_id request for topic {$topic->name->value} of article {$this->id()}.";
+                ebms_debug_log($message, 1);
+                \Drupal::logger('ebms_article')->info($message);
+                return NULL;
+              }
+            }
+            break;
           }
         }
-        if ($modified) {
+
+        // Create a new one if it's missing.
+        $new_topic = FALSE;
+        if (empty($article_topic)) {
+          if (empty($cycle)) {
+            $cycle = new \DateTime($entered);
+            $cycle->modify('first day of next month');
+            $cycle = $cycle->format('Y-m-d');
+          }
+          $new_topic = TRUE;
+          $values = [
+            'topic' => $topic_id,
+            'cycle' => $cycle,
+          ];
+          $article_topic = ArticleTopic::create($values);
+        }
+
+        // Otherwise, make any necessary tweaks to the topic's existing states.
+        else {
+          foreach ($article_topic->states as $state) {
+            $state = $state->entity;
+            $modified = FALSE;
+            if (!empty($state->current->value)) {
+              $state->set('current', FALSE);
+              $modified = TRUE;
+            }
+            if ($state->value->entity->field_sequence->value >= $sequence) {
+              if (!empty($state->active->value)) {
+                $state->set('active', FALSE);
+                $state->comments->appendItem([
+                  'user' => $user_id,
+                  'entered' => $entered,
+                  'body' => "State inactivated by setting '$text_id' at $entered",
+                ]);
+                $modified = TRUE;
+              }
+            }
+            if ($modified) {
+              $state->save();
+            }
+            if ($need_published && $state->value->entity->field_text_id->value === 'published') {
+              $need_published = FALSE;
+            }
+          }
+        }
+
+        // Belt and suspenders: ensure that "current" is off for ALL of this
+        // topic's states on this article. Needed in case older code left
+        // around duplicate state rows and the entity API doesn't expose them
+        // all in the previous loop.
+        \Drupal::database()->update('ebms_state')
+          ->fields(['current' => 0])
+          ->condition('article', $this->id())
+          ->condition('topic', $topic_id)
+          ->condition('current', 1)
+          ->execute();
+
+        // Prepare to create the new `State` entity.
+        $values = [
+          'article' => $this->id(),
+          'board' => $board_id,
+          'topic' => $topic_id,
+          'user' => $user_id,
+          'entered' => $entered,
+          'active' => TRUE,
+        ];
+
+        // If we need a 'published' state, use these values to add one.
+        if ($need_published) {
+          $values['value'] = $published_state->id();
+          $values['current'] = FALSE;
+          $values['comments'][] = [
+            'user' => $user_id,
+            'entered' => $entered,
+            'body' => "Published state added as a result of setting the state for this article/topic to $text_id",
+          ];
+          $state = State::create($values);
           $state->save();
+          $article_topic->states->appendItem($state->id());
+          unset($values['comments']);
         }
-        if ($need_published && $state->value->entity->field_text_id->value === 'published') {
-          $need_published = FALSE;
+
+        // Create the state the caller requested.
+        $values['value'] = $state_value->id();
+        $values['current'] = TRUE;
+        if (!empty($comment)) {
+          $values['comments'][] = [
+            'user' => $user_id,
+            'entered' => $entered,
+            'body' => $comment,
+          ];
         }
+        $state = State::create($values);
+        $state->save();
+        $article_topic->states->appendItem($state->id());
+        $article_topic->save();
+        if ($new_topic) {
+          $this->topics[] = $article_topic->id();
+        }
+
+        // The caller gets a reference to our new `State` entity.
+        return $state;
+
+      }
+      catch (\Exception $e) {
+        $message = "Failure setting state for article {$this->id()}: {$e->getMessage()}";
+        ebms_debug_log($message, 1);
+        \Drupal::logger('ebms_article')->error($message);
+        return NULL;
+      }
+      finally {
+        $lock->release('ebms_state_lock');
+        ebms_debug_log('released state-setting lock');
       }
     }
 
-    // Prepare to create the new `State` entity.
-    $values = [
-      'article' => $this->id(),
-      'board' => $board_id,
-      'topic' => $topic_id,
-      'user' => $user_id,
-      'entered' => $entered,
-      'active' => TRUE,
-    ];
-
-    // If we need a 'published' state, use these value to add one.
-    if ($need_published) {
-      $values['value'] = $published_state->id();
-      $values['current'] = FALSE;
-      $values['comments'][] = [
-        'user' => $user_id,
-        'entered' => $entered,
-        'body' => "Published state added as a result of setting the state for this article/topic to $text_id",
-      ];
-      $state = State::create($values);
-      $state->save();
-      $article_topic->states->appendItem($state->id());
-      unset($values['comments']);
-    }
-
-    // Create the state the caller requested.
-    $values['value'] = $state_value->id();
-    $values['current'] = TRUE;
-    if (!empty($comment)) {
-      $values['comments'][] = [
-        'user' => $user_id,
-        'entered' => $entered,
-        'body' => $comment,
-      ];
-    }
-    $state = State::create($values);
-    $state->save();
-    $article_topic->states->appendItem($state->id());
-    $article_topic->save();
-    if ($new_topic) {
-      $this->topics[] = $article_topic->id();
-    }
-
-    // The caller gets a reference to our new `State` entity.
-    return $state;
   }
 
   /**
@@ -483,7 +524,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     if (empty($date)) {
       $date = date('Y-m-d H:i:s');
     }
-    $comment = trim($comment ?? '');
+    $comment = trim($comment ?: '');
     if (!empty($comment)) {
       $comment = [
         'user' => $user,
@@ -895,7 +936,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $abstract = [];
     if (!empty($article->Abstract->AbstractText)) {
       foreach ($article->Abstract->AbstractText as $node) {
-        $text = trim($node ?? '');
+        $text = trim($node ?: '');
         if (!empty($text)) {
           $text_xml = $node->asXML();
           $text = preg_replace('#<\s*/?\s*AbstractText[^>]*>#', '', $text_xml);
@@ -953,7 +994,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $types = [];
     if (!empty($article->PublicationTypeList->PublicationType)) {
       foreach ($article->PublicationTypeList->PublicationType as $type) {
-        $type = trim($type ?? '');
+        $type = trim($type ?: '');
         if (!empty($type)) {
           $types[] = $type;
         }
@@ -963,7 +1004,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
     $comments_corrections = [];
     if (!empty($citation->CommentsCorrectionsList->CommentsCorrections->PMID)) {
       foreach ($citation->CommentsCorrectionsList->CommentsCorrections->PMID as $pmid) {
-        $pmid = trim($pmid ?? '');
+        $pmid = trim($pmid ?: '');
         if (!empty($pmid)) {
           $comments_corrections[] = $pmid;
         }

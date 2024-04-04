@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,11 +11,29 @@ use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Show packets which have at least one submitted review.
  */
-class ReviewedPackets extends FormBase {
+final class ReviewedPackets extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReviewedPackets {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -202,7 +221,7 @@ class ReviewedPackets extends FormBase {
     if (strlen($end) === 10) {
       $end .= ' 23:59:59';
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_packet');
+    $storage = $this->entityTypeManager->getStorage('ebms_packet');
     $query = $storage->getAggregateQuery()->accessCheck(FALSE);
     // $query = $storage->getQuery()->accessCheck(FALSE);
     $query->sort('title');

@@ -19,12 +19,7 @@ use Drupal\taxonomy\Entity\Term;
  *
  * An article's states field contains entity references to State entities,
  * so it is clear from the Article entity which State entities belong to a
- * given article. There are places in the system (for example, the
- * PublishQueue entities, which let the librarians mark multiple article/topic
- * combinations for transition to the "Published" state on the page for the
- * initial review) which save a reference directly to a State entity, so we
- * also record a back-reference from this entity to the Article entity to
- * which it belongs.
+ * given article.
  *
  * Note: The board is stored separately for this entity, even though it could
  * be derived from the Topic entity, partly for performance, and partly to

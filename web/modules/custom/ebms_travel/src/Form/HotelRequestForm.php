@@ -5,6 +5,7 @@ namespace Drupal\ebms_travel\Form;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\ebms_meeting\Entity\Meeting;
 use Drupal\ebms_travel\Entity\HotelRequest;
@@ -16,7 +17,7 @@ use Drupal\user\Entity\User;
  *
  * @ingroup ebms
  */
-class HotelRequestForm extends FormBase {
+final class HotelRequestForm extends FormBase {
 
   /**
    * The entity type manager.
@@ -26,11 +27,19 @@ class HotelRequestForm extends FormBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $rendererService;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): HotelRequestForm {
-    $instance = parent::create($container);
+    $instance = new static();
     $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->rendererService = $container->get('renderer');
     return $instance;
   }
 
@@ -284,9 +293,10 @@ class HotelRequestForm extends FormBase {
         'comments' => $values['comments'],
       ],
     ];
-    $message = \Drupal::service('renderer')->render($request);
-    $site_mail = \Drupal::config('system.site')->get('mail');
-    $site_name = \Drupal::config('system.site')->get('name');
+    $message = $this->rendererService->render($request);
+    $site_config = $this->config('system.site');
+    $site_mail = $site_config->get('mail');
+    $site_name = $site_config->get('name');
     $from = "$site_name <$site_mail>";
     $headers = implode("\r\n", [
       'MIME-Version: 1.0',

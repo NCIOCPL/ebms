@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,11 +11,29 @@ use Drupal\ebms_review\Entity\PacketArticle;
 use Drupal\ebms_review\Entity\Review;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form used by the board memebers to assess articles in review packets.
  */
 class ReviewForm extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReviewForm {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -93,7 +112,12 @@ class ReviewForm extends FormBase {
     }
 
     // Get the values for the dispositions field.
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $board = $packet->topic->entity->board->entity;
+    $board_dispositions = [];
+    foreach ($board->review_dispositions as $disposition) {
+      $board_dispositions[] = $disposition->target_id;
+    }
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE)
       ->sort('weight')
       ->condition('status', 1)
@@ -101,15 +125,22 @@ class ReviewForm extends FormBase {
     $dispositions = [];
     $no_changes = NULL;
     foreach ($storage->loadMultiple($query->execute()) as $term) {
+      $id = $term->id();
+      $keep = in_array($id, $board_dispositions);
       if (is_null($no_changes)) {
         $no_changes = $term->id();
+        $keep = TRUE;
       }
-      $display = htmlspecialchars($term->name->value);
-      if (!empty($term->description->value)) {
-        $description = htmlspecialchars(rtrim($term->description->value, '.'));
-        $display .= " (<em>$description</em>)";
+      if ($keep) {
+        $display = htmlspecialchars($term->name->value);
+        $description = str_replace('<p>', '', $term->description->value ?? '');
+        $description = str_replace('</p>', '', $description);
+        if (!empty($description)) {
+          $description = htmlspecialchars($description);
+          $display .= " (<em>$description</em>)";
+        }
+        $dispositions[$term->id()] = $display;
       }
-      $dispositions[$term->id()] = $display;
     }
 
     // Get the values for the rejection reasons field.
@@ -211,8 +242,8 @@ class ReviewForm extends FormBase {
         ],
       ],
     ];
-    if (!empty($packet->topic->entity->board->entity->loe_guidelines->entity)) {
-      $file = $packet->topic->entity->board->entity->loe_guidelines->entity;
+    if (!empty($board->loe_guidelines->entity)) {
+      $file = $board->loe_guidelines->entity;
       $form['loe-wrapper']['loe-guidelines'] = [
         '#type' => 'link',
         '#title' => 'Download LOE Guidelines',
@@ -237,7 +268,7 @@ class ReviewForm extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
 
     // Find out which disposition means "no changes" (it's the first one).
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $ids = $storage->getQuery()->accessCheck(FALSE)
       ->sort('weight')
       ->condition('vid', 'dispositions')

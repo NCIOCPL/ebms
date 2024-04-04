@@ -52,5 +52,11 @@
       "target_id": 5
     },
     "auto_imports": 0
+  },
+  {
+    "id": 7,
+    "name": "Pediatric Genetics",
+    "manager": 3,
+    "auto_imports": 0
   }
 ]

@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\ebms_article\Entity\Article;
 use Drupal\file\Entity\File;
+use Drupal\file\FileUsage\FileUsageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,6 +33,13 @@ class FullTextForm extends FormBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * File usage service.
+   *
+   * @var \Drupal\file\FileUsage\FileUsageInterface
+   */
+  protected FileUsageInterface $fileUsage;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): FullTextForm {
@@ -39,6 +47,7 @@ class FullTextForm extends FormBase {
     $instance = parent::create($container);
     $instance->account = $container->get('current_user');
     $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->fileUsage = $container->get('file.usage');
     return $instance;
   }
 
@@ -63,6 +72,7 @@ class FullTextForm extends FormBase {
     $ft_desc = 'Select a PDF file smaller than 20 MB to be uploaded.';
     $title = 'Post Full-Text PDF File';
     if (!empty($article->full_text->file)) {
+      /** @var \Drupal\file\Entity\File */
       $file = $storage->load($article->full_text->file);
       $ft_filename = $file->getFilename();
       $ft_user = $file->uid->entity->getDisplayName();
@@ -160,12 +170,11 @@ class FullTextForm extends FormBase {
     $now = date('Y-m-d H:i:s');
     $message = 'Full-Text PDF file stored.';
     if (empty($form_state->getValue('unavailable'))) {
-      $validators = ['file_validate_extensions' => ['pdf']];
+      $validators = ['FileExtension' => ['extensions' => 'pdf']];
       $file = file_save_upload('full-text', $validators, 'public://', 0);
       $file->setPermanent();
       $file->save();
-      $file_usage = \Drupal::service('file.usage');
-      $file_usage->add($file, 'ebms_article', 'ebms_article', $article_id);
+      $this->fileUsage->add($file, 'ebms_article', 'ebms_article', $article_id);
       $values = [
         'file' => $file->id(),
         'unavailable' => FALSE,

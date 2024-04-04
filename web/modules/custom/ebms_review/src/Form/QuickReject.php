@@ -2,16 +2,35 @@
 
 namespace Drupal\ebms_review\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_review\Entity\PacketArticle;
 use Drupal\ebms_review\Entity\Review;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Fast path to a rejection review.
  */
 class QuickReject extends FormBase {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): QuickReject {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -26,7 +45,7 @@ class QuickReject extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $packet_id = NULL, $packet_article_id = NULL): array {
 
     // Get the values for the rejection reasons field.
-    $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $query = $storage->getQuery()->accessCheck(FALSE)
       ->sort('weight')
       ->condition('status', 1)

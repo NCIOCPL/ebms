@@ -27,8 +27,8 @@
         "drupal/externalauth": "^2.0",
         "drupal/linkit": "^6.1",
         "drupal/role_delegation": "^1.1",
-        "drupal/uswds_base": "^3.3",
-        "drush/drush": "^11.6",
+        "drupal/uswds_base": "^3.7",
+        "drush/drush": "^12.4",
         "league/container": "*",
         "phpoffice/phpspreadsheet": "^1.23",
         "phpspec/prophecy-phpunit": "^2",
@@ -112,7 +112,9 @@
         "behat/mink-selenium2-driver": "^1.6",
         "drupal/devel": "^5.1",
         "kint-php/kint": "^3.3",
+        "mglaman/phpstan-drupal": "^1.2",
         "mikey179/vfsstream": "^1.6",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "*",
         "symfony/phpunit-bridge": "*"
     }

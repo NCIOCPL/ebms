@@ -7,6 +7,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Defines the PDQ Board entity.
@@ -157,6 +158,16 @@ class Board extends ContentEntityBase implements ContentEntityInterface {
         'weight' => 0,
       ]);
 
+    $fields['review_dispositions'] = BaseFieldDefinition::create('entity_reference')
+      ->setRequired(TRUE)
+      ->setLabel('Board Member Review Dispositions')
+      ->setDescription('Available review disposition options for members of this board.')
+      ->setSetting('target_type', 'taxonomy_term')
+      ->setSetting('handler_settings', ['target_bundles' => ['dispositions' => 'dispositions']])
+      ->setDisplayOptions('view', ['label' => 'above'])
+      ->setDisplayOptions('form', ['type' => 'options_select'])
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+
     return $fields;
   }
 
@@ -164,7 +175,7 @@ class Board extends ContentEntityBase implements ContentEntityInterface {
    * {@inheritdoc}
    */
   public static function sort(ContentEntityInterface $a, ContentEntityInterface $b) {
-    return strcmp($a->getName(), $b->getName());
+    return strcmp($a->get('name')->value, $b->get('name')->value);
   }
 
   /**
@@ -199,6 +210,7 @@ class Board extends ContentEntityBase implements ContentEntityInterface {
     $entities = $storage->loadMultiple($query->execute());
     $boards = [];
     foreach ($entities as $entity) {
+      /** @var Board $entity */
       $boards[$entity->id()] = $entity->getName();
     }
     return $boards;

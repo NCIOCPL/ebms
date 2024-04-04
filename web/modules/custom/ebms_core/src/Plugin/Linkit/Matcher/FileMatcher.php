@@ -6,6 +6,7 @@ use Drupal\file\Entity\File;
 use Drupal\linkit\MatcherBase;
 use Drupal\linkit\Suggestion\SimpleSuggestion;
 use Drupal\linkit\Suggestion\SuggestionCollection;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Finds matching files for documents and articles.
@@ -18,12 +19,29 @@ use Drupal\linkit\Suggestion\SuggestionCollection;
 class FileMatcher extends MatcherBase {
 
   /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): FileMatcher {
+    // Instantiates this form class.
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->database = $container->get('database');
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function execute($string) {
     ebms_debug_log("looking for $string", 3);
     $suggestions = new SuggestionCollection();
-    $query = \Drupal::database()->select('ebms_article', 'a');
+    $query = $this->database->select('ebms_article', 'a');
     $query->condition('a.search_title', "%{$string}%", 'LIKE');
     $query->isNotNull('a.full_text__file');
     $query->fields('a', ['title', 'full_text__file']);
@@ -42,7 +60,7 @@ class FileMatcher extends MatcherBase {
       $counter++;
     }
     ebms_debug_log("found $counter matching articles", 3);
-    $query = \Drupal::database()->select('ebms_doc', 'd');
+    $query = $this->database->select('ebms_doc', 'd');
     $query->condition('d.description', "%{$string}%", 'LIKE');
     $query->condition('d.dropped', 0);
     $query->isNotNull('d.file');

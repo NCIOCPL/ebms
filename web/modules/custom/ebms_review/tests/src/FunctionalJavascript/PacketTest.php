@@ -57,12 +57,46 @@ class PacketTest extends WebDriverTestBase {
         'field_sequence' => $sequence,
       ])->save();
     }
+    $decisions = [
+      ['Warrants no changes to the summary', NULL],
+      ['Deserves citation in the summary', 'placement'],
+      ['Merits revision of the text', 'changes'],
+      ['Merits discussion', NULL],
+    ];
+    $board_dispositions = [];
+    foreach ($decisions as $i => list($name, $what)) {
+      $values = [
+        'vid' => 'dispositions',
+        'name' => $name,
+        'weight' => $i + 1,
+        'status' => 1,
+      ];
+      if (!empty($what)) {
+        $values['description'] = "indicate $what in the summary document";
+      }
+      $term = Term::create($values);
+      $term->save();
+      $this->decisions[$name] = $term->id();
+      $board_dispositions[] = $term->id();
+    }
+    $reasons = ['Boring', 'Sloppy work', 'Too long'];
+    foreach ($reasons as $i => $reason) {
+      $term = Term::create([
+        'vid' => 'rejection_reasons',
+        'name' => $reason,
+        'weight' => $i + 1,
+        'status' => 1,
+      ]);
+      $term->save();
+      $this->reasons[$reason] = $term->id();
+    }
 
     // Create a board, a couple of topics, and pair of articles.
     $board = Board::create([
       'id' => 1,
       'name' => 'Test Board',
       'auto_imports' => TRUE,
+      'review_dispositions' => $board_dispositions,
     ]);
     $board->save();
     for ($i = 1; $i <= 2; $i++) {
@@ -89,38 +123,6 @@ class PacketTest extends WebDriverTestBase {
       ]);
       $article->addState($i === 3 ? 'fyi' : 'passed_full_review', 2);
       $article->save();
-    }
-
-    $decisions = [
-      ['Warrants no changes to the summary', NULL],
-      ['Deserves citation in the summary', 'placement'],
-      ['Merits revision of the text', 'changes'],
-      ['Merits discussion', NULL],
-    ];
-    foreach ($decisions as $i => list($name, $what)) {
-      $values = [
-        'vid' => 'dispositions',
-        'name' => $name,
-        'weight' => $i + 1,
-        'status' => 1,
-      ];
-      if (!empty($what)) {
-        $values['description'] = "indicate $what in the summary document";
-      }
-      $term = Term::create($values);
-      $term->save();
-      $this->decisions[$name] = $term->id();
-    }
-    $reasons = ['Boring', 'Sloppy work', 'Too long'];
-    foreach ($reasons as $i => $reason) {
-      $term = Term::create([
-        'vid' => 'rejection_reasons',
-        'name' => $reason,
-        'weight' => $i + 1,
-        'status' => 1,
-      ]);
-      $term->save();
-      $this->reasons[$reason] = $term->id();
     }
   }
 
@@ -309,11 +311,9 @@ class PacketTest extends WebDriverTestBase {
     $assert_session->pageTextContains('in the summary (indicate placement');
     $form = $this->getSession()->getPage();
     $form->checkField('Warrants no changes to the summary');
-    $assert_session->assertWaitOnAjaxRequest();
     $this->createScreenshot('../testdata/screenshots/rejected-checked.png');
     $assert_session->pageTextContains('Boring');
     $form->checkField('Merits discussion');
-    $assert_session->assertWaitOnAjaxRequest();
     $this->createScreenshot('../testdata/screenshots/merits-discussion-checked.png');
     $assert_session->pageTextNotContains('Boring');
     $this->setRichTextValue('.ck-editor__editable', 'Exciting!');

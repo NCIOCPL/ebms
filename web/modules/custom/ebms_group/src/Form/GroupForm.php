@@ -67,6 +67,7 @@ class GroupForm extends ContentEntityForm {
     }
     $form_state->setRedirect('entity.ebms_group.canonical',
                              ['ebms_group' => $entity->id()]);
+    return $status;
   }
 
 }

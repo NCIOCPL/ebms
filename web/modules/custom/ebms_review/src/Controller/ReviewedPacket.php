@@ -10,11 +10,35 @@ use Drupal\ebms_review\Entity\Review;
 use Drupal\ebms_state\Entity\State;
 use Drupal\file\Entity\File;
 use Drupal\taxonomy\Entity\Term;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller for a packet with at least one review.
  */
 class ReviewedPacket extends ControllerBase {
+
+  /**
+   * Service for looking up an EBMS taxonomy term.
+   */
+  protected $termLookup;
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReviewedPacket {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    $instance->termLookup = $container->get('ebms_core.term_lookup');
+    return $instance;
+  }
 
   /**
    * Show the articles and summary of reviews for this packet.
@@ -28,12 +52,12 @@ class ReviewedPacket extends ControllerBase {
   public function display(int $packet_id): array {
 
     // Collect some preliminary information.
-    $full_text_approval = \Drupal::service('ebms_core.term_lookup')->getState('passed_full_review');
-    $archive = \Drupal::request()->get('archive');
-    $revive = \Drupal::request()->get('revive');
-    $show_archived = \Drupal::request()->get('sa');
-    $sort = \Drupal::request()->get('sort');
-    $filter_id = \Drupal::request()->get('filter-id');
+    $full_text_approval = $this->termLookup->getState('passed_full_review');
+    $archive = $this->currentRequest->get('archive');
+    $revive = $this->currentRequest->get('revive');
+    $show_archived = $this->currentRequest->get('sa');
+    $sort = $this->currentRequest->get('sort');
+    $filter_id = $this->currentRequest->get('filter-id');
     $current_options = ['query' => []];
     if (!empty($show_archived)) {
       $current_options['query']['sa'] = $show_archived;
@@ -100,9 +124,7 @@ class ReviewedPacket extends ControllerBase {
           continue;
         }
         $options = ['query' => ['revive' => $packet_article->target_id]];
-        if (!empty($show_archived)) {
-          $options['query']['sa'] = 1;
-        }
+        $options['query']['sa'] = 1;
         if (!empty($filter_id)) {
           $options['query']['filter-id'] = $filter_id;
         }

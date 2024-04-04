@@ -132,7 +132,7 @@ class HomePage extends ControllerBase {
    *   Render array for the alert.
    */
   private function nextMeeting(User $user, array $board_ids): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_meeting');
+    $storage = $this->entityTypeManager()->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('dates.end_value', date('Y-m-d H:i:s'), '>=');
     $query->range(0, 1);
@@ -187,7 +187,7 @@ class HomePage extends ControllerBase {
         '#url' => Url::fromRoute('ebms_review.assigned_packets'),
       ];
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_review');
+    $storage = $this->entityTypeManager()->getStorage('ebms_review');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->addTag('unseen_reviews');
     $query->addMetaData('uid', $user->id());
@@ -215,7 +215,7 @@ class HomePage extends ControllerBase {
   private function hotelRequestsAlert(User $user, array $board_ids) {
     $cutoff = new \DateTime();
     $cutoff->sub(new \DateInterval('P60D'));
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_hotel_request');
+    $storage = $this->entityTypeManager()->getStorage('ebms_hotel_request');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('user.entity.boards', $board_ids, 'IN');
     $query->condition('submitted', $cutoff->format('Y-m-d'), '>=');
@@ -239,7 +239,7 @@ class HomePage extends ControllerBase {
    *   Render array for the alert.
    */
   private function postedSummariesAlert(array $board_ids): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_doc');
+    $storage = $this->entityTypeManager()->getStorage('ebms_doc');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->addTag('posted_summaries');
     $query->addMetaData('boards', $board_ids);

@@ -3,7 +3,9 @@
 namespace Drupal\ebms_help\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\node\Entity\Node;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,6 +23,23 @@ class BoardMemberManualSinglePage extends ControllerBase {
     'Board Members User Manual — Travel',
     'Board Members User Manual — Profile',
   ];
+
+  /**
+   * Conversion from structures into rendered output.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected RendererInterface $renderer;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): BoardMemberManualSinglePage {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->renderer = $container->get('renderer');
+    return $instance;
+  }
 
   /**
    * Show the board members' user manual as a single page.
@@ -46,7 +65,7 @@ class BoardMemberManualSinglePage extends ControllerBase {
       '#title' => "Board Member’s Guide to Using the EBMS",
       '#sections' => $sections,
     ];
-    $page = \Drupal::service('renderer')->render($manual);
+    $page = $this->renderer->render($manual);
     $response = new Response($page);
     return $response;
 }

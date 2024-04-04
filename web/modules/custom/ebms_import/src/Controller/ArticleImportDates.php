@@ -3,6 +3,7 @@
 namespace Drupal\ebms_import\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -11,13 +12,30 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ArticleImportDates extends ControllerBase {
 
   /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticleImportDates {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->database = $container->get('database');
+    return $instance;
+  }
+
+  /**
    * Return a plain-text response.
    */
   public function list(): StreamedResponse {
     $response = new StreamedResponse();
     $response->headers->set('Content-type', 'text/plain');
     $response->setCallback(function () {
-      $query = \Drupal::database()->select('ebms_article', 'article');
+      $query = $this->database->select('ebms_article', 'article');
       $query->fields('article', [
         'id', 'source_id', 'import_date', 'update_date', 'data_checked'
       ]);

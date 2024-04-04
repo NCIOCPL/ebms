@@ -10,7 +10,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 /**
  * Test the board type.
  *
- * @group ebms
+ * @group mysql
  */
 class BoardTest extends KernelTestBase {
 
@@ -19,7 +19,7 @@ class BoardTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['ebms_board', 'user', 'file', 'system'];
+  protected static $modules = ['ebms_board', 'user', 'file', 'system', 'taxonomy'];
 
   /**
    * Test saving a PDQ board.

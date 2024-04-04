@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -15,6 +16,7 @@ use Drupal\ebms_state\Entity\State;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\file\Entity\File;
 use Drupal\taxonomy\Entity\Term;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Reports for articles in various stages of the processing flow.
@@ -52,6 +54,31 @@ class ArticlesByStatusReports extends FormBase {
     ArticlesByStatusReports::WORKING_GROUP_DECISION,
     ArticlesByStatusReports::EDITORIAL_BOARD_DECISION,
   ];
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticlesByStatusReports {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -464,7 +491,7 @@ class ArticlesByStatusReports extends FormBase {
    *   Sorted array of reviewers recommending discussion for the article.
    */
   private function discussionProponents(int $article_id, int $topic_id) {
-    $query = \Drupal::database()->select('users_field_data', 'user');
+    $query = $this->database->select('users_field_data', 'user');
     $query->join('ebms_review', 'review', 'review.reviewer = user.uid');
     $query->join('ebms_packet_article__reviews', 'reviews', 'reviews.reviews_target_id = review.id');
     $query->join('ebms_packet_article', 'article', 'article.id = reviews.entity_id');
@@ -514,7 +541,7 @@ class ArticlesByStatusReports extends FormBase {
   private function abstractDecisionReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     if (!empty($values['topic'])) {
@@ -588,7 +615,7 @@ class ArticlesByStatusReports extends FormBase {
   private function fullTextRetrievalReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     $query->condition('value.entity.field_text_id', 'passed_bm_review');
@@ -668,7 +695,7 @@ class ArticlesByStatusReports extends FormBase {
   private function fullTextDecisionReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     if (!empty($values['topic'])) {
@@ -757,7 +784,7 @@ class ArticlesByStatusReports extends FormBase {
   private function assignedForReviewReport(array $values): array {
 
     // There's no acceptable way to do this with an entity query.
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
     $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = articles.articles_target_id');
     $query->join('ebms_article', 'article', 'article.id = packet_article.article');
@@ -847,7 +874,7 @@ class ArticlesByStatusReports extends FormBase {
   private function boardMemberResponsesReport(array $values): array {
 
     // Again, the entity query API isn't going to cut it.
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
     $query->join('ebms_packet_article', 'packet_article', 'packet_article.id = articles.articles_target_id');
     $query->join('ebms_article', 'article', 'article.id = packet_article.article');
@@ -945,7 +972,7 @@ class ArticlesByStatusReports extends FormBase {
   private function boardManagerActionReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     if (!empty($values['topic'])) {
@@ -1027,7 +1054,7 @@ class ArticlesByStatusReports extends FormBase {
   private function onAgendaReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     $query->condition('value.entity.field_text_id', 'on_agenda');
@@ -1120,7 +1147,7 @@ class ArticlesByStatusReports extends FormBase {
   private function boardDecisionReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     $query->condition('value.entity.field_text_id', 'final_board_decision');
@@ -1213,7 +1240,7 @@ class ArticlesByStatusReports extends FormBase {
   private function wgDecisionReport(array $values): array {
 
     // Construct a query to find the states which the report needs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_state');
+    $storage = $this->entityTypeManager->getStorage('ebms_state');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('current', TRUE);
     $query->condition('value.entity.field_text_id', 'working_group_decision');

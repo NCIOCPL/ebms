@@ -10,7 +10,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 /**ß
  * Test the group management page.
  *
- * @group ebms
+ * @group mysql
  */
 class GroupTest extends WebDriverTestBase {
 

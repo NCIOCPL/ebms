@@ -146,13 +146,13 @@ foreach ($vocabularies as list($filename, $mapname, $label)) {
       $id = $values['id'];
       unset($values['id']);
     }
-    if (!empty($values['description'])) {
+    if (!empty($values['description']) && $mapname !== 'dispositions') {
       if (!str_ends_with($values['description'], '.'))
         $values['description'] .= '.';
     }
     $term = \Drupal\taxonomy\Entity\Term::create($values);
     $term->save();
-    if (!empty($mapname))
+    if (!empty($mapname) && !empty($id))
       $maps[$mapname][$id] = $term->id();
   }
   $n = count($data);

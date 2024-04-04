@@ -6,7 +6,6 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\ebms_article\Entity\Article;
-use Drupal\ebms_core\TermLookup;
 use Drupal\ebms_review\Entity\Review;
 use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * import information, IDs, review cycles, etc.). The rest of the page
  * shows the topic-specific activity, grouped by board.
  */
-class ArticleController extends ControllerBase {
+final class ArticleController extends ControllerBase {
 
   /**
    * Single characters used to characterize an action or state.
@@ -105,22 +104,30 @@ class ArticleController extends ControllerBase {
   protected $userStorage;
 
   /**
-   * Constructs a new \Drupal\ebms_article\Controller\ArticleController object.
+   * The current page requests.
    *
-   * @param \Drupal\ebms_core\TermLookup
-   *   The term_lookup service.
+   * @var \Symfony\Component\HttpFoundation\Request
    */
-  public function __construct(TermLookup $term_lookup) {
-    $this->termLookup = $term_lookup;
-    $this->termStorage = $this->entityTypeManager()->getStorage('taxonomy_term');
-    $this->userStorage = $this->entityTypeManager()->getStorage('user');
-  }
+  protected $currentRequest;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('ebms_core.term_lookup'));
+    $instance = parent::create($container);
+    $instance->termLookup = $container->get('ebms_core.term_lookup');
+    $instance->termStorage = $instance->entityTypeManager()->getStorage('taxonomy_term');
+    $instance->userStorage = $instance->entityTypeManager()->getStorage('user');
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    $instance->database = $container->get('database');
+    return $instance;
   }
 
   /**
@@ -194,7 +201,7 @@ class ArticleController extends ControllerBase {
     $relationships = $storage->loadMultiple($ids);
     $storage = $this->entityTypeManager()->getStorage('ebms_article');
     $values = [];
-    $request_query_parms = \Drupal::request()->query->all();
+    $request_query_parms = $this->currentRequest->query->all();
     foreach ($relationships as $relationship) {
       $related = $relationship->related->target_id;
       $related_to = $relationship->related_to->target_id;
@@ -248,7 +255,7 @@ class ArticleController extends ControllerBase {
 
     // Another place where the entity query API falls short.
     // See https://tracker.nci.nih.gov/browse/OCEEBMS-718.
-    $query = \Drupal::database()->select('ebms_import_batch__actions', 'a');
+    $query = $this->database->select('ebms_import_batch__actions', 'a');
     $query->join('ebms_import_batch', 'b', 'b.id = a.entity_id');
     $query->join('taxonomy_term_field_data', 'd', 'd.tid = a.actions_disposition');
     $query->join('taxonomy_term_field_data', 't', 't.tid = b.import_type');
@@ -356,7 +363,7 @@ class ArticleController extends ControllerBase {
     $states = $storage->loadMultiple($query->execute());
 
     // Extract the display information from each state.
-    $opts = ['query' => \Drupal::request()->query->all()];
+    $opts = ['query' => $this->currentRequest->query->all()];
     $opts['query']['article'] = $article->id();
     foreach ($states as $state) {
       if ($this->brief) {
@@ -698,7 +705,7 @@ class ArticleController extends ControllerBase {
    * @return array
    */
   private function getArticleActionButtons($article) {
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $options_with_article = $options;
     $options_with_article['query']['article'] = $article->id();
     $actions = [
@@ -854,7 +861,7 @@ class ArticleController extends ControllerBase {
       }
       $route = 'ebms_article.add_article_tag_comment';
       $parms = ['tag_id' => $tag->id()];
-      $opts = ['query' => \Drupal::request()->query->all()];
+      $opts = ['query' => $this->currentRequest->query->all()];
       $opts['query']['article'] = $article_id;
       $add_comment = Url::fromRoute($route, $parms, $opts);
       $inactivate = '';
@@ -912,9 +919,9 @@ class ArticleController extends ControllerBase {
   private function getInternalComments(Article $article): array {
     $values = [];
     $comments = $article->get('internal_comments');
-    if (!empty($comments)) {
+    if ($comments->count() > 0) {
       $parms = ['article_id' => $article->id()];
-      $opts = ['query' => \Drupal::request()->query->all()];
+      $opts = ['query' => $this->currentRequest->query->all()];
       foreach ($comments as $delta => $comment) {
         // Delta is passed as 1-based, even though Drupal has them as 0-based,
         // because of PHP's very odd behavior with `empty("0")`.
@@ -1008,7 +1015,7 @@ class ArticleController extends ControllerBase {
         // common practice in the Drupal community.
         $article_topic = $article->findArticleTopic($board_name, $topic_name);
         $topic_id = $article_topic->topic->target_id;
-        $options = ['query' => \Drupal::request()->query->all()];
+        $options = ['query' => $this->currentRequest->query->all()];
         $add_tag_opts = $options;
         $add_tag_opts['query']['topic'] = $topic_id;
         $parms = ['article_id' => $article->id()];

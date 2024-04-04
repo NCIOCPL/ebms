@@ -12,7 +12,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
  * We can't test the journal refresh command, because NLM refuses
  * most connections from test clients. :-(
  *
- * @group ebms
+ * @group mysql
  */
 class JournalTest extends WebDriverTestBase {
 

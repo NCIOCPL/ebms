@@ -11,7 +11,7 @@
     "vid": "dispositions",
     "id": 2,
     "name": "Deserves citation in the summary",
-    "description": "indicate placement in the summary document",
+    "description": "<p>indicate placement in the summary document</p>",
     "weight": 2,
     "status": true
   },
@@ -19,7 +19,7 @@
     "vid": "dispositions",
     "id": 3,
     "name": "Merits revision of the text",
-    "description": "indicate changes in the summary document",
+    "description": "<p>indicate changes in the summary document</p>",
     "weight": 3,
     "status": true
   },
@@ -28,7 +28,39 @@
     "id": 4,
     "name": "Merits discussion",
     "description": null,
+    "weight": 5,
+    "status": true
+  },
+  {
+    "vid": "dispositions",
+    "id": 0,
+    "name": "Deserves citation or merits revision, defer to the Board member listed below",
+    "description": "<p>add the member's name in the comment field</p>",
     "weight": 4,
+    "status": true
+  },
+  {
+    "vid": "dispositions",
+    "id": 0,
+    "name": "Merits discussion if others agree",
+    "description": null,
+    "weight": 6,
+    "status": true
+  },
+  {
+    "vid": "dispositions",
+    "id": 0,
+    "name": "Merits discussion, defer to the Board member listed below",
+    "description": "<p>add the member's name in the comment field</p>",
+    "weight": 7,
+    "status": true
+  },
+  {
+    "vid": "dispositions",
+    "id": 0,
+    "name": "Abstain",
+    "description": "<p>this means you do not feel you can judge the relevance or interest. Please use this option sparingly. Remember we are writing for a wide range of readers so your assessment of potential relevance or interest is important.</p>",
+    "weight": 8,
     "status": true
   }
 ]

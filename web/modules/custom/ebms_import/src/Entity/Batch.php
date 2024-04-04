@@ -416,18 +416,20 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
             if (!empty($request['fast-track']) && in_array($article_id, $batch->readyForReview)) {
               $article->addTag('i_fasttrack', $topic_id, $user, $now);
               $state = $article->addState($placement, $topic_id, $user, $now, $cycle, $fast_track_comment);
-              $article_changed = TRUE;
-              $state_changed = FALSE;
-              if ($placement === 'on_agenda' && !empty($meeting)) {
-                $state->meetings[] = $meeting;
-                $state_changed = TRUE;
-              }
-              elseif ($placement === 'final_board_decision' && !empty($decision)) {
-                $state->decisions[] = $decision;
-                $state_changed = TRUE;
-              }
-              if ($state_changed) {
-                $state->save();
+              if (!empty($state)) {
+                $article_changed = TRUE;
+                $state_changed = FALSE;
+                if ($placement === 'on_agenda' && !empty($meeting)) {
+                  $state->meetings[] = $meeting;
+                  $state_changed = TRUE;
+                }
+                elseif ($placement === 'final_board_decision' && !empty($decision)) {
+                  $state->decisions[] = $decision;
+                  $state_changed = TRUE;
+                }
+                if ($state_changed) {
+                  $state->save();
+                }
               }
             }
             if (!empty($topic_comment)) {
@@ -859,11 +861,10 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
    *   If unable to create a connection object.
    */
   public static function getCurlHandle(string $parms, string $url = self::URL): \CurlHandle {
-    $ch = curl_init();
+    $ch = curl_init($url);
     if (empty($ch)) {
       throw new \Exception('Unable to create an HTTP connection object.');
     }
-    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $parms);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);

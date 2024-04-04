@@ -2,6 +2,7 @@
 
 namespace Drupal\ebms_article\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -10,7 +11,8 @@ use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_import\Entity\Batch;
 use Drupal\ebms_topic\Entity\Topic;
-use Drupal\file\Entity\File;
+use Drupal\file\FileUsage\FileUsageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for managing bulk loading of full-text PDFs.
@@ -21,6 +23,31 @@ class FullTextQueue extends FormBase {
 
   const FILTER = 'Filter';
   const UPLOAD = 'Upload';
+
+  /**
+   * File usage service.
+   *
+   * @var \Drupal\file\FileUsage\FileUsageInterface
+   */
+  protected FileUsageInterface $fileUsage;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): FullTextQueue {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->fileUsage = $container->get('file.usage');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -48,7 +75,7 @@ class FullTextQueue extends FormBase {
     $preliminary = $form_state->getValue('preliminary', $values['preliminary'] ?? 'without');
 
     // Find the articles needing PDFs.
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_article');
+    $storage = $this->entityTypeManager->getStorage('ebms_article');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('topics.entity.states.entity.value.entity.field_text_id', 'passed_bm_review');
     $query->condition('topics.entity.states.entity.current', 1);
@@ -298,9 +325,8 @@ class FullTextQueue extends FormBase {
     // If we've been asked to store the files, do so.
     $trigger = $form_state->getTriggeringElement()['#value'];
     if ($trigger === self::UPLOAD) {
-      $validators = ['file_validate_extensions' => ['pdf']];
-      $file_usage = \Drupal::service('file.usage');
-      $logger = \Drupal::logger('ebms_article');
+      $validators = ['FileExtension' => ['extensions' => 'pdf']];
+      $logger = $this->getLogger('ebms_article');
       $files = $this->getRequest()->files->get('files', []);
       foreach ($files as $key => $uploaded_file) {
         if (!empty($uploaded_file)) {
@@ -325,7 +351,7 @@ class FullTextQueue extends FormBase {
               $values = ['file' => $file->id(), 'unavailable' => FALSE];
               $article->set('full_text', $values);
               $article->save();
-              $file_usage->add($file, 'ebms_article', 'ebms_article', $article_id);
+              $this->fileUsage->add($file, 'ebms_article', 'ebms_article', $article_id);
               $this->messenger()->addMessage("Posted $name for article $article_id.");
             }
           }

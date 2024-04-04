@@ -1,0 +1,47 @@
+{
+  "Adult Treatment": [
+    "Warrants no changes to the summary",
+    "Merits revision of the text"
+  ],
+  "Cancer Genetics": [
+    "Warrants no changes to the summary",
+    "Deserves citation in the summary",
+    "Merits revision of the text",
+    "Deserves citation or merits revision, defer to the Board member listed below",
+    "Merits discussion"
+  ],
+  "Pediatric Treatment": [
+    "Warrants no changes to the summary",
+    "Deserves citation in the summary",
+    "Merits revision of the text",
+    "Deserves citation or merits revision, defer to the Board member listed below",
+    "Merits discussion",
+    "Merits discussion if others agree",
+    "Merits discussion, defer to the Board member listed below"
+  ],
+  "Screening and Prevention": [
+    "Warrants no changes to the summary",
+    "Deserves citation in the summary",
+    "Merits revision of the text",
+    "Merits discussion"
+  ],
+  "Supportive and Palliative Care": [
+    "Warrants no changes to the summary",
+    "Deserves citation in the summary",
+    "Merits discussion",
+    "Abstain"
+  ],
+  "Integrative, Alternative, and Complementary Therapies": [
+    "Warrants no changes to the summary",
+    "Deserves citation in the summary",
+    "Merits revision of the text",
+    "Merits discussion"
+  ],
+  "Pediatric Genetics": [
+    "Warrants no changes to the summary",
+    "Deserves citation in the summary",
+    "Merits revision of the text",
+    "Deserves citation or merits revision, defer to the Board member listed below",
+    "Merits discussion"
+  ]
+}

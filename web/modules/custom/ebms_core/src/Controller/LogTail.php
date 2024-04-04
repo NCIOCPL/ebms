@@ -3,6 +3,7 @@
 namespace Drupal\ebms_core\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -11,14 +12,39 @@ use Symfony\Component\HttpFoundation\Response;
 class LogTail extends ControllerBase {
 
   /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * File system service.
+   *
+   * @var \Drupal\Core\File\FileSystem
+   */
+  protected $fileSystem;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): LogTail {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    $instance->fileSystem = $container->get('file_system');
+    return $instance;
+  }
+
+  /**
    * Show the bottom of the log.
    */
   public function display(): Response {
     try {
-      $p = \Drupal::request()->get('p');
-      $s = \Drupal::request()->get('s');
-      $c = \Drupal::request()->get('c');
-      $r = \Drupal::request()->get('r');
+      $p = $this->currentRequest->get('p');
+      $s = $this->currentRequest->get('s');
+      $c = $this->currentRequest->get('c');
+      $r = $this->currentRequest->get('r');
       if (!empty($r) & !empty($p) && file_exists($p)) {
         $name = pathinfo($p)['filename'];
         $count = filesize($p);
@@ -41,7 +67,7 @@ class LogTail extends ControllerBase {
         return $response;
       }
       if (empty($p)) {
-          $p = \Drupal::service('file_system')->realpath('public://') . '/ebms_debug.log';
+          $p = $this->fileSystem->realpath('public://') . '/ebms_debug.log';
       }
       if (!file_exists($p)) {
         $response = new Response("$p not found");

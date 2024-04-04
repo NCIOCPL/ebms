@@ -31,6 +31,9 @@
     {% if article.board_reviewed %}
     <div class="board-reviewed">Reviewed by Editorial Board</div>
     {% endif %}
+    {% if article.wg_reviewed %}
+    <div class="wg-reviewed">Reviewed by Working Group</div>
+    {% endif %}
     {% if article.other_reviews %}
     <a href="{{ article.other_reviews }}" class="other-reviews button usa-button">Other Reviews</a>
     {% endif %}

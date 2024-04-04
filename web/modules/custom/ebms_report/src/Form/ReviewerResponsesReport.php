@@ -3,12 +3,14 @@
 namespace Drupal\ebms_report\Form;
 
 use Drupal\Core\Database\Query\TableSortExtender;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
 use Drupal\ebms_topic\Entity\Topic;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Show completed/not-completed statistics for assigned reviews.
@@ -17,6 +19,30 @@ use Drupal\user\Entity\User;
  */
 class ReviewerResponsesReport extends FormBase {
 
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ReviewerResponsesReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->database = $container->get('database');
+    return $instance;
+  }
   /**
    * {@inheritdoc}
    */
@@ -187,7 +213,7 @@ class ReviewerResponsesReport extends FormBase {
     // against the live data set could well time out. This way it takes about
     // 1/50 of a second (representing a speedup of better than three orders of
     // magnitude).
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->join('ebms_packet__articles', 'articles', 'articles.entity_id = packet.id');
     if (!empty($params['topics'])) {
       $query->condition('packet.topic', $params['topics'], 'IN');
@@ -222,7 +248,7 @@ class ReviewerResponsesReport extends FormBase {
     if (empty($articles)) {
       $articles = [0 => 'SQL "WHERE ... IN" will not accept an empty array'];
     }
-    $query = \Drupal::database()->select('ebms_review', 'review');
+    $query = $this->database->select('ebms_review', 'review');
     $query->join('ebms_packet_article__reviews', 'reviews', 'reviews.reviews_target_id = review.id');
     $query->join('ebms_packet__articles', 'articles', 'articles.articles_target_id = reviews.entity_id');
     if (!empty($params['reviewers'])) {
@@ -275,7 +301,7 @@ class ReviewerResponsesReport extends FormBase {
     }
 
     // Finally, find all the reviewers for the selected packets.
-    $query = \Drupal::database()->select('ebms_packet', 'packet');
+    $query = $this->database->select('ebms_packet', 'packet');
     $query->condition('packet.id', array_keys($articles), 'IN');
     $query->join('ebms_packet__reviewers', 'reviewers', 'reviewers.entity_id = packet.id');
     $query->join('users_field_data', 'reviewer', 'reviewer.uid = reviewers.reviewers_target_id');
@@ -356,7 +382,7 @@ class ReviewerResponsesReport extends FormBase {
    *   Sorted reviewer names indexed by user ID.
    */
   private function reviewers(int $board_id): array {
-    $storage = \Drupal::entityTypeManager()->getStorage('user');
+    $storage = $this->entityTypeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('boards', $board_id);
     $query->condition('roles', 'board_member');

@@ -10,7 +10,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 /**
  * Test the article type.
  *
- * @group ebms
+ * @group mysql
  */
 class ArticleTest extends KernelTestBase {
 

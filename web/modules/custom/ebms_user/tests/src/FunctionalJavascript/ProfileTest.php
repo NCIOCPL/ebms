@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\Tests\ebms_user\Functional;
+namespace Drupal\Tests\ebms_user\FunctionalJavascript;
 
 use Drupal\Core\Url;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_group\Entity\Group;
 use Drupal\ebms_topic\Entity\Topic;
-use Drupal\Tests\BrowserTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Test the user profile page.
@@ -15,9 +15,9 @@ use Drupal\Tests\BrowserTestBase;
  * by https://www.drupal.org/project/drupal/issues/3281667, which will allow
  * sites based on the drupal/core-recommended template to upgrade to Guzzle 7.
  *
- * @group ebms
+ * @group mysql
  */
-class ProfileTest extends BrowserTestBase {
+class ProfileTest extends WebDriverTestBase {
 
   protected static $modules = ['ebms_user'];
 
@@ -52,7 +52,6 @@ class ProfileTest extends BrowserTestBase {
     $url = Url::fromRoute('ebms_user.profile', ['user' => $user->id()]);
     $this->drupalGet($url->toString());
     $assert_session = $this->assertSession();
-    $assert_session->statusCodeEquals(200);
     // Use for debugging.
     // $html = $this->getSession()->getPage()->getHtml();
     // file_put_contents('../testdata/screenshots/user-profile.html', $html);

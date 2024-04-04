@@ -2,8 +2,10 @@
 
 namespace Drupal\ebms_topic;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Link;
 
 /**
@@ -11,7 +13,24 @@ use Drupal\Core\Link;
  *
  * @ingroup ebms
  */
-class ListBuilder extends EntityListBuilder {
+final class ListBuilder extends EntityListBuilder {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    $type_id = $container->get('entity_type.manager')->getStorage($entity_type->id());
+    $instance = new static($entity_type, $type_id);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -43,7 +62,7 @@ class ListBuilder extends EntityListBuilder {
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->sort('board.entity.name', 'ASC');
     $query->sort('name', 'ASC');
-    $parms = \Drupal::request()->query;
+    $parms = $this->currentRequest->query;
     return $query->execute();
   }
 

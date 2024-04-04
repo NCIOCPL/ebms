@@ -559,7 +559,7 @@ class SearchQuery {
       $authors = explode(';', $this->parms['authors'] ?? '');
     $field = '';
     foreach ($authors as $author) {
-      $author = trim($author ?? '');
+      $author = trim($author ?: '');
       if (!empty($author)) {
         $author = Article::normalize($author);
         // Have to use like because of a bug in the testing harness.

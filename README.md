@@ -1,9 +1,29 @@
-# EBMS 4.0
+# EBMS
 
-This version of the PDQ® Editorial Board Management System has been
-rewritten to use Drupal 9.x or later. The project directory was initialized
-with the command `composer create-project drupal/recommended-project
-ebms4`. After the new version was deployed to production the old repository
+The PDQ® Editorial Board Management System (EBMS) supports the work of the
+U.S. National Cancer Institute to create and maintain comprehensive,
+evidence-based, up-to-date cancer content made available in the form of
+health professional cancer information summaries as a public service of
+the NCI. These published summaries are intended to
+
+- **improve the overall quality of cancer care** by informing and educating
+health professionals about the current published evidence related to individual
+cancer-related topics and
+- **support informed decision making between clinicians and patients**.
+
+The summaries are produced, maintained, and updated regularly by six editorial
+boards comprised of oncology specialists in fields including medical, surgical,
+and radiation oncology; epidemiology; psychology; genetics; and complementary
+and alternative medicine. Each board reviews published research findings on a
+monthly basis and meets several times a year to review and discuss updates to
+their summaries. The boards are not formal advisory or policy-making boards for
+the NCI. The EBMS is used to manage the identification of the newly-published
+relevant literature and to track to various stages of the review process.
+
+This version of the EBMS has been rewritten to use Drupal 9.x or later.
+The project directory was initialized with the command
+`composer create-project drupal/recommended-project ebms4`.
+After the new version was deployed to production the old repository
 was retired and replaced with the new one (renamed from "ebms4" to "ebms").
 
 This page focuses on setting up `Docker` containers for doing
@@ -11,6 +31,11 @@ development work on the EBMS, with non-sensitive dummy data which can
 be put under version control. Jenkins will be used for refreshing lower
 CBIIT tiers from the production server. The `scripts` directory contains
 scripts given to CBIIT for deployment of individual releases.
+
+If at all possible, it is best to be disconnected from the NIH's VPN while
+working on your local instance of the EBMS. This is particularly true when
+running `composer`, as that VPN is known to block access to required
+resources.
 
 ## Prerequisites
 
@@ -43,6 +68,9 @@ A recent version of PHP is needed (version 8.1 or higher).
 1. Run `brew install php@8.1`. It's OK if you end up with a higher version.
 2. Follow any additional instructions on the screen. One of this set is adding PHP to your path. Make sure you do that.
 3. Edit `/opt/homebrew/etc/php/8.1/php.ini` or `/usr/local/etc/php/8.1/php.ini` and set `memory_limit = -1` (this removes any memory limits, which `composer install` usually hits. `/opt/homebrew` is the location for newer M1 Macs. If `php --version` shows that you're running a later version, you'll need to adjust the path of the file you're editing accordingly.
+
+If you already have PHP installed, be sure the `php` executable is in your path, and that the `memory_limit` variable is set
+as described above.
 
 ### Composer
 
@@ -78,12 +106,14 @@ To create a local development environment for this project, perform the followin
 2. Change current directory to the cloned repository
 3. Run `./scripts/create-unversioned-files`
 4. Optionally edit the files in the `unversioned` directory
-5. Run `composer install`
-6. Run `docker compose up -d`
-7. Run `docker exec -it ebms-web-1 bash`
-8. Inside the container, run `./install.sh`
-9. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
-10. Log in as admin using the password created in steps 3-4.
+5. Run `chmod +w web/sites/default`
+6. Run `composer install`
+7. Run `chmod -w web/sites/default`
+8. Run `docker compose up -d`
+9. Run `docker exec -it ebms-web-1 bash`
+10. Inside the container, run `./install.sh`
+11. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
+12. Log in as admin using the password created in steps 3-4.
 
 ## Updated packages
 
@@ -103,32 +133,52 @@ those files, they should run
 composer install
 ```
 
+If there's any chance that files which should be managed by composer have
+been copied into their current locations by other means (for example, using
+`rsync`), then you should first remove the entire `vendor` directory, which
+will be repopulated by `composer`. This will ensure that `composer`'s picture
+of what is installed is accurate, even for files outside the `vendor`
+directory.
+
+
 ## Updated Docker configuration
 
 If settings are changed in `docker-compose.yml` or `Dockerfile` you
 will need to rebuild the images and containers with
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 ## Testing
 
 To run the complete set of regression tests, navigate to the base
-directory of the project in the web container and run:
+directory of the project in the web container and execute
 
 ```bash
-vendor/bin/phpunit web/modules/custom
+mkdir -p web/sites/simpletest
+chown www-data web/sites/simpletest
+su www-data -s /bin/bash -c 'vendor/bin/phpunit web/modules/custom'
 ```
 
-You can run tests for just one module, for example:
+You can then run tests for just one module, for example:
 
 ```bash
-vendor/bin/phpunit web/modules/custom/ebms_review
+su www-data -s /bin/bash -c 'vendor/bin/phpunit web/modules/custom/ebms_review'
 ```
 
 Or even a specific test:
 
 ```bash
-vendor/bin/phpunit web/modules/custom/ebms_article/tests/src/Kernel/SearchTest.php
+EBMS_ARTICLE=web/modules/custom/ebms_article
+ARTICLE_TEST=$EBMS_ARTICLE/tests/src/FunctionalJavascript/ArticleTest.php
+su www-data -s /bin/bash -c "vendor/bin/phpunit $ARTICLE_TEST"
 ```
+
+## Debugging
+
+The `php-xdebug` package is no longer included in the build of the web container,
+because recent versions of Drupal have broken asset aggregation when that package
+is installed and enabled. If you need to debug the site, use `apt install php-xdebug`
+to install the package and `service apache2 reload` to restart the web server. Be
+sure to disable `xdebug` when you have finished debugging.

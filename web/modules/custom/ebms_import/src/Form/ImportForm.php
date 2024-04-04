@@ -462,7 +462,7 @@ class ImportForm extends FormBase {
    * @throws \Exception
    *   If bad filename, parms, out of memory, etc.
    */
-  public function findPubmedIds(string $results): array {
+  public static function findPubmedIds(string $results): array {
 
     // Save what we got (OCEEBMS-313).
     $values = [
@@ -528,7 +528,7 @@ class ImportForm extends FormBase {
     catch (\Exception $e) {
       $error = $e->getMessage();
       $message = "Import failure: $error";
-      $logger = \Drupal::logger('ebms_import');
+      $logger = $this->getLogger('ebms_import');
       $logger->error($message);
       $this->messenger()->addError($message);
       $batch = NULL;
@@ -639,16 +639,18 @@ class ImportForm extends FormBase {
           $form_state->setErrorByName('pmids', $message);
         }
         else {
-          $validators = ['file_validate_extensions' => ''];
+          $validators = ['FileExtension' => []];
           $file = file_save_upload('file', $validators, FALSE, 0);
           if (empty($file)) {
             $name = $files['file']->getClientOriginalName();
             $form_state->setErrorByName('file', "Unable to save $name.");
           }
-          $search_results = file_get_contents($file->getFileUri());
-          $pmids = $this->findPubmedIds($search_results);
-          if (empty($pmids)) {
-            $form_state->setErrorByName('file', 'No PubMed IDs found.');
+          else {
+            $search_results = file_get_contents($file->getFileUri());
+            $pmids = self::findPubmedIds($search_results);
+            if (empty($pmids)) {
+              $form_state->setErrorByName('file', 'No PubMed IDs found.');
+            }
           }
         }
       }
@@ -674,7 +676,7 @@ class ImportForm extends FormBase {
           $form_state->setErrorByName('full-text', $message);
         }
         elseif (empty($form_state->getValue('test-mode'))) {
-          $validators = ['file_validate_extensions' => ['pdf']];
+          $validators = ['FileExtension' => ['extensions' => 'pdf']];
           $file = file_save_upload('full-text', $validators, 'public://', 0);
           $file->setPermanent();
           $file->save();

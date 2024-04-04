@@ -8,11 +8,29 @@ use Drupal\Core\Url;
 use Drupal\ebms_review\Entity\Packet;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Show the articles in the review packet.
  */
 class AssignedPacket extends ControllerBase {
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): AssignedPacket {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    return $instance;
+  }
 
   /**
    * Create the render array for the assigned packet page.
@@ -35,7 +53,7 @@ class AssignedPacket extends ControllerBase {
 
     // Set up some defaults.
     $title = $packet->title->value;
-    $options = ['query' => \Drupal::request()->query->all()];
+    $options = ['query' => $this->currentRequest->query->all()];
     $uid = $this->currentUser()->id();
 
     // Override defaults if working on behalf of a board member.
@@ -59,7 +77,7 @@ class AssignedPacket extends ControllerBase {
     foreach ($packet->articles as $article) {
       $packet_articles[] = $article->entity;
     }
-    $storage = \Drupal::entityTypeManager()->getStorage('ebms_journal');
+    $storage = $this->entityTypeManager()->getStorage('ebms_journal');
     $ids = $storage->getQuery()
       ->accessCheck(FALSE)
       ->condition('core', 1)
@@ -97,7 +115,7 @@ class AssignedPacket extends ControllerBase {
       if (empty($authors)) {
         $authors = ['[No authors named]'];
       }
-      $agendas = $fyi = $review_posted = $board_reviewed = $full_text_url = $other_reviews_url = $review_url = $quick_rejection_url = '';
+      $agendas = $fyi = $review_posted = $wg_reviewed = $board_reviewed = $full_text_url = $other_reviews_url = $review_url = $quick_rejection_url = '';
       if (!empty($article->full_text->file)) {
         $file = File::load($article->full_text->file);
         $full_text_url = $file->createFileUrl();
@@ -132,6 +150,9 @@ class AssignedPacket extends ControllerBase {
         if (empty($review_posted)) {
           if ($current_state->value->entity->field_text_id->value === 'final_board_decision') {
             $board_reviewed = TRUE;
+          }
+          elseif ($current_state->value->entity->field_text_id->value === 'working_group_decision') {
+            $wg_reviewed = TRUE;
           }
           else {
             $review_url = Url::fromRoute('ebms_review.add_review', $parms, $options);
@@ -170,6 +191,7 @@ class AssignedPacket extends ControllerBase {
           'fyi' => $fyi,
           'review_posted' => $review_posted,
           'board_reviewed' => $board_reviewed,
+          'wg_reviewed' => $wg_reviewed,
           'full_text_url' => $full_text_url,
           'other_reviews' => $other_reviews_url,
           'review_url' => $review_url,

@@ -1,0 +1,22 @@
+<?php
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+/**
+ * Implements hook_update_N().
+ *
+ * Add per-board review dispositions. See OCEEBMS-808.
+ */
+function ebms_board_update_10201() {
+  $definition = BaseFieldDefinition::create('entity_reference')
+    ->setRequired(TRUE)
+    ->setLabel('Board Member Review Dispositions')
+    ->setDescription('Available review disposition options for members of this board.')
+    ->setSetting('target_type', 'taxonomy_term')
+    ->setSetting('handler_settings', ['target_bundles' => ['dispositions' => 'dispositions']])
+    ->setDisplayOptions('view', ['label' => 'above'])
+    ->setDisplayOptions('form', ['type' => 'options_select'])
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('review_dispositions', 'ebms_board', 'ebms_board', $definition);
+}

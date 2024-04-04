@@ -4,6 +4,7 @@ namespace Drupal\ebms_import\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\ebms_import\Entity\Batch;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -12,6 +13,31 @@ use Symfony\Component\HttpFoundation\Response;
 class ArticleImportRefresh extends ControllerBase {
 
   const COMMENT = 'BATCH REPLACEMENT OF UPDATED ARTICLES FROM PUBMED';
+
+  /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): ArticleImportRefresh {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * Return a plain-text response.
@@ -23,11 +49,11 @@ class ArticleImportRefresh extends ControllerBase {
     try {
 
       // Get the PubMed IDs.
-      $pmids = \Drupal::request()->request->get('pmids');
+      $pmids = $this->currentRequest->request->get('pmids');
       ebms_debug_log("pmids=$pmids", 3);
 
       // Prevent a rogue process from tricking us into adding new articles.
-      $query = \Drupal::database()->select('ebms_article', 'article');
+      $query = $this->database->select('ebms_article', 'article');
       $query->addField('article', 'source_id');
       $query->distinct();
       $source_ids = $query->execute()->fetchCol();
@@ -36,8 +62,8 @@ class ArticleImportRefresh extends ControllerBase {
       $pmids = array_intersect(explode(',', $pmids), $source_ids);
 
       // If we have any to update, do it.
+      $report = '';
       if (!empty($pmids)) {
-        $matched = [];
         $request = [
           'article-ids' => $pmids,
           'import-comments' => self::COMMENT,
@@ -61,7 +87,7 @@ class ArticleImportRefresh extends ControllerBase {
         // Find out how many we updated.
         else {
           $imported = [];
-          $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+          $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
           $query = $storage->getQuery()->accessCheck(FALSE);
           $query->condition('vid', 'import_dispositions');
           $query->condition('field_text_id', 'error');
@@ -108,9 +134,9 @@ class ArticleImportRefresh extends ControllerBase {
   private function send_report($report, $start) {
 
     @ebms_debug_log('Starting Article XML Refresh report', 1);
-    $to = \Drupal::config('ebms_core.settings')->get('dev_notif_addr');
+    $to = $this->config('ebms_core.settings')->get('dev_notif_addr');
     if (empty($to)) {
-      \Drupal::logger('ebms_review')->error('No recipients for article XML refresh report.');
+      $this->getLogger('ebms_review')->error('No recipients for article XML refresh report.');
       @ebms_debug_log('Aborting Article XML Refresh report: no recipients registered.', 1);
       return;
     }
@@ -132,8 +158,8 @@ class ArticleImportRefresh extends ControllerBase {
     $message .= ' seconds.</p>';
 
     // Send the report.
-    $site_mail = \Drupal::config('system.site')->get('mail');
-    $site_name = \Drupal::config('system.site')->get('name');
+    $site_mail = $this->config('system.site')->get('mail');
+    $site_name = $this->config('system.site')->get('name');
     $from = "$site_name <$site_mail>";
     $headers = implode("\r\n", [
       'MIME-Version: 1.0',
@@ -142,7 +168,7 @@ class ArticleImportRefresh extends ControllerBase {
     ]);
     $rc = mail($to, $subject, $message, $headers);
     if (empty($rc)) {
-      \Drupal::logger('ebms_review')->error('Unable to send Article XML Refresh report.');
+      $this->getLogger('ebms_review')->error('Unable to send Article XML Refresh report.');
       @ebms_debug_log('Failure sending report.', 1);
     }
     @ebms_debug_log('Finished Article XML Refresh report', 1);

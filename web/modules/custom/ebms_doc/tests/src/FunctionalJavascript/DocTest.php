@@ -12,7 +12,7 @@ use Drupal\Core\Url;
 /**
  * Test the parts of import which need a browser with JavaScript.
  *
- * @group ebms
+ * @group mysql
  */
 class DocTest extends WebDriverTestBase {
 

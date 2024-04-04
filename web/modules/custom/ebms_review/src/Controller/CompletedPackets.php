@@ -120,7 +120,7 @@ class CompletedPackets extends ControllerBase {
     }
 
     // Sort the rows by hand.
-    usort($rows, function(array &$a, array &$b): int {
+    usort($rows, function(array $a, array $b): int {
       return $b[1] <=> $a[1] ?: $a[0] <=> $b[0];
     });
 

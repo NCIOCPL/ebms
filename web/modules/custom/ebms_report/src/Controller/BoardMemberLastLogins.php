@@ -8,12 +8,36 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\ebms_board\Entity\Board;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Report on the last time each board member logged in.
  */
 class BoardMemberLastLogins extends ControllerBase {
+
+  /**
+   * Service for looking up an EBMS taxonomy term.
+   */
+  protected $termLookup;
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): BoardMemberLastLogins {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->database = $container->get('database');
+    $instance->termLookup = $container->get('ebms_core.term_lookup');
+    return $instance;
+  }
 
   /**
    * Create an Excel workbook for the report (no form needed).
@@ -29,10 +53,10 @@ class BoardMemberLastLogins extends ControllerBase {
     $start = microtime(TRUE);
 
     // See if the externalauth module is enabled.
-    $have_external_auth = \Drupal::moduleHandler()->moduleExists('externalauth');
+    $have_external_auth = $this->moduleHandler()->moduleExists('externalauth');
 
     // Get the board names.
-    $query = \Drupal::database()->select('ebms_board', 'b');
+    $query = $this->database->select('ebms_board', 'b');
     $query->condition('b.active', 1);
     $query->fields('b', ['id', 'name']);
     $query->orderBy('b.name');
@@ -43,7 +67,7 @@ class BoardMemberLastLogins extends ControllerBase {
     }
 
     // Find all the active board members.
-    $query = \Drupal::database()->select('users_field_data', 'u');
+    $query = $this->database->select('users_field_data', 'u');
     $query->fields('u', ['uid', 'name', 'login']);
     $query->addExpression("FROM_UNIXTIME(u.login, '%Y-%m-%d')", 'last');
     $query->condition('u.status', 1);
@@ -61,7 +85,7 @@ class BoardMemberLastLogins extends ControllerBase {
     }
 
     // Get board memberships.
-    $query = \Drupal::database()->select('user__boards', 'b');
+    $query = $this->database->select('user__boards', 'b');
     $query->join('users_field_data', 'u', 'u.uid = b.entity_id');
     $query->condition('u.status', 1);
     $query->fields('b', ['entity_id', 'boards_target_id']);
@@ -139,21 +163,20 @@ class BoardMemberLastLogins extends ControllerBase {
     static $fyi = NULL;
     static $max_sequence = NULL;
     if (empty($fyi)) {
-      $term_lookup = \Drupal::service('ebms_core.term_lookup');
-      $fyi = $term_lookup->getState('fyi')->id();
-      $passed_full_review = $term_lookup->getState('passed_full_review');
+      $fyi = $this->termLookup->getState('fyi')->id();
+      $passed_full_review = $this->termLookup->getState('passed_full_review');
       $max_sequence = $passed_full_review->field_sequence->value;
     }
 
     // Find the board member's reviews.
-    $subquery = \Drupal::database()->select('ebms_packet_article__reviews', 'reviews');
+    $subquery = $this->database->select('ebms_packet_article__reviews', 'reviews');
     $subquery->join('ebms_review', 'review', 'review.id = reviews.reviews_target_id');
     $subquery->condition('review.reviewer', $uid);
     $subquery->addField('reviews', 'reviews_target_id');
     $subquery->distinct();
 
     // Create the query.
-    $query = \Drupal::database()->select('ebms_packet_article', 'a');
+    $query = $this->database->select('ebms_packet_article', 'a');
     $query->addField('a', 'article', 'id');
     $query->condition('a.dropped', 0);
     $query->isNull('a.archived');

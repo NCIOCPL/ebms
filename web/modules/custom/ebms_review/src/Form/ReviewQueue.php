@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  *
  * @ingroup ebms
  */
-class ReviewQueue extends FormBase {
+final class ReviewQueue extends FormBase {
 
   /**
    * How many articles should appear on the page at most.
@@ -104,6 +104,13 @@ class ReviewQueue extends FormBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $connection;
+
+  /**
    * IDs of boards assigned to the current user.
    *
    * @var array
@@ -122,12 +129,12 @@ class ReviewQueue extends FormBase {
    *
    * @var bool
    */
-  private bool $canReviewAllTopics = FALSE;
+  protected bool $canReviewAllTopics = FALSE;
 
   /**
    * Array of publication types indexed by ancestors.
    */
-  private array $pubTypeHierarchy = [];
+  protected array $pubTypeHierarchy = [];
 
   /**
    * {@inheritdoc}
@@ -143,8 +150,8 @@ class ReviewQueue extends FormBase {
       $instance->userTopics[] = $topic->target_id;
     }
     $instance->canReviewAllTopics = $account->hasPermission('perform all topic reviews');
-    $connection = $container->get('database');
-    $select = $connection->select('on_demand_config', 'c');
+    $instance->connection = $container->get('database');
+    $select = $instance->connection->select('on_demand_config', 'c');
     $select->condition('c.name', 'article-type-ancestors');
     $select->fields('c', ['value']);
     $json = $select->execute()->fetchField();
@@ -188,6 +195,8 @@ class ReviewQueue extends FormBase {
     $decisions = json_decode($decisions_json, TRUE);
     $topic = $params['topic'];
     $cycle = $params['cycle'];
+    $cycle_start = $params['cycle-start'];
+    $cycle_end = $params['cycle-end'];
     $tag = $params['tag'];
     $sort = $params['sort'];
     $journal_filters = $params['journal-filters'] ?? '';
@@ -240,6 +249,7 @@ class ReviewQueue extends FormBase {
     }
     ebms_debug_log('topics: ' . print_r($topics, TRUE), 3);
     if (!empty($topic)) {
+      $topic_ids = [];
       if (!empty($topics)) {
         $topic_ids = array_keys($topics);
         if (!is_numeric($topic_ids[0])) {
@@ -283,7 +293,7 @@ class ReviewQueue extends FormBase {
     // a second or less.
     $queue = [];
     if (empty($values)) {
-      $query = \Drupal::database()->select('ebms_state', 'state');
+      $query = $this->connection->select('ebms_state', 'state');
       $query->addField('state', 'article');
       $query->distinct();
       $query->condition('state.value', State::getStateId($state));
@@ -330,14 +340,24 @@ class ReviewQueue extends FormBase {
           $query->condition('article.brief_journal_title', "%$journal%", 'LIKE');
         }
       }
-      if (!empty($cycle)) {
+      if (!empty($cycle) || !empty($cycle_start) || !empty($cycle_end)) {
         $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
         $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
+      }
+      if (!empty($cycle)) {
         $query->condition('article_topic.cycle', $cycle);
+      }
+      else {
+        if (!empty($cycle_start)) {
+          $query->condition('article_topic.cycle', $cycle_start, '>=');
+        }
+        if (!empty($cycle_end)) {
+          $query->condition('article_topic.cycle', $cycle_end, '<=');
+        }
       }
       if ($queue_type !== 'Librarian Review') {
         if (!empty($tag)) {
-          if (empty($cycle)) {
+          if (empty($cycle) && empty($cycle_start) && empty($cycle_end)) {
             $query->join('ebms_article__topics', 'topics', 'topics.entity_id = state.article');
             $query->join('ebms_article_topic', 'article_topic', 'article_topic.id = topics.topics_target_id AND article_topic.topic = topic.id');
           }
@@ -432,6 +452,10 @@ class ReviewQueue extends FormBase {
           'callback' => '::decisionsCallback',
           'event' => 'change',
           'wrapper' => 'queued-decisions-list',
+          'progress' => [
+            'type' => 'throbber',
+            'message' => 'Processing—please wait ...',
+          ],
         ],
         '#attributes' => ['class' => ['hidden'], 'maxlength' => ''],
       ],
@@ -464,15 +488,46 @@ class ReviewQueue extends FormBase {
             '#default_value' => $topic,
             '#multiple' => TRUE,
             '#validated' => TRUE,
+            '#size' => 8,  // Broken in USWDS.
+            '#attributes' => ['style' => 'height: 12.4rem;'],
           ],
         ],
-        'cycle' => [
-          '#type' => 'select',
-          '#title' => 'Review Cycle',
-          '#options' => $cycles,
-          '#description' => 'Include articles assigned to at least one reviewable topic for this review cycle.',
-          '#default_value' => $cycle,
-          '#empty_value' => '',
+        'cycle-and-date-wrapper' => [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['grid-row', 'grid-gap']],
+          'cycle-wrapper' => [
+            '#type' => 'container',
+            '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
+            'cycle' => [
+              '#type' => 'select',
+              '#title' => 'Review Cycle',
+              '#options' => $cycles,
+              '#description' => 'Filter queue by review cycle(s).',
+              '#default_value' => $cycle,
+              '#empty_value' => '',
+            ],
+            ],
+          'cycle-range-wrapper' => [
+            '#type' => 'container',
+            '#attributes' => ['class' => ['grid-col-12', 'desktop:grid-col-6']],
+            'cycle-range' => [
+              '#type' => 'container',
+              '#attributes' => ['class' => ['inline-fields']],
+              '#title' => 'Review Cycle Range',
+              'cycle-start' => [
+                '#type' => 'select',
+                '#options' => $cycles,
+                '#default_value' => $cycle_start,
+                '#empty_value' => '',
+              ],
+              'cycle-end' => [
+                '#type' => 'select',
+                '#options' => $cycles,
+                '#default_value' => $cycle_end,
+                '#empty_value' => '',
+              ],
+            ],
+          ],
         ],
         'tag' => [
           '#type' => 'select',
@@ -532,7 +587,7 @@ class ReviewQueue extends FormBase {
       ],
       'display-options' => [
         '#type' => 'details',
-        '#open' => $params['filtered'],
+        '#open' => FALSE,
         '#title' => 'Display Options',
         'sort' => [
           '#type' => 'select',
@@ -769,6 +824,8 @@ class ReviewQueue extends FormBase {
       'board' => $parameters['board'] ?? Board::defaultBoard($user),
       'topic' => $parameters['topic'] ?? [],
       'cycle' => $parameters['cycle'] ?? '',
+      'cycle-start' => $parameters['cycle-start'] ?? '',
+      'cycle-end' => $parameters['cycle-end'] ?? '',
       'tag' => $parameters['tag'] ?? 0,
       'title' => $parameters['title'] ?? '',
       'journal' => $parameters['journal'] ?? '',
@@ -1048,7 +1105,7 @@ class ReviewQueue extends FormBase {
     // now this step takes around 5 seconds.
     $state_id = State::getStateId($state);
     ebms_debug_log("integer state ID is $state_id");
-    $query = \Drupal::database()->select('ebms_state', 'state');
+    $query = $this->connection->select('ebms_state', 'state');
     $query->condition('state.value', $state_id);
     $query->condition('state.topic', $topic_ids, 'IN');
     $query->condition('state.current', 1);

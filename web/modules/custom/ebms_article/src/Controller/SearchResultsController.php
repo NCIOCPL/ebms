@@ -25,12 +25,20 @@ class SearchResultsController extends ControllerBase {
   protected Search $searchService;
 
   /**
+   * The current page requests.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $currentRequest;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): SearchResultsController {
     // Instantiates this form class.
     $instance = parent::create($container);
     $instance->searchService = $container->get('ebms_article.search');
+    $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
     return $instance;
   }
 
@@ -53,7 +61,7 @@ class SearchResultsController extends ControllerBase {
       $query->pager($per_page);
     }
     $articles = Article::loadMultiple($query->execute());
-    $query = \Drupal::request()->query->all();
+    $query = $this->currentRequest->query->all();
     $query['search'] = $request_id;
     $opts = ['query' => $query];
     $route = 'ebms_article.article';
@@ -82,7 +90,7 @@ class SearchResultsController extends ControllerBase {
     }
     $start = 1;
     if ($per_page !== 'all') {
-      $page = \Drupal::request()->get('page') ?: 0;
+      $page = $this->currentRequest->get('page') ?: 0;
       $start += $page * $per_page;
     }
     return [

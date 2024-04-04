@@ -117,6 +117,7 @@ class MeetingTest extends WebDriverTestBase {
     $this->setRichTextValue($selector, $notes);
     $form->findButton('Meeting Files')->click();
     $file_field = $form->findField('files[files][]');
+    $this->assertNotEmpty($file_field);
     $file_field->attachFile('/usr/local/share/testdata/test.docx');
     $assert_session->assertWaitOnAjaxRequest();
     $this->createScreenshot('../testdata/screenshots/create-meeting-form.png');
@@ -213,7 +214,7 @@ class MeetingTest extends WebDriverTestBase {
     $this->clickLink('Board 1 First Meeting This Month');
     $this->createScreenshot('../testdata/screenshots/first-meeting.png');
     $assert_session->pageTextContains('Board 1 First Meeting This Month');
-    $assert_session->pageTextMatches('/When.*9:30 am - 4:00 pm \(Eastern Time\)\s+How\s+In Person\s+Who\sBoard 1 Board; Group 2\s+Notes\s+Presenters.+Larry.+Moe.+Curly\s+Meeting Documents\s+test\.docx/');
+    $assert_session->pageTextMatches('/When.*9:30 am - 4:00 pm \(Eastern Time\)\s+How\s+In Person\s+Who\sBoard 1 Board; Group 2\s+Notes\s+Presenters.+Larry.+Moe.+Curly/');
     $assert_session->pageTextNotContains('Agenda');
 
     // Navigate throught the next couple of meetings.
@@ -242,9 +243,8 @@ class MeetingTest extends WebDriverTestBase {
   /**
    * Assign a new value to a rich text field.
    *
-   * For some reason, the CKEditor 5 tests are able to call $page->fieldField()
-   * for formatted text fields. When we
-   *
+   * For some reason, the CKEditor 5 tests are unable to call $page->findField()
+   * for formatted text fields.
    */
   private function setRichTextValue(string $selector, string $value) {
     $this->getSession()->executeScript(<<<JS

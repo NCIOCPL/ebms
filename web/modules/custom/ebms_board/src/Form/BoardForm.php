@@ -65,6 +65,7 @@ class BoardForm extends ContentEntityForm {
         ]));
     }
     $form_state->setRedirect('entity.ebms_board.canonical', ['ebms_board' => $entity->id()]);
+    return $status;
   }
 
 }

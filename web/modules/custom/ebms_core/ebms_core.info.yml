@@ -8,6 +8,7 @@ dependencies:
   - drupal:datetime
   - drupal:editor
   - drupal:node
+  - drupal:path
   - drupal:taxonomy
   - drupal:text
   - drupal:user

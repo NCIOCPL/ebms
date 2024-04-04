@@ -5,6 +5,7 @@ namespace Drupal\ebms_core\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for posting a fresh hierarchy for publication types.
@@ -17,6 +18,23 @@ use Drupal\file\Entity\File;
  */
 class PubtypeAncestors extends FormBase
 {
+
+  /**
+   * Database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
+  protected $database;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): PubtypeAncestors {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->database = $container->get('database');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -37,7 +55,7 @@ class PubtypeAncestors extends FormBase
         '#type' => 'managed_file',
         '#required' => TRUE,
         '#validated' => TRUE,
-        '#upload_validators' => ['file_validate_extensions' => ['json']],
+        '#upload_validators' => ['FileExtension' => ['extensions' => 'json']],
         '#description' => 'Post a fresh set of JSON-encoded MeSH publication type terms.',
       ],
       'submit' => [
@@ -79,8 +97,7 @@ class PubtypeAncestors extends FormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $value = $form_state->getValue('payload');
-    $connection = \Drupal::service('database');
-    $upsert = $connection->upsert('on_demand_config')
+    $upsert = $this->database->upsert('on_demand_config')
       ->fields(['name', 'value'])
       ->key('name');
     $upsert->values([

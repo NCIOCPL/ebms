@@ -13,6 +13,8 @@ use Drupal\taxonomy\Entity\Term;
  * @FieldType(
  *   id = "ebms_parking_or_toll_expense",
  * )
+ * @property string $date
+ * See https://github.com/mglaman/phpstan-drupal/issues/602.
  */
 class ParkingOrTollExpense extends FieldItemBase {
 

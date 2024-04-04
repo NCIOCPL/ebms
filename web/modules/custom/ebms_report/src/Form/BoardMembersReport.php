@@ -2,10 +2,12 @@
 
 namespace Drupal\ebms_report\Form;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebms_board\Entity\Board;
 use Drupal\ebms_core\Entity\SavedRequest;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for submitting a request for a hotel reservation.
@@ -13,7 +15,25 @@ use Drupal\ebms_core\Entity\SavedRequest;
  * @ingroup ebms
  */
 class BoardMembersReport extends FormBase {
-   /**
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): BoardMembersReport {
+    // Instantiates this form class.
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId(): string {
@@ -122,14 +142,14 @@ class BoardMembersReport extends FormBase {
     if ($include_groups) {
 
       // Identify the groups for this board.
-      $storage = \Drupal::entityTypeManager()->getStorage('ebms_group');
+      $storage = $this->entityTypeManager->getStorage('ebms_group');
       $query = $storage->getQuery()->accessCheck(FALSE);
       $query->sort('name');
       $query->condition('boards', $board_id);
       $subgroups = $storage->loadMultiple($query->execute());
 
       // Retrieve the user information.
-      $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+      $user_storage = $this->entityTypeManager->getStorage('user');
 
       // Iterate over the subgroups to retrieve the corresponding group
       // members for each group.

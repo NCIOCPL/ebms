@@ -21,6 +21,11 @@ use Drupal\Core\TypedData\DataDefinition;
  *   description = @Translation("Articulated Article Publication Date"),
  *   translatable = FALSE
  * )
+ *
+ * Very strange behavior from PHPStan, which complains that it can't find
+ * the year property, but has no problems finding any of the others. See
+ * https://github.com/mglaman/phpstan-drupal/issues/602.
+ * @property string $year
  */
 class PubDate extends FieldItemBase {
 
@@ -96,7 +101,7 @@ class PubDate extends FieldItemBase {
     if (!empty($this->season)) {
       return $this->season . ' ' . $this->year;
     }
-    if (!empty($his->day)) {
+    if (!empty($this->day)) {
       if (!empty($this->month)) {
         if (strlen($this->month) === 3) {
           return $this->day . ' ' . $this->month . ' ' . $this->year;

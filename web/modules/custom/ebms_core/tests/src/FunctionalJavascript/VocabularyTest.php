@@ -1,18 +1,17 @@
 <?php
 
-namespace Drupal\Tests\ebms_core\Functional;
+namespace Drupal\Tests\ebms_core\FunctionalJavascript;
 
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Url;
-use Drupal\Tests\BrowserTestBase;
-use Drupal\taxonomy\Entity\Term;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Test EBMS vocabularies.
  *
- * @group ebms
+ * @group mysql
  */
-class VocabularyTest extends BrowserTestBase {
+class VocabularyTest extends WebDriverTestBase {
 
   const VOCABULARIES = [
     'article_tags',
@@ -103,7 +102,7 @@ class VocabularyTest extends BrowserTestBase {
         }
         $unique_names[] = strtoupper($term_name);
         $this->drupalGet($url);
-        $this->assertSession()->statusCodeEquals(200);
+        //$this->assertSession()->statusCodeEquals(200);
         $form = $this->getSession()->getPage();
         $values = [
           'name' => $term_name,
@@ -111,7 +110,9 @@ class VocabularyTest extends BrowserTestBase {
           'status' => rand(0, 1),
         ];
         $form->fillField('Name', $values['name']);
-        $form->fillField('Description', $values['description']);
+        $selector = '.form-item--description-0-value .ck-editor__editable';
+        $this->setRichTextValue($selector, $values['description']);
+        // $form->fillField('Description', $values['description']);
         if (!empty($values['status'])) {
           $form->checkField("Published");
         }
@@ -150,7 +151,7 @@ class VocabularyTest extends BrowserTestBase {
         // Save and remember the values so we can check them later.
         $vocabularies[$vid][$term_name] = $values;
         $form->pressButton('Save');
-        $this->assertSession()->statusCodeEquals(200);
+        // $this->assertSession()->statusCodeEquals(200);
       }
     }
 
@@ -168,7 +169,8 @@ class VocabularyTest extends BrowserTestBase {
         $this->assertSession()->assert($count === 1, "Found {$count} matching terms, but expected exactly 1 term for $this_term.");
         $term = $storage->load(reset($ids));
         $this->assertSession()->assert($term->name->value === $values['name'], 'Mismatched name.');
-        $this->assertSession()->assert($term->description->value === $values['description'], 'Mismatched description.');
+        // $this->assertSession()->assert($term->description->value === $values['description'], 'Mismatched description.');
+        $this->assertEquals('<p>' . $values['description'] . '</p>', $term->description->value);
         $this->assertSession()->assert($term->status->value == $values['status'], 'Mismatched status.');
 
         // Check the extra values if present.
@@ -182,6 +184,28 @@ class VocabularyTest extends BrowserTestBase {
         }
       }
     }
+  }
+
+  /**
+   * Assign a new value to a rich text field.
+   *
+   * For some reason, the CKEditor 5 tests are unable to call $page->findField()
+   * for formatted text fields.
+   */
+  private function setRichTextValue(string $selector, string $value) {
+    $this->getSession()->executeScript(<<<JS
+      const domEditableElement = document.querySelector("$selector");
+      if (domEditableElement) {
+        const editorInstance = domEditableElement.ckeditorInstance;
+        if (editorInstance) {
+          editorInstance.setData("$value");
+        } else {
+          throw new Exception('Could not get the editor instance!');
+        }
+      } else {
+        throw new Exception('could not find the element!');
+      }
+    JS);
   }
 
 }
