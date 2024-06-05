@@ -118,6 +118,13 @@ final class ArticleController extends ControllerBase {
   protected $database;
 
   /**
+   * Messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -127,6 +134,7 @@ final class ArticleController extends ControllerBase {
     $instance->userStorage = $instance->entityTypeManager()->getStorage('user');
     $instance->currentRequest = $container->get('request_stack')->getCurrentRequest();
     $instance->database = $container->get('database');
+    $instance->messenger = $container->get('messenger');
     return $instance;
   }
 
@@ -371,10 +379,9 @@ final class ArticleController extends ControllerBase {
           continue;
         }
       }
-      // PHPStorm doesn't like $state->board but $state->topic is fine.
-      // Go figure.
-      $board = $state->board->entity->name->value;
-      $topic = $state->topic->entity->getName();
+      $topic = $state->topic->entity;
+      $board = $topic->board->entity->name->value;
+      $topic = $topic->getName();
       $this->topicBoards[$topic] = $board;
       $route = 'ebms_article.add_state_comment';
       $parms = ['state_id' => $state->id()];
@@ -1014,6 +1021,12 @@ final class ArticleController extends ControllerBase {
         // something else which doesn't yet exist, but this mislabeling is a
         // common practice in the Drupal community.
         $article_topic = $article->findArticleTopic($board_name, $topic_name);
+        if (empty($article_topic)) {
+            $message = "Unable to find article-topic for $board_name/$topic_name.";
+            ebms_debug_log($message);
+            $this->messenger->addWarning($message);
+            continue;
+        }
         $topic_id = $article_topic->topic->target_id;
         $options = ['query' => $this->currentRequest->query->all()];
         $add_tag_opts = $options;
