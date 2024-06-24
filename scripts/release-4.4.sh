@@ -15,6 +15,7 @@ export WORKDIR=/tmp/ebms-4.4
 export SCRIPTS=$WORKDIR/ebms/scripts
 export CONFIG=$WORKDIR/config
 export BASEDIR=/local/drupal/ebms
+export SETTINGS=$BASEDIR/web/sites/default/settings.php
 export BACKUP=`/bin/date +"/tmp/ebms-backup-%Y%m%d%H%M%S.tgz"`
 export USWDS_VERSION=3.7.1
 export DOWNLOAD=https://github.com/uswds/uswds/releases/download
@@ -96,6 +97,11 @@ echo Ignore warnings about abandoned packages
 cd $BASEDIR
 chmod +w web/sites/default || { echo chmod sites-default failed; exit; }
 composer install --no-dev || { echo composer install failed; exit; }
+if ! grep -q state_cache $SETTINGS; then
+    chmod +w $SETTINGS
+    echo "\$settings['state_cache'] = TRUE;" >> $SETTINGS
+    chmod -w $SETTINGS
+fi
 chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 
 echo Running the database update script
