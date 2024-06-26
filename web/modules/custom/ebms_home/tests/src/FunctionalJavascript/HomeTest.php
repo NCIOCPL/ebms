@@ -286,7 +286,10 @@ class HomeTest extends WebDriverTestBase {
     $this->createScreenshot('../testdata/screenshots/home-page-with-added-review.png');
     $assert_session->pageTextContains('You have 1 articles assigned for review');
     $assert_session->linkExists('assigned for review');
-    $this->drupalGet(Url::fromRoute('user.logout')->toString());
+    $this->drupalGet(Url::fromRoute('user.logout'));
+    $this->createScreenshot('../testdata/screenshots/log-out.png');
+    $assert_session->pageTextContains('Are you sure you want to log out?');
+    $this->submitForm([], 'Log out');
     $this->createScreenshot('../testdata/screenshots/logged-out.png');
     $assert_session->linkExists('Go To Login Page');
 
@@ -316,7 +319,8 @@ class HomeTest extends WebDriverTestBase {
     $assert_session->pageTextContains('EBMS ID: 2');
 
     // Log in as a librarian.
-    $this->drupalGet(Url::fromRoute('user.logout')->toString());
+    $this->drupalGet(Url::fromRoute('user.logout'));
+    $this->submitForm([], 'Log out');
     $assert_session->linkExists('Go To Login Page');
     $this->login('medical_librarian');
     $this->createScreenshot('../testdata/screenshots/librarian-home-page.png');
@@ -327,7 +331,8 @@ class HomeTest extends WebDriverTestBase {
     $assert_session->pageTextMatches('/Admin\s+Articles.+Journals\s+Reports\s+Calendar\s+About\s+Help/');
     $librarian_image = $assert_session->waitForElementVisible('css', 'div#block-ebms-content > img');
     $this->assertNotEmpty($librarian_image);
-    $this->drupalGet(Url::fromRoute('user.logout')->toString());
+    $this->drupalGet(Url::fromRoute('user.logout'));
+    $this->submitForm([], 'Log out');
     $assert_session->linkExists('Go To Login Page');
 
     // Log in as an admin assistant.
@@ -338,7 +343,8 @@ class HomeTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Document Activity');
     $assert_session->pageTextContains('Meeting Activity');
     $assert_session->pageTextMatches('/Admin\s+Articles.+Journals\s+Packets\s+Summaries\s+Reports\s+Travel\s+Calendar\s+About\s+Help/');
-    $this->drupalGet(Url::fromRoute('user.logout')->toString());
+    $this->drupalGet(Url::fromRoute('user.logout'));
+    $this->submitForm([], 'Log out');
     $assert_session->linkExists('Go To Login Page');
   }
 

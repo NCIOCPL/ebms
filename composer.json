@@ -46,7 +46,9 @@
             "composer/installers": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "drupal/core-composer-scaffold": true,
-            "drupal/core-project-message": true
+            "drupal/core-project-message": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true
         }
     },
     "extra": {
@@ -107,15 +109,9 @@
         }
     },
     "require-dev": {
-        "behat/mink": "^1.10",
         "behat/mink-goutte-driver": "^2.0",
-        "behat/mink-selenium2-driver": "^1.6",
+        "drupal/core-dev": "^10.2",
         "drupal/devel": "^5.2",
-        "kint-php/kint": "^3.3",
-        "mglaman/phpstan-drupal": "^1.2",
-        "mikey179/vfsstream": "^1.6",
-        "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "*",
-        "symfony/phpunit-bridge": "*"
+        "kint-php/kint": "^3.3"
     }
 }
