@@ -36,6 +36,7 @@ services:
       net:
 
   chrome:
+    # See https://github.com/SeleniumHQ/docker-selenium/issues/2291.
     image: seleniarm/standalone-chromium:4.1.4-20220429
     volumes:
       - ./testdata/browser:/usr/local/share/testdata

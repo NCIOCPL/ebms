@@ -93,10 +93,11 @@ curl -sS https://getcomposer.org/installer | php -- --install-dir=/opt/homebrew/
 3. Follow the instructions to install.
 4. Click on the Docker icon at the top right of your Mac's display
 5. Select *Settings*
-6. From the menu on the left select *Resources*
-7. Make sure *Memory* is at least 6GB
-8. Set *Virtual disk limit* to at least 100GB
-9. Click **Apply & Restart**
+6. On the *General* tab set the sharing implementation to *gRPC FUSE*
+7. From the menu on the left select *Resources*
+8. Make sure *Memory* is at least 6GB
+9. Set *Virtual disk limit* to at least 100GB
+10. Click **Apply & Restart**
 
 ## EBMS Developer Setup
 
@@ -174,6 +175,13 @@ EBMS_ARTICLE=web/modules/custom/ebms_article
 ARTICLE_TEST=$EBMS_ARTICLE/tests/src/FunctionalJavascript/ArticleTest.php
 su www-data -s /bin/bash -c "vendor/bin/phpunit $ARTICLE_TEST"
 ```
+
+Make sure the sharing implementation for Docker is *gRPC FUSE*. When set to
+*VirtioFS* (the default) some of the tests will fail (likely because of a
+[permissions issue](https://github.com/docker/for-mac/issues/6614)).
+You'll need to check this after every Docker Desktop update, because Docker
+has the nasty habit over forgetting the choice you originally made when
+moving to the next version.
 
 ## Debugging
 

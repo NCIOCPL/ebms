@@ -109,7 +109,6 @@
         }
     },
     "require-dev": {
-        "behat/mink-goutte-driver": "^2.0",
         "drupal/core-dev": "^10.2",
         "drupal/devel": "^5.2",
         "kint-php/kint": "^3.3"
