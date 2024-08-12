@@ -49,8 +49,8 @@ final class Authname extends FormBase {
    */
   public static function create($container) {
     $form = new static();
-    $form->authmap = $container->get('externalauth.authmap');
     $form->moduleHandler = $container->get('module_handler');
+    $form->authmap = $form->moduleHandler->moduleExists('externalauth') ? $container->get('externalauth.authmap') : null;
     $form->database = $container->get('database');
     return $form;
   }
