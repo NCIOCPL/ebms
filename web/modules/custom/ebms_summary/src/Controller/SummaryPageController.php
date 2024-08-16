@@ -231,7 +231,7 @@ final class SummaryPageController extends ControllerBase {
       '#caption' => 'Documents Posted by Board Members',
       '#header' => $header,
       '#rows' => array_reverse($member_docs),
-      '#empty' => 'No documents have been posted by board members for this page yet.',
+      '#empty' => 'No documents are currently posted by Board members.',
     ];
 
     // Add buttons below the table if appropriate.
