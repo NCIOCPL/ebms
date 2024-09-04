@@ -166,9 +166,9 @@ class SummaryTest extends WebDriverTestBase {
     $this->clickLink('Topics 1 & 2');
     $this->createScreenshot('../testdata/screenshots/summaries-page.png');
     $assert_session->pageTextMatches('/Topics 1 & 2\s+Cancer.gov Summaries/');
-    $assert_session->pageTextContainsOnce('No summary links are available for this page yet');
-    $assert_session->pageTextContainsOnce('No documents have been posted by NCI for this page yet');
-    $assert_session->pageTextContainsOnce('No documents have been posted by board members for this page yet');
+    $assert_session->pageTextContainsOnce('No summary links are available for this page yet.');
+    $assert_session->pageTextContainsOnce('No documents have been posted by NCI for this page yet.');
+    $assert_session->pageTextContainsOnce('No documents are currently posted by Board members.');
 
     // Add a summary link.
     $this->clickLink('Add New Summary Link');
@@ -213,7 +213,7 @@ class SummaryTest extends WebDriverTestBase {
     // Navigate to the summaries page.
     $this->clickLink('Topics 1 & 2');
     $this->createScreenshot('../testdata/screenshots/board-member-on-summaries-page.png');
-    $assert_session->pageTextContainsOnce('No documents have been posted by board members for this page yet');
+    $assert_session->pageTextContainsOnce('No documents are currently posted by Board members.');
     $assert_session->pageTextMatches(
       '#This is the summary document\s+The topic 1/2 summary doc\s+' .
       $this->board_manager->name->value . '\s+' . date('Y-m-d') . '#'
