@@ -309,6 +309,9 @@ td.text-bold {
 .usa-list li {
   max-width: none;
 }
+.inline-list-items li {
+  display: inline-block;
+}
 
 /* Buttons */
 .usa-button {
