@@ -66,8 +66,8 @@ cd $BASEDIR
 rm -rf composer.* scheduled/* web/modules/custom/* vendor
 # Not needed for this release.
 # rm -rf web/themes/custom/ebms/templates
-# rm -rf web/themes/custom/ebms/css
-# rm -rf web/themes/custom/ebms/package
+rm -rf web/themes/custom/ebms/css
+rm -rf web/themes/custom/ebms/package
 
 echo Refreshing those directories
 cd $WORKDIR/ebms
@@ -80,17 +80,17 @@ cp -r web/modules/custom $BASEDIR/web/modules/ || {
 # cp -r web/themes/custom/ebms/templates $BASEDIR/web/themes/custom/ebms/ || {
 #   echo cp custom theme templates failed; exit;
 # }
-# cp -r web/themes/custom/ebms/css $BASEDIR/web/themes/custom/ebms/ || {
-#   echo cp custom theme css failed; exit;
-# }
-# cd $THEME || {
-#     echo unable to switch to custom EBMS theme directory
-#     exit 1
-# }
-# $CURL $USWDS_URL | $TAR -xzf - || {
-#     echo fetch $USWDS_URL failed
-#     exit 1
-# }
+cp -r web/themes/custom/ebms/css $BASEDIR/web/themes/custom/ebms/ || {
+  echo cp custom theme css failed; exit;
+}
+cd $THEME || {
+    echo unable to switch to custom EBMS theme directory
+    exit 1
+}
+$CURL $USWDS_URL | $TAR -xzf - || {
+    echo fetch $USWDS_URL failed
+    exit 1
+}
 
 echo Applying PHP upgrades
 echo Ignore warnings about abandoned packages
