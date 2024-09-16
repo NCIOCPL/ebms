@@ -3,6 +3,3 @@ parameters:
   paths:
     - web/modules/custom
     - web/themes/custom
-includes:
-  - vendor/mglaman/phpstan-drupal/extension.neon
-  - vendor/mglaman/phpstan-drupal/rules.neon
