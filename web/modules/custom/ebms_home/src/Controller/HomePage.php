@@ -135,6 +135,7 @@ class HomePage extends ControllerBase {
     $storage = $this->entityTypeManager()->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('dates.end_value', date('Y-m-d H:i:s'), '>=');
+    $query->condition('status.entity.name', 'Canceled', '<>');
     $query->range(0, 1);
     $query->sort('dates');
     if (!empty($board_ids)) {

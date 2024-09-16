@@ -166,9 +166,16 @@ class MeetingDisplay extends ControllerBase {
     }
     $agenda = $agenda_visible ? $meeting->agenda->value : '';
 
+    // Find out if the meeting has been canceled.
+    $status = $meeting->status->entity->name->value;
+    $title = $meeting->name->value;
+    if ($status === 'Canceled') {
+      $title .= ' (canceled)';
+    }
+
     // Assemble and return the render array for the page.
     return [
-      '#title' => $meeting->name->value,
+      '#title' => $title,
       '#attached' => [
         'library' => ['ebms_meeting/meeting-display'],
       ],
