@@ -222,8 +222,8 @@ class Control:
 
     @cached_property
     def verbose(self):
-      """Should we display progress?"""
-      return self.opts.verbose
+        """Should we display progress?"""
+        return self.opts.verbose
 
     def _fetch_articles(self, pmids):
         """Retrieve the XML for a batch of PubMed articles from NLM.

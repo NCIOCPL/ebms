@@ -24,7 +24,7 @@ function rrmdir($dir) {
 }
 
 // Fetch the assets from USWDS.
-$version = '3.8.2';
+$version = '3.9.0';
 $url = "https://github.com/uswds/uswds/releases/download/v$version/uswds-uswds-$version.tgz";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
