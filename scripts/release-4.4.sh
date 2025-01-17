@@ -15,6 +15,7 @@ export WORKDIR=/tmp/ebms-4.4
 export SCRIPTS=$WORKDIR/ebms/scripts
 export CONFIG=$WORKDIR/config
 export BASEDIR=/local/drupal/ebms
+export DRUSH=$BASEDIR/vendor/bin/drush
 export SETTINGS=$BASEDIR/web/sites/default/settings.php
 export BACKUP=`/bin/date +"/tmp/ebms-backup-%Y%m%d%H%M%S.tgz"`
 export USWDS_VERSION=3.9.0
@@ -57,7 +58,7 @@ mv NCIOCPL-ebms* ebms || {
 
 echo Putting site into maintenance mode
 cd $BASEDIR
-drush state:set system.maintenance_mode 1 || {
+$DRUSH state:set system.maintenance_mode 1 || {
   echo failure setting maintenance mode; exit;
 }
 
@@ -105,19 +106,19 @@ fi
 chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 
 echo Running the database update script
-drush updatedb -y
+$DRUSH updatedb -y
 
 # Uncomment and modify this as necessary.
 # echo Installing CUSTOM STUFF FOR RELEASE
-# drush php:script --script-path=$SCRIPTS script-name || {
+# $DRUSH php:script --script-path=$SCRIPTS script-name || {
 #   echo failure installing custom stuff; exit;
 # }
 
 echo Clearing Drupal caches
-drush cr
+$DRUSH cr
 
 echo Putting site back into live mode
-drush state:set system.maintenance_mode 0 || {
+$DRUSH state:set system.maintenance_mode 0 || {
   echo failure leaving maintenance mode; exit;
 }
 
