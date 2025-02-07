@@ -25,6 +25,11 @@ class FullTextTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * Avoid breakage from https://www.drupal.org/project/drupal/issues/3469309.
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
+
+  /**
    * Test the queue.
    */
   public function testFullTextQueue() {
