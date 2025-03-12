@@ -98,7 +98,7 @@ ddev exec ./install.sh
 ddev launch
 ```
 
-Get the password `unversioned/userpw` and use it to log in as `admin`.
+Get the password from `unversioned/userpw` and use it to log in as `admin`.
 
 ## Updated packages
 
