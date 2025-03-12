@@ -26,11 +26,12 @@ The project directory was initialized with the command
 After the new version was deployed to production the old repository
 was retired and replaced with the new one (renamed from "ebms4" to "ebms").
 
-This page focuses on setting up `Docker` containers for doing
-development work on the EBMS, with non-sensitive dummy data which can
-be put under version control. Jenkins will be used for refreshing lower
-CBIIT tiers from the production server. The `scripts` directory contains
-scripts given to CBIIT for deployment of individual releases.
+This page focuses on setting up a `ddev` environment for doing development
+work on the EBMS (as recommended by the Drupal community), with non-sensitive
+dummy data which can be put under version control. Jenkins will be used for
+refreshing lower CBIIT tiers from the production server. The `scripts`
+directory contains scripts given to CBIIT for deployment of individual
+releases.
 
 If at all possible, it is best to be disconnected from the NIH's VPN while
 working on your local instance of the EBMS. This is particularly true when
@@ -41,7 +42,7 @@ resources.
 
 MacOS is the only supported environment for EBMS development, as using
 Docker on Windows is too painful.
-You will need `git`, `homebrew`, `php`, `composer`, and `docker`.
+You will need `git`, `homebrew`, `ddev` and `docker`.
 For those tools which are not already installed, follow the instructions
 here.
 
@@ -62,33 +63,9 @@ package manager for tools not supplied by Apple.
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### PHP
-A recent version of PHP is needed (version 8.1 or higher).
-
-1. Run `brew install php@8.1`. It's OK if you end up with a higher version.
-2. Follow any additional instructions on the screen. One of this set is adding PHP to your path. Make sure you do that.
-3. Edit `/opt/homebrew/etc/php/8.1/php.ini` or `/usr/local/etc/php/8.1/php.ini` and set `memory_limit = -1` (this removes any memory limits, which `composer install` usually hits. `/opt/homebrew` is the location for newer M1 Macs. If `php --version` shows that you're running a later version, you'll need to adjust the path of the file you're editing accordingly.
-
-If you already have PHP installed, be sure the `php` executable is in your path, and that the `memory_limit` variable is set
-as described above.
-
-### Composer
-
-If you have an older Intel-based Mac, run
-
-```bash
-curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2
-```
-
-For the newer Apple silicon (M1) Macs, the command is:
-
-```bash
-curl -sS https://getcomposer.org/installer | php -- --install-dir=/opt/homebrew/bin --filename=composer --2
-```
-
 ### Docker
 
-1. Go to https://docs.docker.com/desktop/install/mac-install/
+1. Go to [the Docker installer page](https://docs.docker.com/desktop/install/mac-install/)
 2. Select the right binary for your Mac's architecture
 3. Follow the instructions to install.
 4. Click on the Docker icon at the top right of your Mac's display
@@ -99,22 +76,29 @@ curl -sS https://getcomposer.org/installer | php -- --install-dir=/opt/homebrew/
 9. Set *Virtual disk limit* to at least 100GB
 10. Click **Apply & Restart**
 
+### ddev
+
+Run the following command to install [ddev](https://ddev.com), which is used to
+manage Docker-based PHP development environments.
+
+```bash
+brew install ddev/ddev/ddev
+```
+
 ## EBMS Developer Setup
 
 To create a local development environment for this project, perform the following steps.
 
-1. Clone the repository
-2. Change current directory to the cloned repository
-3. Run `./scripts/create-unversioned-files`
-4. Optionally edit the files in the `unversioned` directory
-5. Run `chmod +w web/sites/default`
-6. Run `composer install`
-7. Run `chmod -w web/sites/default`
-8. Run `docker compose up -d`
-9. Run `docker exec -it ebms-web-1 bash`
-10. Inside the container, run `./install.sh`
-11. Point your favorite browser (other than Safari, which doesn't recognize subdomains without a certificate) to http://ebms.localhost:8081
-12. Log in as admin using the password created in steps 3-4.
+```bash
+git clone git@github.com:NCIOCPL/ebms.git
+cd ebms
+ddev start
+ddev composer install
+ddev exec ./install.sh
+ddev launch
+```
+
+Get the password `unversioned/userpw` and use it to log in as `admin`.
 
 ## Updated packages
 
@@ -123,7 +107,7 @@ released to address serious bugs or security vulnerabilities), run
 
 ```bash
 chmod 777 web/sites/default
-composer update drupal/core "drupal/core-*" --with-all-dependencies
+ddev composer update drupal/core "drupal/core-*" --with-all-dependencies
 chmod 555 web/sites/default
 ```
 
@@ -131,7 +115,9 @@ Commit the updated `composer.*` files. When other developers pull down
 those files, they should run
 
 ```bash
+chmod 777 web/sites/default
 composer install
+chmod 555 web/sites/default
 ```
 
 If there's any chance that files which should be managed by composer have
@@ -141,14 +127,37 @@ will be repopulated by `composer`. This will ensure that `composer`'s picture
 of what is installed is accurate, even for files outside the `vendor`
 directory.
 
+## Managing the containers
 
-## Updated Docker configuration
-
-If settings are changed in `docker-compose.yml` or `Dockerfile` you
-will need to rebuild the images and containers with
+To list the running containers:
 
 ```bash
-docker compose up --build -d
+ddev list
+```
+
+To stop the probject:
+
+```bash
+ddev stop
+```
+
+To start the probject's containers:
+
+```bash
+ddev stop
+```
+
+To stop and restart the probject's containers (useful if things get sluggish
+or wonky):
+
+```bash
+ddev restart
+```
+
+For more information about the containers:
+
+```bash
+ddev describe
 ```
 
 ## Testing
@@ -157,23 +166,19 @@ To run the complete set of regression tests, navigate to the base
 directory of the project in the web container and execute
 
 ```bash
-mkdir -p web/sites/simpletest
-chown www-data web/sites/simpletest
-su www-data -s /bin/bash -c 'vendor/bin/phpunit web/modules/custom'
+ddev exec ./run-tests.sh
 ```
 
-You can then run tests for just one module, for example:
+You can restrict the tests to just one or more modules.
 
 ```bash
-su www-data -s /bin/bash -c 'vendor/bin/phpunit web/modules/custom/ebms_review'
+ddev exec ./run-tests.sh ebms_article ebms_meeting
 ```
 
-Or even a specific test:
+You can even run just a single test script.
 
 ```bash
-EBMS_ARTICLE=web/modules/custom/ebms_article
-ARTICLE_TEST=$EBMS_ARTICLE/tests/src/FunctionalJavascript/ArticleTest.php
-su www-data -s /bin/bash -c "vendor/bin/phpunit $ARTICLE_TEST"
+ddev exec ./run-tests.sh ebms_review/tests/src/FunctionalJavascript/QueueTest.php
 ```
 
 Make sure the sharing implementation for Docker is *gRPC FUSE*. When set to
@@ -185,8 +190,24 @@ moving to the next version.
 
 ## Debugging
 
-The `php-xdebug` package is no longer included in the build of the web container,
-because recent versions of Drupal have broken asset aggregation when that package
-is installed and enabled. If you need to debug the site, use `apt install php-xdebug`
-to install the package and `service apache2 reload` to restart the web server. Be
-sure to disable `xdebug` when you have finished debugging.
+1. Install the *PHP Debug* extension in Visual Studio Code if it's not
+already installed.
+2. Set a breakpoint for the code you want to debug (click to the left
+of the line number).
+3. From the menu, choose *Terminal -> Run Task...* and choose *DDEV:
+Enable Xdebug*.
+4. From the menu, choose *Run -> Start Debugging*. You may need to select
+"Listen for Xdebug" by the green arrowhead at the top left. The bottom
+pane of VS Code should now be orange (live) and should say "Listen for
+Xdebug."
+5. In your browser, navigate to the page you want to debug.
+6. Use the navigation buttons in the debugging toolbar to step into or
+past each line of code.
+7. When you have finished debugging, click the *Stop* button (a red
+rectangle) on the debugging toolbar.
+8. From the menu, choose *Terminal -> Run Task...* and choose *DDEV:
+Disable Xdebug*.
+
+That last step is important, because recent versions of Drupal have
+broken asset aggregation when the `php-xdebug` package is installed
+and enabled.
