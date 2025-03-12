@@ -1,5 +1,6 @@
 logs
 unversioned
+recipes
 __pycache__
 /testdata/maps.json
 /testdata/dumps
