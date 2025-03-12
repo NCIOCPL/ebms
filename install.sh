@@ -2,43 +2,34 @@
 
 start_time=${SECONDS}
 date
-SUDO=$(which sudo)
-REPO_BASE=$(pwd)
-while getopts r: flag
-do
-    case "${flag}" in
-        r) REPO_BASE=${OPTARG};;
-    esac
-done
-export REPO_BASE
+SUDO=/usr/bin/sudo
+export REPO_BASE=/var/www/html
 DRUSH=${REPO_BASE}/vendor/bin/drush
 DATA=${REPO_BASE}/testdata
 SITE=${REPO_BASE}/web/sites/default
 UNVERSIONED=${REPO_BASE}/unversioned
-DBURL=$(cat ${UNVERSIONED}/dburl)
-ADMINPW=$(cat ${UNVERSIONED}/adminpw)
-SITEHOST=$(cat ${UNVERSIONED}/sitehost)
+DBURL=mysql://db:db@db/db
+SITEHOST=ebms.ddev.site
+SETTINGS=${SITE}/settings.php
+FILES=${SITE}/files
+EMAIL=ebms@cancer.gov
+USERPW=$(openssl rand -base64 12)
+mkdir -p ${UNVERSIONED}
+echo ${USERPW} > ${UNVERSIONED}/userpw
 echo options: > ${REPO_BASE}/drush/drush.yml
-case $SITEHOST in
-    *localhost*)
-        echo "  uri: http://$SITEHOST" >> ${REPO_BASE}/drush/drush.yml
-        ;;
-    *)
-        echo "  uri: https://$SITEHOST" >> ${REPO_BASE}/drush/drush.yml
-        ;;
-esac
+echo "  uri: https://${SITEHOST}" >> ${REPO_BASE}/drush/drush.yml
 $SUDO chmod a+w ${SITE}
 $SUDO rm -rf ${REPO_BASE}/logs
 $SUDO mkdir ${REPO_BASE}/logs
 $SUDO chmod 777 ${REPO_BASE}/logs
-[ -d ${SITE}/files ] && $SUDO chmod -R a+w ${SITE}/files && rm -rf ${SITE}/files/*
-[ -f ${SITE}/settings.php ] && $SUDO chmod +w ${SITE}/settings.php
-cp -f ${SITE}/default.settings.php ${SITE}/settings.php
-$SUDO chmod +w ${SITE}/settings.php
-echo "\$settings['trusted_host_patterns'] = ['^$SITEHOST\$'];" >> ${SITE}/settings.php
-$DRUSH si -y --site-name EBMS --account-pass=${ADMINPW} --db-url=${DBURL} \
-       --site-mail=ebms@cancer.gov
-$SUDO chmod -w ${SITE}/settings.php
+[ -d ${FILES} ] && $SUDO chmod -R a+w ${FILES} && rm -rf ${FILES}/*
+[ -f ${SETTINGS} ] && $SUDO chmod +w ${SETTINGS}
+cp -f ${SITE}/default.settings.php ${SETTINGS}
+$SUDO chmod +w ${SETTINGS}
+echo "\$settings['trusted_host_patterns'] = ['^${SITEHOST}\$'];" >> ${SETTINGS}
+$DRUSH si -y --site-name=EBMS --account-pass=${USERPW} --db-url=${DBURL} \
+       --site-mail=${EMAIL}
+$SUDO chmod -w ${SETTINGS}
 $DRUSH state:set system.maintenance_mode 1
 $DRUSH pmu contact
 $DRUSH then uswds_base
@@ -93,7 +84,7 @@ $DRUSH scr --script-path=$DATA pubtypes
 $DRUSH scr --script-path=$DATA help
 $DRUSH scr --script-path=$DATA about
 $DRUSH state:set system.maintenance_mode 0
-$SUDO chmod -R 777 ${SITE}/files
+$SUDO chmod -R 777 ${FILES}
 date
 elapsed=$(( SECONDS - start_time ))
 eval "echo Elapsed time: $(date -ud "@$elapsed" +'$((%s/3600/24)) days %H hr %M min %S sec')"
