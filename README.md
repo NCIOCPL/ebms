@@ -92,7 +92,11 @@ To create a local development environment for this project, perform the followin
 ```bash
 git clone git@github.com:NCIOCPL/ebms.git
 cd ebms
+# If appropriate, switch to the branch you need to work on with
+# git checkout branch-name.
 ddev start
+# At this point you may be asked if ddev can send usage and error statistics
+# back to the mother ship, to which you must answer Y or N as appropriate.
 ddev composer install
 ddev exec ./install.sh
 ddev launch
