@@ -2,7 +2,7 @@ name: EBMS Article State
 description: Per-topic state for an article at a given moment in time.
 type: module
 package: EBMS
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10 || ^11
 dependencies:
   - drupal:taxonomy
   - ebms_board:ebms_board

@@ -2,7 +2,7 @@ name: EBMS Breadcrumbs
 description: Controls the site's breadcrumb paths.
 type: module
 package: EBMS
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10 || ^11
 dependencies:
   - ebms_article:ebms_article
   - ebms_core:ebms_core
