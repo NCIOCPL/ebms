@@ -20,6 +20,6 @@ $CURL -o oceebms-812.php $SCRIPTS/oceebms-812.php
 
 echo Running the update script
 DRUSH=/local/drupal/ebms/vendor/bin/drush
-$DRUSH php:script - < oceebms-812.php > oceebms-812.log
+$DRUSH php:script --script-path=/local/drupal/ebms/scripts oceebms-812 > oceebms-812.log
 
 echo Done. Please post the oceebms-812.log to the ticket.
