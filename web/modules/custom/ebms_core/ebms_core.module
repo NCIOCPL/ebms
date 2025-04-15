@@ -112,6 +112,7 @@ function _ebms_core_role_permissions(): array {
       'manage articles',
       'manage documents',
       'manage journals',
+      'manage meetings',
       'manage review packets',
       'manage summaries',
       'manage topic assignments',
