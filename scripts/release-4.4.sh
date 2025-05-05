@@ -105,6 +105,9 @@ if ! grep -q state_cache $SETTINGS; then
 fi
 chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 
+echo Fixing Drupal silliness
+$DRUSH php:eval '\Drupal::entityDefinitionUpdateManager()->installEntityType(\Drupal::entityTypeManager()->getDefinition("path_alias"));'
+
 echo Running the database update script
 $DRUSH updatedb -y
 
