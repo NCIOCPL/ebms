@@ -38,10 +38,26 @@ class HomePage extends ControllerBase {
     $user = User::load($this->currentUser()->id());
     if (!$user->hasPermission('view alerts')) {
       return [
-        '#theme' => 'image',
-        '#attributes' => [
-          'src' => '/themes/custom/ebms/images/' . self::LIBRARY_IMAGES[random_int(0, count(self::LIBRARY_IMAGES) - 1)],
-          'class' => ['margin-top-5'],
+        'alert' => [
+          '#markup' => '
+  <div class="usa-alert usa-alert--warning margin-top-2">
+    <div class="usa-alert__body">
+      <p class="usa-alert__text">
+        <strong>
+          The PDQ program is on hold, and EBMS content is not currently being
+          updated.
+        </strong>
+      </p>
+    </div>
+  </div>
+',
+        ],
+        'photo' => [
+          '#theme' => 'image',
+          '#attributes' => [
+            'src' => '/themes/custom/ebms/images/' . self::LIBRARY_IMAGES[random_int(0, count(self::LIBRARY_IMAGES) - 1)],
+            'class' => ['margin-top-5'],
+          ],
         ],
         '#cache' => ['max-age' => 0],
       ];
