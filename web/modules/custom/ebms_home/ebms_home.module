@@ -5,6 +5,7 @@ function ebms_home_theme($existing, $type, $theme, $path): array {
     'activity_cards' => [
       'variables' => [
         'cards' => [],
+        'alert_banner' => '',
       ],
     ],
     'home_page_next_meeting' => [

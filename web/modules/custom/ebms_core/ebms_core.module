@@ -357,9 +357,19 @@ function ebms_core_form_alter(&$form, $form_state, $form_id) {
       ],
       'pubmed_missing_article_report_recips' => [
         '#type' => 'textfield',
-        '#title' => 'XXX Missing article report recipients',
+        '#title' => 'Missing article report recipients',
         '#description' => 'Email addresses for the report of articles which NLM sent us in the past but can no longer find. Separate multiple addresses with commas.',
         '#default_value' => $site_config->get('pubmed_missing_article_report_recips'),
+      ],
+    ];
+    $form['ebms_alert_banner'] = [
+      '#type' => 'details',
+      '#title' => 'Alert Banner',
+      'alert_banner_message' => [
+        '#type' => 'textfield',
+        '#title' => 'Alert banner text',
+        '#description' => 'Banner describing information about the state of the EBMS.',
+        '#default_value' => $site_config->get('alert_banner_message'),
       ],
     ];
     $form['#submit'][] = 'ebms_core_site_information_settings_submit';
@@ -370,15 +380,15 @@ function ebms_core_form_alter(&$form, $form_state, $form_id) {
  * Custom submit callback for the site information settings form.
  */
 function ebms_core_site_information_settings_submit(&$form, $form_state) {
-    $site_config = \Drupal::service('config.factory')->getEditable('ebms_core.settings');
-    //$site_config = $this->configFactory()->getEditable('ebms_core.settings');
+  $site_config = \Drupal::service('config.factory')->getEditable('ebms_core.settings');
 
-    $fields = [
-      'debug_level',
-      'dev_notif_addr',
-      'pubmed_missing_article_report_recips',
-    ];
-    foreach ($fields as $name) {
+  $fields = [
+    'debug_level',
+    'dev_notif_addr',
+    'pubmed_missing_article_report_recips',
+    'alert_banner_message',
+  ];
+  foreach ($fields as $name) {
     $site_config->set($name, $form_state->getValue($name));
   }
   $site_config->save();
