@@ -84,6 +84,9 @@ cp -r web/modules/custom $BASEDIR/web/modules/ || {
 cp -r web/themes/custom/ebms/css $BASEDIR/web/themes/custom/ebms/ || {
   echo cp custom theme css failed; exit;
 }
+cp web/themes/custom/ebms/ebms.info.yml $BASEDIR/web/themes/custom/ebms/ || {
+  echo cp custom theme info failed; exit;
+}
 cd $THEME || {
     echo unable to switch to custom EBMS theme directory
     exit 1
