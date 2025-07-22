@@ -192,6 +192,8 @@ You'll need to check this after every Docker Desktop update, because Docker
 has the nasty habit over forgetting the choice you originally made when
 moving to the next version.
 
+Note that the tests use SQLite. This is because while MySQL/Maria DB work without any problems in production and with the site running from the Docker container, the tests hang with those databases, whereas they complete successfully using SQLite.
+
 ## Debugging
 
 1. Install the *PHP Debug* extension in Visual Studio Code if it's not

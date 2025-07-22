@@ -1,0 +1,9 @@
+services:
+  menu.active_trail:
+    class: Drupal\ebms_menu\ActiveTrail
+    arguments:
+      - '@plugin.manager.menu.link'     # ← Correct service ID
+      - '@current_route_match'
+      - '@cache.menu'
+      - '@lock'
+      - '@request_stack'
