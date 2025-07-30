@@ -2,7 +2,7 @@ name: EBMS Users
 description: Added properties for EBMS users.
 type: module
 package: EBMS
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10 || ^11
 dependencies:
   - drupal:options
   - drupal:user

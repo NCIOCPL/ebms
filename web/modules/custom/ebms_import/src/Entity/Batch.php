@@ -557,6 +557,7 @@ class Batch extends ContentEntityBase implements ContentEntityInterface {
         $error = $response;
       }
       if (!empty($error)) {
+        ebms_debug_log("parms=$parms");
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $msg = "Request error returned by NLM (HTTP CODE $code): $error";
         $logger->error($msg);

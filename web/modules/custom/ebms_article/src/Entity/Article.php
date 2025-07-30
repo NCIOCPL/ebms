@@ -851,7 +851,7 @@ class Article extends ContentEntityBase implements ContentEntityInterface {
         $journals[$journal_id] = $journal->core->value;
       }
     }
-    return $journals[$journal_id];
+    return $journals[$journal_id] ? TRUE : FALSE;
   }
 
   /**

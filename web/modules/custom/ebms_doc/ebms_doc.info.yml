@@ -2,7 +2,7 @@ name: EBMS Documents
 description: Word-processing and other documents posted to the EBMS.
 type: module
 package: EBMS
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10 || ^11
 dependencies:
   - drupal:file
   - drupal:taxonomy

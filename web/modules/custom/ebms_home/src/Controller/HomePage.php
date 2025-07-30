@@ -34,17 +34,35 @@ class HomePage extends ControllerBase {
    */
   public function display(): array {
 
+    // See if we have an alert banner to display.
+    $alert_banner = \Drupal::config('ebms_core.settings')->get('alert_banner_message');
+
     // If the user doesn't see activity cards on the home page, show image.
     $user = User::load($this->currentUser()->id());
     if (!$user->hasPermission('view alerts')) {
-      return [
+      $render_array = [];
+      if (!empty($alert_banner)) {
+        $render_array['alert'] = [
+          '#markup' => '
+  <div class="usa-alert usa-alert--warning margin-top-2">
+    <div class="usa-alert__body">
+      <p class="usa-alert__text">
+        <strong>' . $alert_banner . '</strong>
+      </p>
+    </div>
+  </div>
+',
+        ];
+      }
+      $render_array['photo'] = [
         '#theme' => 'image',
         '#attributes' => [
           'src' => '/themes/custom/ebms/images/' . self::LIBRARY_IMAGES[random_int(0, count(self::LIBRARY_IMAGES) - 1)],
           'class' => ['margin-top-5'],
         ],
-        '#cache' => ['max-age' => 0],
       ];
+      $render_array['#cache'] = ['max-age' => 0];
+      return $render_array;
     }
 
     // The first card contains any available alerts.
@@ -85,6 +103,7 @@ class HomePage extends ControllerBase {
         '#theme' => 'activity_cards',
         '#cache' => ['max-age' => 0],
         '#cards' => $cards,
+        '#alert_banner' => $alert_banner,
       ],
     ];
   }
@@ -135,6 +154,7 @@ class HomePage extends ControllerBase {
     $storage = $this->entityTypeManager()->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('dates.end_value', date('Y-m-d H:i:s'), '>=');
+    $query->condition('status.entity.name', 'Canceled', '<>');
     $query->range(0, 1);
     $query->sort('dates');
     if (!empty($board_ids)) {

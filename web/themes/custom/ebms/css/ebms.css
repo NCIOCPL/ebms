@@ -62,6 +62,9 @@ main#main-content h1 {
   display: flex;
   justify-content: space-between;
 }
+.usa-header form.usa-search {
+  margin-top: 0;
+}
 .usa-header--extended .usa-navbar {
   max-width: none;
 }
@@ -308,6 +311,9 @@ td.text-bold {
 .usa-prose ul li,
 .usa-list li {
   max-width: none;
+}
+.inline-list-items li {
+  display: inline-block;
 }
 
 /* Buttons */

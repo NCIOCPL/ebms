@@ -19,6 +19,10 @@ class TopicTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
   protected $profile = 'minimal';
 
+  /**
+   * Avoid breakage from https://www.drupal.org/project/drupal/issues/3469309.
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
 
   public function testTopics() {
 

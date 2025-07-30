@@ -18,7 +18,7 @@ final class SummaryPageController extends ControllerBase {
   /**
    * Request stack.
    *
-   * @var RequestStack
+   * @var Symfony\Component\HttpFoundation\RequestStack
    */
   public $request;
 
@@ -125,8 +125,13 @@ final class SummaryPageController extends ControllerBase {
       ];
     }
 
-    // Add the table for the documents posted by NCI staff.
+    // Remember the query parameter choices.
+    $show_archived_member_docs = $this->request->get('archived-member-docs') === 'show';
     $show_archived_nci_docs = $this->request->get('archived-nci-docs') === 'show';
+    $nci_doc_sort = $this->request->get('nci-doc-sort') ?? 'date';
+    $member_doc_sort = $this->request->get('member-doc-sort') ?? 'date';
+
+    // Add the table for the documents posted by NCI staff.
     $nci_docs = [];
     $route = 'ebms_summary.page';
     $parms = ['summary_page' => $summary_page->id()];
@@ -156,6 +161,15 @@ final class SummaryPageController extends ControllerBase {
         $nci_docs[] = $values;
       }
     }
+    if (count($nci_docs) > 1) {
+      usort($nci_docs, function($a, $b) use ($nci_doc_sort) {
+        if ($nci_doc_sort === 'filename') {
+          return $a['text'] <=> $b['text'];
+        }
+        return $b['date'] <=> $a['date'];
+      });
+    }
+
     $header = ['File Name', 'Notes', 'Uploaded By', 'Date'];
     if ($manager) {
       $header[] = 'Archived';
@@ -164,7 +178,7 @@ final class SummaryPageController extends ControllerBase {
       '#theme' => 'doc_table',
       '#caption' => 'Documents Posted by NCI',
       '#header' => $header,
-      '#rows' => array_reverse($nci_docs),
+      '#rows' => $nci_docs,
       '#empty' => 'No documents have been posted by NCI for this page yet.',
     ];
 
@@ -182,11 +196,28 @@ final class SummaryPageController extends ControllerBase {
       }
     }
     if ($manager && !empty($summary_page->manager_docs)) {
+      $options = ['query' => $query_parameters];
       $action = $show_archived_nci_docs ? 'hide' : 'show';
-      $options = ['query' => ['archived-nci-docs' => $action]];
+      $options['query']['archived-nci-docs'] = $action;
       $buttons[] = [
         'url' => Url::fromRoute($route, $parms, $options),
         'title' => ucfirst($action) . ' Archived NCI Documents',
+        'attributes' => ['class' => ['button', 'usa-button']],
+      ];
+    }
+    if (count($nci_docs) > 1) {
+      $options = ['query' => $query_parameters];
+      if ($nci_doc_sort === 'date') {
+        $options['query']['nci-doc-sort'] = 'filename';
+        $button_title = 'Sort by file name';
+      }
+      else {
+        $options['query']['nci-doc-sort'] = 'date';
+        $button_title = 'Sort by date';
+      }
+      $buttons[] = [
+        'url' => Url::fromRoute($route, $parms, $options),
+        'title' => $button_title,
         'attributes' => ['class' => ['button', 'usa-button']],
       ];
     }
@@ -194,11 +225,11 @@ final class SummaryPageController extends ControllerBase {
       $page['nci-doc-buttons'] = [
         '#theme' => 'links',
         '#links' => $buttons,
+        '#attributes' => ['class' => ['inline-list-items']],
       ];
     }
 
     // Add the table for the documents posted by the board members.
-    $show_archived_member_docs = $this->request->get('archived-member-docs') === 'show';
     $member_docs = [];
     foreach ($summary_page->member_docs as $delta => $doc_usage) {
       $active = $doc_usage->active;
@@ -226,12 +257,20 @@ final class SummaryPageController extends ControllerBase {
         $member_docs[] = $values;
       }
     }
+    if (count($member_docs) > 1) {
+      usort($member_docs, function($a, $b) use ($member_doc_sort) {
+        if ($member_doc_sort === 'filename') {
+          return $a['text'] <=> $b['text'];
+        }
+        return $b['date'] <=> $a['date'];
+      });
+    }
     $page['reviewer-docs'] = [
       '#theme' => 'doc_table',
       '#caption' => 'Documents Posted by Board Members',
       '#header' => $header,
-      '#rows' => array_reverse($member_docs),
-      '#empty' => 'No documents have been posted by board members for this page yet.',
+      '#rows' => $member_docs,
+      '#empty' => 'No documents are currently posted by Board members.',
     ];
 
     // Add buttons below the table if appropriate.
@@ -245,11 +284,29 @@ final class SummaryPageController extends ControllerBase {
       ];
     }
     if ($manager && !empty($summary_page->member_docs)) {
+      $options = ['query' => $query_parameters];
       $action = $show_archived_member_docs ? 'hide' : 'show';
-      $options = ['query' => ['archived-member-docs' => $action]];
+      $options['query']['archived-member-docs'] = $action;
       $buttons[] = [
         'url' => Url::fromRoute($route, $parms, $options),
         'title' => ucfirst($action) . ' Archived Member Documents',
+        'attributes' => ['class' => ['button', 'usa-button']],
+        '#attributes' => ['class' => ['foobar']]
+      ];
+    }
+    if (count($member_docs) > 1) {
+      $options = ['query' => $query_parameters];
+      if ($member_doc_sort === 'date') {
+        $options['query']['member-doc-sort'] = 'filename';
+        $button_title = 'Sort by file name';
+      }
+      else {
+        $options['query']['member-doc-sort'] = 'date';
+        $button_title = 'Sort by date';
+      }
+      $buttons[] = [
+        'url' => Url::fromRoute($route, $parms, $options),
+        'title' => $button_title,
         'attributes' => ['class' => ['button', 'usa-button']],
       ];
     }
@@ -257,6 +314,7 @@ final class SummaryPageController extends ControllerBase {
       $page['member-doc-buttons'] = [
         '#theme' => 'links',
         '#links' => $buttons,
+        '#attributes' => ['class' => ['inline-list-items']],
       ];
     }
     return $page;

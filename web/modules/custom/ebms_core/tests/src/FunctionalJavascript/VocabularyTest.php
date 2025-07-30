@@ -70,6 +70,11 @@ class VocabularyTest extends WebDriverTestBase {
   protected $defaultTheme = 'claro';
 
   /**
+   * Avoid breakage from https://www.drupal.org/project/drupal/issues/3469309.
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
+
+  /**
    * Test creation of relationships between articles.
    */
   public function testVocabularies() {

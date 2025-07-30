@@ -79,7 +79,7 @@ class Archive extends ControllerBase {
   private function createArchive(array $filenames, string $dirname): string|false {
     $base = $this->fileSystem->realpath('public://');
     $zip = new \ZipArchive();
-    $path = tempnam(sys_get_temp_dir(), 'meeting-docs');
+    $path = sys_get_temp_dir() . '/meeting-docs-' . uniqid() . '.zip';
     $rc = $zip->open($path, ZipArchive::CREATE);
     if ($rc !== TRUE) {
       $this->getLogger('ebms_meeting')->error("Error $rc creating $path");

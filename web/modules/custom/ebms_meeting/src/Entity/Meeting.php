@@ -314,6 +314,7 @@ class Meeting extends ContentEntityBase implements ContentEntityInterface {
     $storage = \Drupal::entityTypeManager()->getStorage('ebms_meeting');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('dates.end_value', date('Y-m-d H:i:s'), '>=');
+    $query->condition('status.entity.name', 'Canceled', '<>');
     $query->range(0, 6);
     $query->sort('dates');
     self::applyMeetingFilters($query, $user);

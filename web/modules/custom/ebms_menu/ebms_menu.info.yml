@@ -2,4 +2,4 @@ name: EBMS Menus
 description: Workarounds for flaws in Drupal's menu handling.
 type: module
 package: EBMS
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10 || ^11

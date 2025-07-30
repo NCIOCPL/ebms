@@ -875,7 +875,6 @@ class PacketForm extends FormBase {
   private function reviewersForTopic(int $topic_id, array $selected_reviewers): array {
     ebms_debug_log('top of PacketForm::reviewersForTopic()');
     $this->nonSpecialists = FALSE;
-    $roles = user_role_names(TRUE, 'review literature');
     $storage = $this->entityTypeManager->getStorage('user');
     $query = $storage->getQuery()->accessCheck(FALSE);
     $query->condition('status.value', 1);

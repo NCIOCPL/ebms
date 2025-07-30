@@ -25,6 +25,11 @@ class TravelTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * Avoid breakage from https://www.drupal.org/project/drupal/issues/3469309.
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
+
+  /**
    * Lookup map for vocabulary term IDs.
    */
   private $term_ids = [];
@@ -271,19 +276,16 @@ class TravelTest extends WebDriverTestBase {
     $assert_session->assertWaitOnAjaxRequest();
     $form->fillField('transportation-date-1', $arrival);
     $form->selectFieldOption('transportation-type-1', $this->term_ids['transportation_expense_types']['taxi']);
-    $assert_session->assertWaitOnAjaxRequest();
     $form->fillField('transportation-amount-1', '25.99');
     $form->findButton('Add Transportation Expense')->click();
     $assert_session->assertWaitOnAjaxRequest();
     $form->fillField('transportation-date-2', $departure);
     $form->selectFieldOption('transportation-type-2', $this->term_ids['transportation_expense_types']['private']);
-    $assert_session->assertWaitOnAjaxRequest();
     $form->fillField('transportation-mileage-2', '500');
     $form->findButton('Add Transportation Expense')->click();
     $assert_session->assertWaitOnAjaxRequest();
     $form->fillField('transportation-date-3', $arrival);
     $form->selectFieldOption('transportation-type-3', $this->term_ids['transportation_expense_types']['shuttle']);
-    $assert_session->assertWaitOnAjaxRequest();
     $form->fillField('transportation-amount-3', '10');
     $form->findButton('Remove Last Transportation Expense')->click();
     $assert_session->assertWaitOnAjaxRequest();

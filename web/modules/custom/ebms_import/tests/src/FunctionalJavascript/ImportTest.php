@@ -25,6 +25,11 @@ class ImportTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * Avoid breakage from https://www.drupal.org/project/drupal/issues/3469309.
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {

@@ -46,8 +46,9 @@ settings:
         - heading5
         - heading6
     ckeditor5_list:
-      reversed: false
-      startIndex: true
+      properties:
+        reversed: false
+        startIndex: true
     ckeditor5_alignment:
       enabled_alignments:
         - left

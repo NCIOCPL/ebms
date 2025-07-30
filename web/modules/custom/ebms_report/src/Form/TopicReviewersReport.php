@@ -95,6 +95,11 @@ class TopicReviewersReport extends FormBase {
         }
       }
     }
+    if (empty($params)) {
+      $topic_statuses = ['active'];
+    } else {
+      $topic_statuses = array_values(array_diff($params['topic-statuses'], [0]));
+    }
 
     // Assemble the fields for the form.
     $form = [
@@ -138,6 +143,16 @@ class TopicReviewersReport extends FormBase {
             '#default_value' => $selected_reviewers,
             '#empty_value' => '',
           ],
+        ],
+        'topic-statuses' => [
+          '#type' => 'checkboxes',
+          '#title' => 'Topic Statuses To Include',
+          '#description' => 'Filter report based on whether the topics are active.',
+          '#options' => [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+          ],
+          '#default_value' => $topic_statuses,
         ],
       ],
       'option-box' => [
@@ -249,6 +264,11 @@ class TopicReviewersReport extends FormBase {
     ];
     $route = 'ebms_topic.reviewers';
     $grouping = $params['grouping'] ?? 'topic';
+    $topic_statuses = array_values(array_diff($params['topic-statuses'], [0]));
+    $topic_status = NULL;
+    if (count($topic_statuses) === 1) {
+      $topic_status = reset($topic_statuses) === 'active' ? 1 : 0;
+    }
     if ($grouping === 'topic') {
       $header = ['Topic', 'Board Members'];
       $topic_reviewers = [];
@@ -273,6 +293,9 @@ class TopicReviewersReport extends FormBase {
       }
       else {
         $query->condition('board', $params['board']);
+        if (!is_null($topic_status)) {
+          $query->condition('active', $topic_status);
+        }
       }
       if (!empty($params['reviewers'])) {
         $query->condition('id', array_keys($topic_reviewers), 'IN');
@@ -290,19 +313,26 @@ class TopicReviewersReport extends FormBase {
         ];
       }
       $topic_count = count($rows);
-    }
-    else {
+    } else {
       $header = ['Board Member', 'Topics'];
       $topic_ids = [];
       foreach ($users as $user) {
         $topics = [];
-        foreach ($user->topics as $topic) {
-          $topic_id = $topic->target_id;
-          if (empty($params['topics']) && $topic->entity->board->target_id == $params['board'] || !empty($params['topics']) && array_key_exists($topic_id, $params['topics'])) {
-            $topic_name = $topic->entity->name->value;
-            $topic_ids[$topic_id] = $topic_id;
-            $topics[$topic_name] = $print_version ? $topic_name : Link::createFromRoute($topic_name, $route, ['topic_id' => $topic_id], $options);
+        foreach ($user->topics as $user_topic) {
+          $topic_id = $user_topic->target_id;
+          $topic = $user_topic->entity;
+          if (empty($params['topics'])) {
+            if ($topic->board->target_id != $params['board']) {
+              continue;
+            } elseif (!is_null($topic_status) && $topic->active->value != $topic_status) {
+              continue;
+            }
+          } elseif (!array_key_exists($topic_id, $params['topics'])) {
+            continue;
           }
+          $topic_name = $topic->name->value;
+          $topic_ids[$topic_id] = $topic_id;
+          $topics[$topic_name] = $print_version ? $topic_name : Link::createFromRoute($topic_name, $route, ['topic_id' => $topic_id], $options);
         }
         ksort($topics);
         $topics_list = [
