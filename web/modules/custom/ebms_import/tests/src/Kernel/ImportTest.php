@@ -590,25 +590,40 @@ class ImportTest extends KernelTestBase {
     // Find some article retractions in the journal Science.
     $url = Batch::EUTILS . '/esearch.fcgi';
     $terms = [
-      'science[journal]'.
-      'retraction+of+publication[Publication+Type]',
+      'science[journal]',
+      '"retraction+of+publication"[Publication+Type]',
     ];
-    $parms = 'db=pubmed&term=' . implode('+AND+', $terms);
+
+    // Now this produces: "science[journal]+AND+retraction+of+publication[Publication+Type]".
+    $encoded_terms = array_map('urlencode', $terms);
+    $parms = 'db=pubmed&term=' . implode('+AND+', $encoded_terms);
     $ch = Batch::getCurlHandle($parms, $url);
     $response = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
     $this->assertEquals(200, $code);
+
     curl_close($ch);
     usleep(500000);
+
     $root = new \SimpleXMLElement($response);
     $this->assertEquals('eSearchResult', $root->getName());
     $pmids = [];
-    foreach ($root->IdList->Id as $id) {
-      $id = trim($id ?: '');
-      if (!empty($id)) {
-        $pmids[] = $id;
+    // Use null coalescing operator for safety if IdList or Id is missing.
+    if ($root->IdList && $root->IdList->Id) {
+      foreach ($root->IdList->Id as $id) {
+        $id = trim($id ?: '');
+        if (!empty($id)) {
+          $pmids[] = $id;
+        }
       }
     }
+
+    // Debug output if assertion fails again
+    if (empty($pmids)) {
+        fwrite(STDERR, "API Query: " . $url . '?' . $parms . "\n");
+        fwrite(STDERR, "API Response: " . substr($response, 0, 300) . "...\n");
+    }
+
     $this->assertNotEmpty($pmids);
 
     // Fetch the article XML.

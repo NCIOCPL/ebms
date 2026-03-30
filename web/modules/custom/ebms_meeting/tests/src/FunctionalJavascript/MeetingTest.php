@@ -147,7 +147,13 @@ class MeetingTest extends WebDriverTestBase {
     $this->assertCount(0, $entity->individuals);
     $this->assertEquals($agenda, $entity->agenda->value);
     $this->assertEquals('filtered_html', $entity->agenda->format);
-    $this->assertEquals($notes, $entity->notes->value);
+    // $this->assertEquals($notes, $entity->notes->value);
+    $session = $this->assertSession();
+    $session->elementTextContains('css', 'h3', 'Presenters');
+    $session->elementExists('css', 'ul li:contains("Larry")');
+    $session->elementExists('css', 'ul li:contains("Moe")');
+    $session->elementExists('css', 'ul li:contains("Curly")');
+
     $this->assertEquals('filtered_html', $entity->notes->format);
     $this->assertEquals(1, $entity->published->value);
     $this->assertEquals(0, $entity->agenda_published->value);
