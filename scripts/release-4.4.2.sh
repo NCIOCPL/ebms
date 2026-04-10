@@ -58,9 +58,9 @@ mv NCIOCPL-ebms* ebms || {
 
 echo Putting site into maintenance mode
 cd $BASEDIR
-# $DRUSH state:set system.maintenance_mode 1 || {
-#  echo failure setting maintenance mode; exit;
-# }
+$DRUSH state:set system.maintenance_mode 1 || {
+  echo failure setting maintenance mode; exit;
+}
 
 echo Clearing files and directories which will be refreshed from GitHub
 cd $BASEDIR
@@ -77,8 +77,8 @@ cp composer.* $BASEDIR/ || { echo copying composer files failed; exit; }
 cp scheduled/* $BASEDIR/scheduled/ || { echo cp scheduled failed; exit; }
 cp -r web/modules/custom $BASEDIR/web/modules/ || {
   echo cp custom modules failed; exit;
-}
-cp -r private/saml_certs $BASEDIR/private/ || {
+}`
+cp -r private/ $BASEDIR/private/ || {
   echo cp saml certs failed; exit;
 }
 
