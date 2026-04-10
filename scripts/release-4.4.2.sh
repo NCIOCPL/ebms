@@ -58,9 +58,9 @@ mv NCIOCPL-ebms* ebms || {
 
 echo Putting site into maintenance mode
 cd $BASEDIR
-$DRUSH state:set system.maintenance_mode 1 || {
-  echo failure setting maintenance mode; exit;
-}
+# $DRUSH state:set system.maintenance_mode 1 || {
+#  echo failure setting maintenance mode; exit;
+# }
 
 echo Clearing files and directories which will be refreshed from GitHub
 cd $BASEDIR
