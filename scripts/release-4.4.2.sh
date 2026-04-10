@@ -117,7 +117,7 @@ if ! grep -q state_cache $SETTINGS; then
 fi
 chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 
-//Enabling samlauth (specific to this release)
+# Enabling samlauth (specific to this release)
 $DRUSH en samlauth -y || {
   echo enabling samlauth failed; exit;
 }
