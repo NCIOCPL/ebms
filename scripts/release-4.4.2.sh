@@ -70,6 +70,7 @@ rm -rf composer.* scheduled/* web/modules/custom/* vendor
 rm -rf web/themes/custom/ebms/css
 rm -rf web/themes/custom/ebms/package
 rm -rf private/saml_certs
+rm -rf config/saml_patch
 
 echo Refreshing those directories
 cd $WORKDIR/ebms
@@ -77,9 +78,12 @@ cp composer.* $BASEDIR/ || { echo copying composer files failed; exit; }
 cp scheduled/* $BASEDIR/scheduled/ || { echo cp scheduled failed; exit; }
 cp -r web/modules/custom $BASEDIR/web/modules/ || {
   echo cp custom modules failed; exit;
-}`
+}
 cp -r private/ $BASEDIR/private/ || {
   echo cp saml certs failed; exit;
+}
+cp -r config/ $BASEDIR/config/ || {
+  echo cp saml patch config failed; exit;
 }
 
 # Not needed for this release.
@@ -112,6 +116,14 @@ if ! grep -q state_cache $SETTINGS; then
     chmod -w $SETTINGS
 fi
 chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
+
+//Enabling samlauth (specific to this release)
+$DRUSH en samlauth -y || {
+  echo enabling samlauth failed; exit;
+}
+config:import --partial --source=config/saml_patch -y || {
+  echo importing saml patch config failed; exit;
+}
 
 echo Fixing Drupal silliness
 $DRUSH php:eval '\Drupal::entityDefinitionUpdateManager()->installEntityType(\Drupal::entityTypeManager()->getDefinition("path_alias"));'
