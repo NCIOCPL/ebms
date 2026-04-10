@@ -70,7 +70,7 @@ rm -rf composer.* scheduled/* web/modules/custom/* vendor
 rm -rf web/themes/custom/ebms/css
 rm -rf web/themes/custom/ebms/package
 rm -rf private/saml_certs
-rm -rf config/saml_patch
+rm -rf config
 
 echo Refreshing those directories
 cd $WORKDIR/ebms
@@ -82,7 +82,7 @@ cp -r web/modules/custom $BASEDIR/web/modules/ || {
 cp -r private/ $BASEDIR/private/ || {
   echo cp saml certs failed; exit;
 }
-cp -r config/ $BASEDIR/config/ || {
+cp -r config/ $BASEDIR/ || {
   echo cp saml patch config failed; exit;
 }
 
