@@ -1,5 +1,3 @@
-_core:
-  default_config_hash: U_osGwFmSBlCxLj13jTNB0qVtGbS876-wUPqWc74K6A
 login_menu_item_title: ''
 logout_menu_item_title: ''
 login_link_title: ''
@@ -26,8 +24,8 @@ idp_change_password_service: ''
 idp_certs: {  }
 idp_cert_encryption: ''
 unique_id_attribute: ''
-map_users: false
-map_users_name: true
+map_users: true
+map_users_name: false
 map_users_mail: true
 map_users_roles:
   - anonymous
