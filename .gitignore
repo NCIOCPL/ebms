@@ -43,3 +43,8 @@ settings.php
 .DS_Store
 nohup.out
 ebms3db.json
+
+private
+
+.ddev/traefik/certs
+
