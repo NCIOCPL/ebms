@@ -118,9 +118,7 @@ chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 $DRUSH en samlauth -y || {
   echo enabling samlauth failed; exit;
 }
-$DRUSH config:import --partial --source=$BASEDIR//**
-
-config/saml_patch -y || {
+$DRUSH config:import --partial --source=$BASEDIR//**config/saml_patch -y || {
   echo importing saml patch config failed; exit;
 }
 
