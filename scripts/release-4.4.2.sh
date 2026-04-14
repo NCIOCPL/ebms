@@ -69,7 +69,6 @@ rm -rf composer.* scheduled/* web/modules/custom/* vendor
 # rm -rf web/themes/custom/ebms/templates
 rm -rf web/themes/custom/ebms/css
 rm -rf web/themes/custom/ebms/package
-rm -rf private/saml_certs
 rm -rf config
 
 echo Refreshing those directories
@@ -79,9 +78,7 @@ cp scheduled/* $BASEDIR/scheduled/ || { echo cp scheduled failed; exit; }
 cp -r web/modules/custom $BASEDIR/web/modules/ || {
   echo cp custom modules failed; exit;
 }
-cp -r private/ $BASEDIR/private/ || {
-  echo cp saml certs failed; exit;
-}
+
 cp -r config/ $BASEDIR/ || {
   echo cp saml patch config failed; exit;
 }
@@ -121,7 +118,9 @@ chmod -w web/sites/default || { echo chmod sites-default failed; exit; }
 $DRUSH en samlauth -y || {
   echo enabling samlauth failed; exit;
 }
-$DRUSH config:import --partial --source=$BASEDIR/config/saml_patch -y || {
+$DRUSH config:import --partial --source=$BASEDIR//**
+
+config/saml_patch -y || {
   echo importing saml patch config failed; exit;
 }
 
