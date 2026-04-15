@@ -6,13 +6,13 @@
 // 1. Detect the Environment (Acquia/Pantheon/Custom)
 // Change 'AH_SITE_ENVIRONMENT' to whatever env variable your host uses.
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-if (preg_match('/^dev\./', $host)) {
+if (preg_match('/^dev\./i', $host) || preg_match('/^ncias-d3776-c\./i', $host)) {
   $env = 'dev';
-} elseif (preg_match('/^stage\./', $host)) {
+} elseif (preg_match('/^stage\./i', $host)) {
   $env = 'stage';
-} elseif (preg_match('/^qa\./', $host)) {
+} elseif (preg_match('/^qa\./i', $host) || preg_match('/^ncias-q3778-c\./i', $host)) {
   $env = 'qa';
-} elseif (preg_match('/^ddev\./', $host)) {
+} elseif (preg_match('/^ddev\./i', $host)) {
   $env = 'ddev';
 } else {
   $env = 'prod';
