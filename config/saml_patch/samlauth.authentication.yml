@@ -11,10 +11,10 @@ local_login_saml_error: true
 logout_different_user: false
 drupal_login_roles:
   administrator: administrator
-sp_entity_id: 'https://ebms.ddev.site/'
-sp_x509_certificate: 'file:/var/www/html/private/saml_certs/local/sp.crt'
+sp_entity_id: 'https://ebms.qa.nci.nih.gov/'
+sp_x509_certificate: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.key'
 sp_new_certificate: ''
-sp_private_key: 'file:/var/www/html/private/saml_certs/local/sp.key'
+sp_private_key: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.key'
 metadata_valid_secs: 60
 metadata_cache_http: false
 idp_entity_id: ''
@@ -60,4 +60,3 @@ debug_phpsaml: false
 use_proxy_headers: false
 use_base_url: true
 bypass_relay_state_check: false
-
