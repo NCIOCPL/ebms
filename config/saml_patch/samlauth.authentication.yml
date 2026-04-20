@@ -23,7 +23,7 @@ idp_single_log_out_service: ''
 idp_change_password_service: ''
 idp_certs: {  }
 idp_cert_encryption: ''
-unique_id_attribute: ''
+unique_id_attribute: nameidentifier
 map_users: true
 map_users_name: false
 map_users_mail: true
@@ -32,8 +32,8 @@ map_users_roles:
 create_users: false
 sync_name: false
 sync_mail: false
-user_name_attribute: uid
-user_mail_attribute: mail
+user_name_attribute: nameidentifier
+user_mail_attribute: emailaddress
 request_set_name_id_policy: true
 strict: true
 security_metadata_sign: false
