@@ -11,17 +11,18 @@ local_login_saml_error: true
 logout_different_user: false
 drupal_login_roles:
   administrator: administrator
-sp_entity_id: 'https://ebms.qa.nci.nih.gov/'
-sp_x509_certificate: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.key'
+sp_entity_id: 'https://ebms-qa.nih.nci.gov/'
+sp_x509_certificate: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.crt'
 sp_new_certificate: ''
 sp_private_key: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.key'
 metadata_valid_secs: 60
 metadata_cache_http: false
-idp_entity_id: ''
-idp_single_sign_on_service: ''
-idp_single_log_out_service: ''
+idp_entity_id: 'https://sts.windows.net/14b77578-9773-42d5-8507-251ca2dc2b06/'
+idp_single_sign_on_service: 'https://login.microsoftonline.com/14b77578-9773-42d5-8507-251ca2dc2b06/saml2'
+idp_single_log_out_service: 'https://login.microsoftonline.com/14b77578-9773-42d5-8507-251ca2dc2b06/saml2'
 idp_change_password_service: ''
-idp_certs: {  }
+idp_certs:
+  - 'file:/local/drupal/ebms/private/saml_certs/qa/X509Certificate'
 idp_cert_encryption: ''
 unique_id_attribute: nameidentifier
 map_users: true
