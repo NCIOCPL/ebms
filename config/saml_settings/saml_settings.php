@@ -57,3 +57,11 @@ if (file_exists($cert_path . '/sp.key') && file_exists($cert_path . '/sp.crt')) 
     $config['samlauth.authentication']['sp_private_key'] = file_get_contents($cert_path . '/sp.key');
     $config['samlauth.authentication']['sp_x509_certificate'] = file_get_contents($cert_path . '/sp.crt');
 }
+$config['samlauth.authentication']['strict'] = FALSE;
+$config['samlauth.authentication']['user_mail_attribute'] = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
+$config['samlauth.authentication']['map_users'] = TRUE;
+$config['samlauth.authentication']['map_users_field'] = 'authname';
+
+// Disable standard name/mail mapping to ensure it only uses your custom field
+$config['samlauth.authentication']['map_users_name'] = FALSE;
+$config['samlauth.authentication']['map_users_mail'] = FALSE;
