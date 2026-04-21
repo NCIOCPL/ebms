@@ -13,7 +13,7 @@ class Login extends ControllerBase {
    * Show the login instructions and a button to the real login page.
    */
   public function display(): array {
-    $url = $this->moduleHandler()->moduleExists('externalauth') ? '/ssologin' : '/user/login';
+    $url = $this->moduleHandler()->moduleExists('externalauth') ? '/saml/login' : '/user/login';
     return [
       '#title' => '',
       '#attached' => ['library' => ['ebms_core/login']],

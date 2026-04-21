@@ -19,7 +19,7 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
   const SKIP = [
     '/user/login',
     '/login',
-    '/ssologin',
+    '/saml/login',
     '/articles/import/dates',
     '/articles/import/refresh',
   ];
