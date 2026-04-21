@@ -34,11 +34,3 @@ ebms_core.log-tail:
     _controller: Drupal\ebms_core\Controller\LogTail::display
   requirements:
     _permission: 'administer site configuration'
-ebms_core.ssologin:
-  path: /ssologin
-  defaults:
-    _controller: Drupal\ebms_core\Controller\SingleSignOn::login
-  requirements:
-    _access: 'TRUE'
-  options:
-    no_cache: TRUE
