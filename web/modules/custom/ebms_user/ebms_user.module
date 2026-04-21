@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\ebms_user\Form\Authname;
 use Drupal\user\Entity\User;
@@ -202,6 +203,20 @@ function ebms_user_form_alter(&$form, $form_state, $form_id) {
       '#default_value' => $authname,
     ];
     $form['actions']['submit']['#submit'][] = 'ebms_user_user_form_submit';
+  }
+}
+
+/**
+ * Custom submit handler for the user form.
+ */
+function ebms_user_user_form_submit($form, FormStateInterface $form_state) {
+  ebms_debug_log('custom user form submit handler');
+  $authname = $form_state->getValue('authname');
+  if (!empty($authname)) {
+    $account = $form_state->getFormObject()->getEntity();
+    $authmap = \Drupal::service('externalauth.authmap');
+    $authmap->save($account, 'samlauth', $authname);
+    ebms_debug_log("Saved SSO authname $authname");
   }
 }
 

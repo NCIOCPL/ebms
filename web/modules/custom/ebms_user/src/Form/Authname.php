@@ -109,6 +109,9 @@ final class Authname extends FormBase {
     $user = User::load($uid);
     $user->set('pass', NULL);
     $user->save();
+    $this->authmap->save($user, 'samlauth', $authname);
+    ebms_debug_log("Saved SSO authname $authname");
+
     $form_state->setRedirect('entity.user.edit_form', ['user' => $uid]);
   }
 
