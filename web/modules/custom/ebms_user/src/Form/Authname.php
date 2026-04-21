@@ -6,7 +6,6 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\ebms_core\Controller\SingleSignOn;
 use Drupal\user\Entity\User;
 
 /**
@@ -110,8 +109,6 @@ final class Authname extends FormBase {
     $user = User::load($uid);
     $user->set('pass', NULL);
     $user->save();
-    $this->authmap->save($user, SingleSignOn::PROVIDER, $authname);
-    ebms_debug_log("Saved SSO authname $authname");
     $form_state->setRedirect('entity.user.edit_form', ['user' => $uid]);
   }
 
