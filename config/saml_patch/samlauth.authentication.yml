@@ -11,7 +11,7 @@ local_login_saml_error: true
 logout_different_user: false
 drupal_login_roles:
   administrator: administrator
-sp_entity_id: 'https://ebms-qa.nih.nci.gov/'
+sp_entity_id: 'https://ebms-qa.nci.nih.gov/'
 sp_x509_certificate: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.crt'
 sp_new_certificate: ''
 sp_private_key: 'file:/local/drupal/ebms/private/saml_certs/qa/sp.key'
@@ -24,7 +24,7 @@ idp_change_password_service: ''
 idp_certs:
   - 'file:/local/drupal/ebms/private/saml_certs/qa/X509Certificate'
 idp_cert_encryption: ''
-unique_id_attribute: nameidentifier
+unique_id_attribute: '!nameid'
 map_users: true
 map_users_name: false
 map_users_mail: true
@@ -33,10 +33,10 @@ map_users_roles:
 create_users: false
 sync_name: false
 sync_mail: false
-user_name_attribute: nameidentifier
-user_mail_attribute: emailaddress
+user_name_attribute: nameid
+user_mail_attribute: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
 request_set_name_id_policy: true
-strict: true
+strict: false
 security_metadata_sign: false
 security_authn_requests_sign: true
 security_logout_requests_sign: true
@@ -44,8 +44,8 @@ security_logout_responses_sign: true
 security_nameid_encrypt: false
 security_signature_algorithm: ''
 security_encryption_algorithm: ''
-security_messages_sign: true
-security_assertions_signed: false
+security_messages_sign: false
+security_assertions_signed: true
 security_assertions_encrypt: false
 security_nameid_encrypted: false
 security_want_name_id: true
@@ -61,3 +61,5 @@ debug_phpsaml: false
 use_proxy_headers: false
 use_base_url: true
 bypass_relay_state_check: false
+security_want_messages_signed: 'false'
+security_want_assertions_signed: 'true'
