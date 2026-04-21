@@ -19,9 +19,11 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
   const SKIP = [
     '/user/login',
     '/login',
-    '/saml/login',
     '/articles/import/dates',
     '/articles/import/refresh',
+    '/saml/login',
+    '/saml/acs',
+    '/saml/metadata',
   ];
 
   /**
@@ -55,7 +57,7 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
     if ($this->currentUser->isAnonymous() && !in_array($current_path, self::SKIP)) {
       ebms_debug_log('redirecting to /login');
       $response = new RedirectResponse('/login');
-      $response->send();
+      $event->setResponse($response);
     }
   }
 
