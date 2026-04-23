@@ -17,6 +17,7 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
    * End points we don't want to redirect.
    */
   const SKIP = [
+    '/sites/default/files/',
     '/user/login',
     '/login',
     '/articles/import/dates',
