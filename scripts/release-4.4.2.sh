@@ -134,9 +134,6 @@ $DRUSH updatedb -y
 #   echo failure installing custom stuff; exit;
 # }
 
-# updating the authmap table is necessary to avoid lockouts after this release, but it has to be done after the database update script runs, because that script adds a unique index on the authname column of the authmap table, and if there are any duplicate authnames in that table, the update script will fail. So we do this after the update script runs, and we ignore any errors about duplicate authnames, because those will be resolved by the update script.
-# $DRUSH eval '$results = \Drupal::database()->query("SELECT uid, authname FROM {authmap}")->fetchAll(); $count = 0; foreach ($results as $row) { $account = \Drupal\user\Entity\User::load($row->uid); if ($account) { \Drupal::service("externalauth.authmap")->save($account, "samlauth", $row->authname); $count++; } } echo "Successfully migrated $count users to the new SAML authmap.\n";'
-
 echo Clearing Drupal caches
 $DRUSH cr
 
