@@ -24,3 +24,21 @@ function ebms_core_schema(): array {
     ],
   ];
 }
+
+/**
+ * Migrate legacy authmap entries to externalauth_authmap.
+ */
+function ebms_core_update_9001() {
+  $authmap_service = \Drupal::service('externalauth.authmap');
+  $db = \Drupal::database();
+
+  if ($db->schema()->tableExists('authmap')) {
+    $results = $db->query("SELECT uid, authname FROM {authmap}")->fetchAll();
+    foreach ($results as $row) {
+      $account = \Drupal\user\Entity\User::load($row->uid);
+      if ($account && !$authmap_service->getAuthname($row->uid, 'samlauth')) {
+        $authmap_service->save($account, 'samlauth', $row->authname);
+      }
+    }
+  }
+}
