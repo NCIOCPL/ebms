@@ -55,6 +55,10 @@ class RedirectAnonymousUser implements EventSubscriberInterface {
    */
   public function checkLoginStatus(RequestEvent $event) {
     $current_path = $event->getRequest()->getPathInfo();
+    // 1. Check for specific path prefixes first
+    if (str_starts_with($current_path, '/sites/default/files/')) {
+      return;
+    }
     if ($this->currentUser->isAnonymous() && !in_array($current_path, self::SKIP)) {
       ebms_debug_log('redirecting to /login');
       $response = new RedirectResponse('/login');
