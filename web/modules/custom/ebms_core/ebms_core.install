@@ -33,12 +33,20 @@ function ebms_core_update_9001() {
   $db = \Drupal::database();
 
   if ($db->schema()->tableExists('authmap')) {
+    // Pull from the old legacy table
     $results = $db->query("SELECT uid, authname FROM {authmap}")->fetchAll();
+    $count = 0;
+
     foreach ($results as $row) {
       $account = \Drupal\user\Entity\User::load($row->uid);
-      if ($account && !$authmap_service->getAuthname($row->uid, 'samlauth')) {
+
+      // The .get() method returns the authname if it exists, otherwise FALSE
+      if ($account && !$authmap_service->get($row->uid, 'samlauth')) {
         $authmap_service->save($account, 'samlauth', $row->authname);
+        $count++;
       }
     }
+
+    \Drupal::messenger()->addMessage("Successfully migrated $count new users to the SAML authmap.");
   }
 }
