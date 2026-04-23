@@ -2,7 +2,7 @@ login_menu_item_title: ''
 logout_menu_item_title: ''
 login_link_title: ''
 login_auto_redirect: false
-login_redirect_url: ''
+login_redirect_url: /
 logout_redirect_url: ''
 error_redirect_url: ''
 error_throw: false
