@@ -36,7 +36,7 @@ sync_mail: false
 user_name_attribute: nameid
 user_mail_attribute: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
 request_set_name_id_policy: true
-strict: false
+strict: true
 security_metadata_sign: false
 security_authn_requests_sign: true
 security_logout_requests_sign: true
