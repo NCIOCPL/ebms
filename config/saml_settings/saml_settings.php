@@ -5,18 +5,31 @@
 */
 // 1. Detect the Environment (Acquia/Pantheon/Custom)
 // Change 'AH_SITE_ENVIRONMENT' to whatever env variable your host uses.
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-if (preg_match('/^dev\./i', $host) || preg_match('/^ncias-d3776-c\./i', $host)) {
-  $env = 'dev';
-} elseif (preg_match('/^stage\./i', $host)) {
-  $env = 'stage';
-} elseif (preg_match('/^qa\./i', $host) || preg_match('/^ncias-q3778-c\./i', $host)) {
-  $env = 'qa';
-} elseif (preg_match('/^ddev\./i', $host)) {
-  $env = 'ddev';
-} else {
-  $env = 'prod';
+// 1. Check for Proxy Header (Load Balancers often swallow the real host)
+$machine_hostname = gethostname();
+
+// 2. Get the Web Host
+$http_host = $_SERVER['HTTP_HOST'] ?? '';
+
+// 3. Determine ENV based on Machine Name FIRST (most reliable for Drush/CLI)
+if (str_contains($machine_hostname, 'd3776') || str_contains($http_host, 'ebms-dev')) {
+    $env = 'dev';
 }
+elseif (str_contains($machine_hostname, 'q3778') || str_contains($http_host, 'ebms-qa')) {
+    $env = 'qa';
+}
+elseif (str_contains($machine_hostname, 'stage-id-here') || str_contains($http_host, 'ebms-stage')) {
+    $env = 'stage';
+}
+elseif (isset($_SERVER['DDEV_PROJECT'])) {
+    $env = 'ddev';
+}
+else {
+    $env = 'prod';
+}
+
+$settings['env'] = $env;
+$settings['machine_name'] = $machine_hostname;
 
 switch ($env) {
   case 'dev':
@@ -56,5 +69,5 @@ switch ($env) {
 if (file_exists($cert_path . '/sp.key') && file_exists($cert_path . '/sp.crt')) {
     $config['samlauth.authentication']['sp_private_key'] = file_get_contents($cert_path . '/sp.key');
     $config['samlauth.authentication']['sp_x509_certificate'] = file_get_contents($cert_path . '/sp.crt');
-}
+};
 
